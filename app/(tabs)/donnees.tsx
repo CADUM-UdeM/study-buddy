@@ -11,59 +11,77 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useCourses } from "../context/CoursesContext";
+
+// Define the course structure with evaluations
+export interface Evaluation {
+  id: string;
+  name: string;
+  note: number;
+  weight: number;
+  type: "travail" | "examen";
+}
+
+export interface Course {
+  id: string;
+  name: string;
+  objective: number;
+  evaluations: Evaluation[];
+}
 
 export default function Donnees() {
+  const { courses, addCourse, updateCourse, deleteCourse, isLoading } =
+    useCourses();
   const router = useRouter();
-  const [courses, setCourses] = useState([
-    { id: "1", name: "Placeholder Cours" },
-  ]);
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
+  const [courseObjective, setCourseObjective] = useState("85");
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
   const handleAddCourse = () => {
     if (courseName.trim()) {
-      const newCourse = {
-        id: Date.now().toString(),
-        name: courseName.trim(),
-      };
-      setCourses([...courses, newCourse]);
+      addCourse(courseName.trim(), parseFloat(courseObjective) || 85);
       setCourseName("");
+      setCourseObjective("85");
       setModalVisible(false);
     }
   };
 
   const handleDeleteCourse = (id: string) => {
-    setCourses(courses.filter((course) => course.id !== id));
+    deleteCourse(id);
     setMenuVisible(null);
   };
 
-  const handleEditCourse = (course: { id: string; name: string }) => {
+  const handleEditCourse = (course: Course) => {
     setEditingCourse(course);
     setCourseName(course.name);
+    setCourseObjective(course.objective.toString());
     setMenuVisible(null);
     setEditModalVisible(true);
   };
 
   const handleUpdateCourse = () => {
     if (courseName.trim() && editingCourse) {
-      setCourses(
-        courses.map((course) =>
-          course.id === editingCourse.id
-            ? { ...course, name: courseName.trim() }
-            : course
-        )
+      updateCourse(
+        editingCourse.id,
+        courseName.trim(),
+        parseFloat(courseObjective) || 85
       );
       setCourseName("");
+      setCourseObjective("85");
       setEditModalVisible(false);
       setEditingCourse(null);
     }
+  };
+
+  const navigateToCourseDetails = (courseId: string) => {
+    router.push({
+      pathname: "/detailscours",
+      params: { courseId }, // Just pass ID, not entire object
+    });
   };
 
   return (
@@ -86,7 +104,7 @@ export default function Donnees() {
         {courses.map((course) => (
           <Pressable
             key={course.id}
-            onPress={() => router.push("/detailscours")}
+            onPress={() => navigateToCourseDetails(course.id)} // Pass ID only
             style={{ width: "100%", alignItems: "center" }}
           >
             <View style={styles.coursContainer}>
@@ -147,12 +165,21 @@ export default function Donnees() {
               autoFocus
             />
 
+            <TextInput
+              style={styles.input}
+              placeholder="Objectif (%)"
+              value={courseObjective}
+              onChangeText={setCourseObjective}
+              keyboardType="numeric"
+            />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setModalVisible(false);
                   setCourseName("");
+                  setCourseObjective("");
                 }}
               >
                 <Text style={styles.cancelButtonText}>Annuler</Text>
@@ -181,6 +208,7 @@ export default function Donnees() {
           onPress={() => {
             setEditModalVisible(false);
             setCourseName("");
+            setCourseObjective("85");
             setEditingCourse(null);
           }}
         >
@@ -198,12 +226,21 @@ export default function Donnees() {
               autoFocus
             />
 
+            <TextInput
+              style={styles.input}
+              placeholder="Objectif (%)"
+              value={courseObjective}
+              onChangeText={setCourseObjective}
+              keyboardType="numeric"
+            />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setEditModalVisible(false);
                   setCourseName("");
+                  setCourseObjective("85");
                   setEditingCourse(null);
                 }}
               >
