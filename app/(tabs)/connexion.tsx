@@ -3,10 +3,10 @@ import React from 'react';
 
 const Profil = () => {
 return (
-    <View>
-    <Text>connexion</Text>
-
-
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <Text style={{ fontSize: 20, textAlign: 'center' }}>
+            Bienvenue!
+        </Text>
     </View>
 );
 };
