@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -31,7 +32,12 @@ export default function DetailsCours() {
 
   // Form state
   const [evalName, setEvalName] = useState("");
+  const [gradeMode, setGradeMode] = useState<"percentage" | "fraction">(
+    "percentage"
+  );
   const [evalNote, setEvalNote] = useState("");
+  const [evalNumerator, setEvalNumerator] = useState("");
+  const [evalDenominator, setEvalDenominator] = useState("");
   const [evalWeight, setEvalWeight] = useState("");
   const [evalType, setEvalType] = useState<"travail" | "examen">("travail");
 
@@ -62,6 +68,96 @@ export default function DetailsCours() {
       </View>
     );
   }
+
+  // Calculate current total weight
+  const getTotalWeight = (): number => {
+    return course.evaluations.reduce((sum, e) => sum + e.weight, 0);
+  };
+
+  // Calculate total manual weight (excluding the one being edited)
+  const getManualWeightTotal = (excludeId?: string): number => {
+    return course.evaluations
+      .filter((e) => e.id !== excludeId && !e.isAutoWeight)
+      .reduce((sum, e) => sum + e.weight, 0);
+  };
+
+  // Validate note (0-100)
+  const validateNote = (): number | null => {
+    if (gradeMode === "percentage") {
+      if (!evalNote.trim()) {
+        Alert.alert("Erreur", "Veuillez entrer une note");
+        return null;
+      }
+      const num = parseFloat(evalNote);
+      if (isNaN(num) || num < 0 || num > 100) {
+        Alert.alert("Erreur", "La note doit être entre 0 et 100%");
+        return null;
+      }
+      return num;
+    } else {
+      // Fraction mode
+      if (!evalNumerator.trim() || !evalDenominator.trim()) {
+        Alert.alert(
+          "Erreur",
+          "Veuillez entrer la note obtenue et la note totale"
+        );
+        return null;
+      }
+      const numerator = parseFloat(evalNumerator);
+      const denominator = parseFloat(evalDenominator);
+
+      if (isNaN(numerator) || isNaN(denominator)) {
+        Alert.alert("Erreur", "Les notes doivent être des nombres valides");
+        return null;
+      }
+
+      if (denominator <= 0) {
+        Alert.alert("Erreur", "La note totale doit être supérieure à 0");
+        return null;
+      }
+
+      if (numerator < 0) {
+        Alert.alert("Erreur", "La note obtenue ne peut pas être négative");
+        return null;
+      }
+
+      if (numerator > denominator) {
+        Alert.alert(
+          "Erreur",
+          "La note obtenue ne peut pas dépasser la note totale"
+        );
+        return null;
+      }
+
+      // Calculate percentage
+      return Math.round((numerator / denominator) * 100 * 100) / 100;
+    }
+  };
+
+  // Validate weight for manual entries only
+  const validateManualWeight = (
+    value: string,
+    excludeId?: string
+  ): number | null => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0 || num > 100) {
+      Alert.alert("Erreur", "La pondération doit être entre 0 et 100%");
+      return null;
+    }
+
+    const currentManualTotal = getManualWeightTotal(excludeId);
+    if (currentManualTotal + num > 100) {
+      Alert.alert(
+        "Erreur",
+        `La pondération manuelle totale ne peut pas dépasser 100%. Actuellement: ${currentManualTotal}%. Disponible: ${
+          100 - currentManualTotal
+        }%`
+      );
+      return null;
+    }
+
+    return num;
+  };
 
   // Calculate current grade
   const calculateGrade = () => {
@@ -105,32 +201,78 @@ export default function DetailsCours() {
   };
 
   const handleAddEvaluation = () => {
-    if (evalName.trim() && evalNote && evalWeight) {
-      addEvaluation(courseId, {
-        name: evalName.trim(),
-        note: parseFloat(evalNote),
-        weight: parseFloat(evalWeight),
-        type: evalType,
-      });
-
-      resetForm();
-      setModalVisible(false);
+    if (!evalName.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un nom d'évaluation");
+      return;
     }
+
+    const note = validateNote();
+    if (note === null) return;
+
+    let weight: number;
+    let isAutoWeight: boolean;
+
+    if (!evalWeight.trim()) {
+      // Auto weight - will be calculated by context
+      weight = 0; // Placeholder, will be recalculated
+      isAutoWeight = true;
+    } else {
+      // Manual weight
+      const validatedWeight = validateManualWeight(evalWeight);
+      if (validatedWeight === null) return;
+      weight = validatedWeight;
+      isAutoWeight = false;
+    }
+
+    addEvaluation(courseId, {
+      name: evalName.trim(),
+      note,
+      weight,
+      type: evalType,
+      isAutoWeight,
+    });
+
+    resetForm();
+    setModalVisible(false);
   };
 
   const handleUpdateEvaluation = () => {
-    if (evalName.trim() && evalNote && evalWeight && editingEvalId) {
-      updateEvaluation(courseId, editingEvalId, {
-        name: evalName.trim(),
-        note: parseFloat(evalNote),
-        weight: parseFloat(evalWeight),
-        type: evalType,
-      });
-
-      resetForm();
-      setEditModalVisible(false);
-      setEditingEvalId(null);
+    if (!evalName.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un nom d'évaluation");
+      return;
     }
+
+    if (!editingEvalId) return;
+
+    const note = validateNote();
+    if (note === null) return;
+
+    let weight: number;
+    let isAutoWeight: boolean;
+
+    if (!evalWeight.trim()) {
+      // Auto weight
+      weight = 0; // Placeholder, will be recalculated
+      isAutoWeight = true;
+    } else {
+      // Manual weight
+      const validatedWeight = validateManualWeight(evalWeight, editingEvalId);
+      if (validatedWeight === null) return;
+      weight = validatedWeight;
+      isAutoWeight = false;
+    }
+
+    updateEvaluation(courseId, editingEvalId, {
+      name: evalName.trim(),
+      note,
+      weight,
+      type: evalType,
+      isAutoWeight,
+    });
+
+    resetForm();
+    setEditModalVisible(false);
+    setEditingEvalId(null);
   };
 
   const handleDeleteEvaluation = (evaluationId: string) => {
@@ -141,8 +283,12 @@ export default function DetailsCours() {
   const handleEditEvaluation = (evaluation: Evaluation) => {
     setEditingEvalId(evaluation.id);
     setEvalName(evaluation.name);
+    setGradeMode("percentage"); // Default to percentage for editing
     setEvalNote(evaluation.note.toString());
-    setEvalWeight(evaluation.weight.toString());
+    setEvalNumerator("");
+    setEvalDenominator("");
+    // Only show weight if it's manually set
+    setEvalWeight(evaluation.isAutoWeight ? "" : evaluation.weight.toString());
     setEvalType(evaluation.type);
     setMenuVisible(null);
     setEditModalVisible(true);
@@ -150,13 +296,93 @@ export default function DetailsCours() {
 
   const resetForm = () => {
     setEvalName("");
+    setGradeMode("percentage");
     setEvalNote("");
+    setEvalNumerator("");
+    setEvalDenominator("");
     setEvalWeight("");
     setEvalType("travail");
   };
 
   const works = course.evaluations.filter((e) => e.type === "travail");
   const exams = course.evaluations.filter((e) => e.type === "examen");
+  const totalWeight = getTotalWeight();
+  const autoWeightCount = course.evaluations.filter(
+    (e) => e.isAutoWeight
+  ).length;
+  const manualWeightTotal = course.evaluations
+    .filter((e) => !e.isAutoWeight)
+    .reduce((sum, e) => sum + e.weight, 0);
+
+  const renderGradeInput = () => {
+    return (
+      <>
+        <View style={styles.gradeModeSelector}>
+          <TouchableOpacity
+            style={[
+              styles.gradeModeButton,
+              gradeMode === "percentage" && styles.gradeModeButtonActive,
+            ]}
+            onPress={() => setGradeMode("percentage")}
+          >
+            <Text
+              style={[
+                styles.gradeModeText,
+                gradeMode === "percentage" && styles.gradeModeTextActive,
+              ]}
+            >
+              Pourcentage
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.gradeModeButton,
+              gradeMode === "fraction" && styles.gradeModeButtonActive,
+            ]}
+            onPress={() => setGradeMode("fraction")}
+          >
+            <Text
+              style={[
+                styles.gradeModeText,
+                gradeMode === "fraction" && styles.gradeModeTextActive,
+              ]}
+            >
+              Note sur...
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {gradeMode === "percentage" ? (
+          <TextInput
+            style={styles.input}
+            placeholder="Note (%)"
+            value={evalNote}
+            onChangeText={setEvalNote}
+            keyboardType="numeric"
+          />
+        ) : (
+          <View style={styles.fractionInputContainer}>
+            <TextInput
+              style={[styles.input, styles.fractionInput]}
+              placeholder="Note"
+              value={evalNumerator}
+              onChangeText={setEvalNumerator}
+              keyboardType="numeric"
+            />
+            <Text style={styles.fractionSlash}>/</Text>
+            <TextInput
+              style={[styles.input, styles.fractionInput]}
+              placeholder="Total"
+              value={evalDenominator}
+              onChangeText={setEvalDenominator}
+              keyboardType="numeric"
+            />
+          </View>
+        )}
+      </>
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -184,6 +410,25 @@ export default function DetailsCours() {
           </AnimatedCircularProgress>
 
           <Text style={styles.objectif}>Objectif: {course.objective}%</Text>
+          <Text style={styles.totalWeight}>
+            Pondération totale: {totalWeight.toFixed(2)}%
+            {totalWeight !== 100 && (
+              <Text
+                style={{ color: totalWeight > 100 ? "#d32f2f" : "#ff9800" }}
+              >
+                {" "}
+                ({totalWeight > 100 ? "Dépasse" : "Reste"}{" "}
+                {Math.abs(100 - totalWeight).toFixed(2)}%)
+              </Text>
+            )}
+          </Text>
+          {autoWeightCount > 0 && (
+            <Text style={styles.autoWeightInfo}>
+              {autoWeightCount} éval{autoWeightCount > 1 ? "s" : ""} auto (
+              {((100 - manualWeightTotal) / autoWeightCount).toFixed(2)}%
+              chacune)
+            </Text>
+          )}
         </View>
 
         {/* Encouragement message */}
@@ -266,17 +511,11 @@ export default function DetailsCours() {
               autoFocus
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Note (%)"
-              value={evalNote}
-              onChangeText={setEvalNote}
-              keyboardType="numeric"
-            />
+            {renderGradeInput()}
 
             <TextInput
               style={styles.input}
-              placeholder="Pondération (%)"
+              placeholder="Pondération (%) - Auto si vide"
               value={evalWeight}
               onChangeText={setEvalWeight}
               keyboardType="numeric"
@@ -369,17 +608,11 @@ export default function DetailsCours() {
               autoFocus
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Note (%)"
-              value={evalNote}
-              onChangeText={setEvalNote}
-              keyboardType="numeric"
-            />
+            {renderGradeInput()}
 
             <TextInput
               style={styles.input}
-              placeholder="Pondération (%)"
+              placeholder="Pondération (%) - Auto si vide"
               value={evalWeight}
               onChangeText={setEvalWeight}
               keyboardType="numeric"
@@ -501,7 +734,12 @@ function EvaluationCard({
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
         <Text style={styles.cardTitle}>{item.name}</Text>
-        <Text style={styles.cardWeight}>Pondération {item.weight}%</Text>
+        <Text style={styles.cardWeight}>
+          Pondération {item.weight.toFixed(2)}%
+          {item.isAutoWeight && (
+            <Text style={{ color: "#666", fontSize: 11 }}> (auto)</Text>
+          )}
+        </Text>
       </View>
 
       <View
@@ -536,6 +774,17 @@ const styles = StyleSheet.create({
   objectif: {
     marginTop: 10,
     fontSize: 18,
+  },
+  totalWeight: {
+    marginTop: 5,
+    fontSize: 14,
+    color: "#666",
+  },
+  autoWeightInfo: {
+    marginTop: 3,
+    fontSize: 12,
+    color: "#888",
+    fontStyle: "italic",
   },
   encouragementBox: {
     backgroundColor: "#e9e9e9",
@@ -611,6 +860,47 @@ const styles = StyleSheet.create({
     padding: 15,
     fontSize: 16,
     marginBottom: 15,
+  },
+  gradeModeSelector: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 15,
+  },
+  gradeModeButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+  },
+  gradeModeButtonActive: {
+    backgroundColor: "#7f3dff",
+    borderColor: "#7f3dff",
+  },
+  gradeModeText: {
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "600",
+  },
+  gradeModeTextActive: {
+    color: "white",
+  },
+  fractionInputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 15,
+  },
+  fractionInput: {
+    flex: 1,
+    marginBottom: 0,
+  },
+  fractionSlash: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: "#666",
   },
   typeSelector: {
     flexDirection: "row",

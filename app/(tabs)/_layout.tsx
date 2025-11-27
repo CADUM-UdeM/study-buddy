@@ -15,6 +15,7 @@ export default function TabLayout() {
           backgroundColor: "#221F3D",
           shadowColor: "#000",
         },
+        animation: "fade",
       }}
     >
       <Tabs.Screen

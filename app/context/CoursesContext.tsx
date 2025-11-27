@@ -13,6 +13,7 @@ export interface Evaluation {
   note: number;
   weight: number;
   type: "travail" | "examen";
+  isAutoWeight: boolean; // Track if weight is auto-calculated
 }
 
 export interface Course {
@@ -42,6 +43,25 @@ const CoursesContext = createContext<CoursesContextType | undefined>(undefined);
 
 const STORAGE_KEY = "@courses_data";
 
+// Helper function to recalculate auto-weights
+const recalculateAutoWeights = (evaluations: Evaluation[]): Evaluation[] => {
+  const manualWeightTotal = evaluations
+    .filter((e) => !e.isAutoWeight)
+    .reduce((sum, e) => sum + e.weight, 0);
+
+  const autoWeightCount = evaluations.filter((e) => e.isAutoWeight).length;
+
+  if (autoWeightCount === 0) return evaluations;
+
+  const remainingWeight = Math.max(0, 100 - manualWeightTotal);
+  const autoWeight =
+    autoWeightCount > 0 ? remainingWeight / autoWeightCount : 0;
+
+  return evaluations.map((e) =>
+    e.isAutoWeight ? { ...e, weight: Math.round(autoWeight * 100) / 100 } : e
+  );
+};
+
 export function CoursesProvider({ children }: { children: ReactNode }) {
   const [courses, setCourses] = useState<Course[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,7 +82,16 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     try {
       const storedData = await AsyncStorage.getItem(STORAGE_KEY);
       if (storedData) {
-        setCourses(JSON.parse(storedData));
+        const parsedCourses = JSON.parse(storedData);
+        // Ensure all evaluations have isAutoWeight property (for backwards compatibility)
+        const coursesWithAutoWeight = parsedCourses.map((course: Course) => ({
+          ...course,
+          evaluations: course.evaluations.map((e: any) => ({
+            ...e,
+            isAutoWeight: e.isAutoWeight ?? false,
+          })),
+        }));
+        setCourses(coursesWithAutoWeight);
       } else {
         // Initialize with default data if nothing stored
         const defaultCourses: Course[] = [
@@ -75,22 +104,25 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
                 id: "1",
                 name: "Devoir 1",
                 note: 70,
-                weight: 10,
+                weight: 33.33,
                 type: "travail",
+                isAutoWeight: true,
               },
               {
                 id: "2",
                 name: "Devoir 2",
                 note: 90,
-                weight: 10,
+                weight: 33.33,
                 type: "travail",
+                isAutoWeight: true,
               },
               {
                 id: "3",
                 name: "Examen intra",
                 note: 86,
-                weight: 10,
+                weight: 33.34,
                 type: "examen",
+                isAutoWeight: true,
               },
             ],
           },
@@ -149,9 +181,10 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
             ...evaluation,
             id: Date.now().toString(),
           };
+          const updatedEvaluations = [...course.evaluations, newEvaluation];
           return {
             ...course,
-            evaluations: [...course.evaluations, newEvaluation],
+            evaluations: recalculateAutoWeights(updatedEvaluations),
           };
         }
         return course;
@@ -167,11 +200,12 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     setCourses(
       courses.map((course) => {
         if (course.id === courseId) {
+          const updatedEvaluations = course.evaluations.map((e) =>
+            e.id === evaluationId ? { ...evaluation, id: evaluationId } : e
+          );
           return {
             ...course,
-            evaluations: course.evaluations.map((e) =>
-              e.id === evaluationId ? { ...evaluation, id: evaluationId } : e
-            ),
+            evaluations: recalculateAutoWeights(updatedEvaluations),
           };
         }
         return course;
@@ -183,11 +217,12 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     setCourses(
       courses.map((course) => {
         if (course.id === courseId) {
+          const updatedEvaluations = course.evaluations.filter(
+            (e) => e.id !== evaluationId
+          );
           return {
             ...course,
-            evaluations: course.evaluations.filter(
-              (e) => e.id !== evaluationId
-            ),
+            evaluations: recalculateAutoWeights(updatedEvaluations),
           };
         }
         return course;

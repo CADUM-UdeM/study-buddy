@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -13,7 +14,6 @@ import {
 } from "react-native";
 import { useCourses } from "../context/CoursesContext";
 
-// Define the course structure with evaluations
 export interface Evaluation {
   id: string;
   name: string;
@@ -35,19 +35,39 @@ export default function Donnees() {
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
-  const [courseObjective, setCourseObjective] = useState("85");
+  const [courseObjective, setCourseObjective] = useState("");
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
-  const handleAddCourse = () => {
-    if (courseName.trim()) {
-      addCourse(courseName.trim(), parseFloat(courseObjective) || 85);
-      setCourseName("");
-      setCourseObjective("85");
-      setModalVisible(false);
+  const validateObjective = (value: string): number | null => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0 || num > 100) {
+      Alert.alert("Erreur", "L'objectif doit être entre 0 et 100%");
+      return null;
     }
+    return num;
+  };
+
+  const handleAddCourse = () => {
+    if (!courseName.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un nom de cours");
+      return;
+    }
+
+    if (!courseObjective.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un objectif");
+      return;
+    }
+
+    const objective = validateObjective(courseObjective);
+    if (objective === null) return;
+
+    addCourse(courseName.trim(), objective);
+    setCourseName("");
+    setCourseObjective("");
+    setModalVisible(false);
   };
 
   const handleDeleteCourse = (id: string) => {
@@ -64,23 +84,30 @@ export default function Donnees() {
   };
 
   const handleUpdateCourse = () => {
-    if (courseName.trim() && editingCourse) {
-      updateCourse(
-        editingCourse.id,
-        courseName.trim(),
-        parseFloat(courseObjective) || 85
-      );
-      setCourseName("");
-      setCourseObjective("85");
-      setEditModalVisible(false);
-      setEditingCourse(null);
+    if (!courseName.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un nom de cours");
+      return;
     }
+
+    if (!courseObjective.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un objectif");
+      return;
+    }
+
+    const objective = validateObjective(courseObjective);
+    if (objective === null || !editingCourse) return;
+
+    updateCourse(editingCourse.id, courseName.trim(), objective);
+    setCourseName("");
+    setCourseObjective("");
+    setEditModalVisible(false);
+    setEditingCourse(null);
   };
 
   const navigateToCourseDetails = (courseId: string) => {
     router.push({
       pathname: "/detailscours",
-      params: { courseId }, // Just pass ID, not entire object
+      params: { courseId },
     });
   };
 
@@ -104,7 +131,7 @@ export default function Donnees() {
         {courses.map((course) => (
           <Pressable
             key={course.id}
-            onPress={() => navigateToCourseDetails(course.id)} // Pass ID only
+            onPress={() => navigateToCourseDetails(course.id)}
             style={{ width: "100%", alignItems: "center" }}
           >
             <View style={styles.coursContainer}>
@@ -208,7 +235,7 @@ export default function Donnees() {
           onPress={() => {
             setEditModalVisible(false);
             setCourseName("");
-            setCourseObjective("85");
+            setCourseObjective("");
             setEditingCourse(null);
           }}
         >
@@ -240,7 +267,7 @@ export default function Donnees() {
                 onPress={() => {
                   setEditModalVisible(false);
                   setCourseName("");
-                  setCourseObjective("85");
+                  setCourseObjective("");
                   setEditingCourse(null);
                 }}
               >
