@@ -43,7 +43,7 @@ return (
     <View style ={styles.buttonStyle}>
         
 
-    <Text style={{color: isDarkMode ? 'white' : 'black'}}> Nom de l’application </Text>
+    <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyTracker </Text>
             <Text></Text>
             <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight:'bold'}}> Profil </Text>
             <Text></Text>
