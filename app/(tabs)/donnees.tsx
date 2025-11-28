@@ -12,22 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useCourses } from "../context/CoursesContext";
-
-export interface Evaluation {
-  id: string;
-  name: string;
-  note: number;
-  weight: number;
-  type: "travail" | "examen";
-}
-
-export interface Course {
-  id: string;
-  name: string;
-  objective: number;
-  evaluations: Evaluation[];
-}
+import { Course, useCourses } from "../context/CoursesContext";
 
 export default function Donnees() {
   const { courses, addCourse, updateCourse, deleteCourse, isLoading } =
@@ -149,7 +134,13 @@ export default function Donnees() {
                   size={20}
                 />
               </TouchableOpacity>
-              <Text style={styles.coursText}>{course.name}</Text>
+              <Text
+                style={styles.coursText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {course.name}
+              </Text>
               <Ionicons
                 style={styles.chevRight}
                 name="chevron-forward"
@@ -364,6 +355,8 @@ const styles = StyleSheet.create({
   },
   coursText: {
     fontSize: 16,
+    flex: 1,
+    marginRight: 30,
   },
   addCoursButton: {
     backgroundColor: "#5900a1ff",

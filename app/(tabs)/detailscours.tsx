@@ -32,6 +32,7 @@ export default function DetailsCours() {
 
   // Form state
   const [evalName, setEvalName] = useState("");
+  const [isScheduled, setIsScheduled] = useState(false);
   const [gradeMode, setGradeMode] = useState<"percentage" | "fraction">(
     "percentage"
   );
@@ -81,8 +82,10 @@ export default function DetailsCours() {
       .reduce((sum, e) => sum + e.weight, 0);
   };
 
-  // Validate note (0-100)
+  // Validate note (0-100) - only required if not scheduled
   const validateNote = (): number | null => {
+    if (isScheduled) return null; // Scheduled evaluations don't need a grade yet
+
     if (gradeMode === "percentage") {
       if (!evalNote.trim()) {
         Alert.alert("Erreur", "Veuillez entrer une note");
@@ -159,18 +162,18 @@ export default function DetailsCours() {
     return num;
   };
 
-  // Calculate current grade
+  // Calculate current grade (only from completed evaluations)
   const calculateGrade = () => {
-    if (course.evaluations.length === 0) return 0;
-
-    const totalWeight = course.evaluations.reduce(
-      (sum, e) => sum + e.weight,
-      0
+    const completed = course.evaluations.filter(
+      (e) => !e.isScheduled && e.note !== null
     );
+    if (completed.length === 0) return 0;
+
+    const totalWeight = completed.reduce((sum, e) => sum + e.weight, 0);
     if (totalWeight === 0) return 0;
 
-    const weightedSum = course.evaluations.reduce(
-      (sum, e) => sum + e.note * e.weight,
+    const weightedSum = completed.reduce(
+      (sum, e) => sum + e.note! * e.weight,
       0
     );
 
@@ -181,10 +184,26 @@ export default function DetailsCours() {
 
   // Generate encouragement message
   const getEncouragementMessage = () => {
+    const completed = course.evaluations.filter(
+      (e) => !e.isScheduled && e.note !== null
+    );
+    const scheduled = course.evaluations.filter((e) => e.isScheduled);
+
+    if (completed.length === 0 && scheduled.length === 0) {
+      return "Ajoutez vos premières évaluations pour commencer à suivre vos progrès!";
+    }
+
+    if (completed.length === 0 && scheduled.length > 0) {
+      return "📅 Vous avez des évaluations planifiées. Ajoutez vos notes au fur et à mesure!";
+    }
+
     const diff = currentGrade - course.objective;
 
-    if (course.evaluations.length === 0) {
-      return "Ajoutez vos premières évaluations pour commencer à suivre vos progrès!";
+    if (scheduled.length > 0) {
+      const target = scheduled[0].targetGrade || 100;
+      return `🎯 Cible pour évaluations à venir: ${target.toFixed(
+        1
+      )}% pour atteindre ${course.objective}%`;
     }
 
     if (diff >= 10) {
@@ -207,7 +226,7 @@ export default function DetailsCours() {
     }
 
     const note = validateNote();
-    if (note === null) return;
+    if (note === null && !isScheduled) return;
 
     let weight: number;
     let isAutoWeight: boolean;
@@ -230,6 +249,7 @@ export default function DetailsCours() {
       weight,
       type: evalType,
       isAutoWeight,
+      isScheduled,
     });
 
     resetForm();
@@ -245,7 +265,7 @@ export default function DetailsCours() {
     if (!editingEvalId) return;
 
     const note = validateNote();
-    if (note === null) return;
+    if (note === null && !isScheduled) return;
 
     let weight: number;
     let isAutoWeight: boolean;
@@ -268,6 +288,7 @@ export default function DetailsCours() {
       weight,
       type: evalType,
       isAutoWeight,
+      isScheduled,
     });
 
     resetForm();
@@ -283,11 +304,11 @@ export default function DetailsCours() {
   const handleEditEvaluation = (evaluation: Evaluation) => {
     setEditingEvalId(evaluation.id);
     setEvalName(evaluation.name);
-    setGradeMode("percentage"); // Default to percentage for editing
-    setEvalNote(evaluation.note.toString());
+    setIsScheduled(evaluation.isScheduled);
+    setGradeMode("percentage");
+    setEvalNote(evaluation.note !== null ? evaluation.note.toString() : "");
     setEvalNumerator("");
     setEvalDenominator("");
-    // Only show weight if it's manually set
     setEvalWeight(evaluation.isAutoWeight ? "" : evaluation.weight.toString());
     setEvalType(evaluation.type);
     setMenuVisible(null);
@@ -296,6 +317,7 @@ export default function DetailsCours() {
 
   const resetForm = () => {
     setEvalName("");
+    setIsScheduled(false);
     setGradeMode("percentage");
     setEvalNote("");
     setEvalNumerator("");
@@ -304,8 +326,16 @@ export default function DetailsCours() {
     setEvalType("travail");
   };
 
-  const works = course.evaluations.filter((e) => e.type === "travail");
-  const exams = course.evaluations.filter((e) => e.type === "examen");
+  const completed = course.evaluations.filter(
+    (e) => !e.isScheduled && e.note !== null
+  );
+  const scheduled = course.evaluations.filter((e) => e.isScheduled);
+
+  const completedWorks = completed.filter((e) => e.type === "travail");
+  const completedExams = completed.filter((e) => e.type === "examen");
+  const scheduledWorks = scheduled.filter((e) => e.type === "travail");
+  const scheduledExams = scheduled.filter((e) => e.type === "examen");
+
   const totalWeight = getTotalWeight();
   const autoWeightCount = course.evaluations.filter(
     (e) => e.isAutoWeight
@@ -315,6 +345,17 @@ export default function DetailsCours() {
     .reduce((sum, e) => sum + e.weight, 0);
 
   const renderGradeInput = () => {
+    if (isScheduled) {
+      return (
+        <View style={styles.scheduledInfo}>
+          <Ionicons name="calendar-outline" size={20} color="#7f3dff" />
+          <Text style={styles.scheduledText}>
+            Évaluation planifiée - La note sera ajoutée plus tard
+          </Text>
+        </View>
+      );
+    }
+
     return (
       <>
         <View style={styles.gradeModeSelector}>
@@ -391,7 +432,9 @@ export default function DetailsCours() {
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="arrow-back" size={26} />
         </TouchableOpacity>
-        <Text style={styles.title}>{course.name}</Text>
+        <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+          {course.name}
+        </Text>
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 20 }}>
@@ -438,11 +481,11 @@ export default function DetailsCours() {
           </Text>
         </View>
 
-        {/* Works Section */}
-        {works.length > 0 && (
+        {/* Completed Works Section */}
+        {completedWorks.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Travaux</Text>
-            {works.map((item) => (
+            {completedWorks.map((item) => (
               <EvaluationCard
                 key={item.id}
                 item={item}
@@ -456,11 +499,47 @@ export default function DetailsCours() {
           </>
         )}
 
-        {/* Exams Section */}
-        {exams.length > 0 && (
+        {/* Completed Exams Section */}
+        {completedExams.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Examens</Text>
-            {exams.map((item) => (
+            {completedExams.map((item) => (
+              <EvaluationCard
+                key={item.id}
+                item={item}
+                onMenuPress={(e) => {
+                  const { pageY, pageX } = e.nativeEvent;
+                  setMenuPosition({ top: pageY, left: pageX });
+                  setMenuVisible(item.id);
+                }}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Scheduled Works Section */}
+        {scheduledWorks.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Travaux à venir</Text>
+            {scheduledWorks.map((item) => (
+              <EvaluationCard
+                key={item.id}
+                item={item}
+                onMenuPress={(e) => {
+                  const { pageY, pageX } = e.nativeEvent;
+                  setMenuPosition({ top: pageY, left: pageX });
+                  setMenuVisible(item.id);
+                }}
+              />
+            ))}
+          </>
+        )}
+
+        {/* Scheduled Exams Section */}
+        {scheduledExams.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Examens à venir</Text>
+            {scheduledExams.map((item) => (
               <EvaluationCard
                 key={item.id}
                 item={item}
@@ -510,6 +589,28 @@ export default function DetailsCours() {
               onChangeText={setEvalName}
               autoFocus
             />
+
+            {/* Scheduled Toggle */}
+            <TouchableOpacity
+              style={styles.scheduledToggle}
+              onPress={() => setIsScheduled(!isScheduled)}
+            >
+              <View style={styles.checkboxContainer}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    isScheduled && styles.checkboxChecked,
+                  ]}
+                >
+                  {isScheduled && (
+                    <Ionicons name="checkmark" size={16} color="white" />
+                  )}
+                </View>
+                <Text style={styles.checkboxLabel}>
+                  Évaluation planifiée (note à venir)
+                </Text>
+              </View>
+            </TouchableOpacity>
 
             {renderGradeInput()}
 
@@ -607,6 +708,28 @@ export default function DetailsCours() {
               onChangeText={setEvalName}
               autoFocus
             />
+
+            {/* Scheduled Toggle */}
+            <TouchableOpacity
+              style={styles.scheduledToggle}
+              onPress={() => setIsScheduled(!isScheduled)}
+            >
+              <View style={styles.checkboxContainer}>
+                <View
+                  style={[
+                    styles.checkbox,
+                    isScheduled && styles.checkboxChecked,
+                  ]}
+                >
+                  {isScheduled && (
+                    <Ionicons name="checkmark" size={16} color="white" />
+                  )}
+                </View>
+                <Text style={styles.checkboxLabel}>
+                  Évaluation planifiée (note à venir)
+                </Text>
+              </View>
+            </TouchableOpacity>
 
             {renderGradeInput()}
 
@@ -727,13 +850,20 @@ function EvaluationCard({
   item: Evaluation;
   onMenuPress: (e: any) => void;
 }) {
+  const isScheduled = item.isScheduled;
+  const displayGrade = isScheduled
+    ? `Cible: ${item.targetGrade?.toFixed(1) || "100"}%`
+    : `${item.note}%`;
+
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, isScheduled && styles.scheduledCard]}>
       <TouchableOpacity onPress={onMenuPress}>
         <Ionicons name="ellipsis-vertical" size={20} color="#555" />
       </TouchableOpacity>
       <View style={{ flex: 1 }}>
-        <Text style={styles.cardTitle}>{item.name}</Text>
+        <Text style={styles.cardTitle} numberOfLines={1} ellipsizeMode="tail">
+          {item.name}
+        </Text>
         <Text style={styles.cardWeight}>
           Pondération {item.weight.toFixed(2)}%
           {item.isAutoWeight && (
@@ -745,10 +875,14 @@ function EvaluationCard({
       <View
         style={[
           styles.noteBadge,
-          { backgroundColor: item.note >= 75 ? "#c8f7c5" : "#f7c5c5" },
+          isScheduled
+            ? { backgroundColor: "#e3d5ff" }
+            : { backgroundColor: item.note! >= 75 ? "#c8f7c5" : "#f7c5c5" },
         ]}
       >
-        <Text style={styles.noteText}>{item.note}%</Text>
+        <Text style={[styles.noteText, isScheduled && { color: "#7f3dff" }]}>
+          {displayGrade}
+        </Text>
       </View>
     </View>
   );
@@ -765,6 +899,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: "bold",
+    flex: 1,
   },
   percentText: {
     fontSize: 32,
@@ -807,12 +942,23 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     gap: 12,
   },
-  cardTitle: { fontSize: 16, fontWeight: "600" },
+  scheduledCard: {
+    borderWidth: 2,
+    borderColor: "#e3d5ff",
+    borderStyle: "dashed",
+  },
+  cardTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    flex: 1,
+  },
   cardWeight: { fontSize: 13, color: "#555" },
   noteBadge: {
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 10,
+    minWidth: 70,
+    alignItems: "center",
   },
   noteText: { fontWeight: "bold", fontSize: 14 },
   addEvalButton: {
@@ -901,6 +1047,43 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     color: "#666",
+  },
+  scheduledInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  scheduledText: {
+    color: "#7f3dff",
+    marginLeft: 6,
+    fontSize: 14,
+  },
+  scheduledToggle: {
+    marginBottom: 12,
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "white",
+  },
+  checkboxChecked: {
+    backgroundColor: "#7f3dff",
+    borderColor: "#7f3dff",
+  },
+  checkboxLabel: {
+    fontSize: 14,
+    color: "#444",
   },
   typeSelector: {
     flexDirection: "row",

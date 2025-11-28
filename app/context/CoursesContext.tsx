@@ -10,10 +10,12 @@ import React, {
 export interface Evaluation {
   id: string;
   name: string;
-  note: number;
+  note: number | null; // null if scheduled/not graded yet
   weight: number;
   type: "travail" | "examen";
-  isAutoWeight: boolean; // Track if weight is auto-calculated
+  isAutoWeight: boolean;
+  isScheduled: boolean; // true if this is a future assignment
+  targetGrade?: number; // calculated target grade for scheduled evaluations
 }
 
 export interface Course {
@@ -43,6 +45,44 @@ const CoursesContext = createContext<CoursesContextType | undefined>(undefined);
 
 const STORAGE_KEY = "@courses_data";
 
+// Helper function to calculate target grades for scheduled evaluations
+const calculateTargetGrades = (
+  evaluations: Evaluation[],
+  objective: number
+): Evaluation[] => {
+  const completed = evaluations.filter(
+    (e) => !e.isScheduled && e.note !== null
+  );
+  const scheduled = evaluations.filter((e) => e.isScheduled);
+
+  if (scheduled.length === 0) return evaluations;
+
+  // Calculate current weighted grade from completed evaluations
+  const completedWeight = completed.reduce((sum, e) => sum + e.weight, 0);
+  const completedWeightedSum = completed.reduce(
+    (sum, e) => sum + e.note! * e.weight,
+    0
+  );
+
+  const scheduledWeight = scheduled.reduce((sum, e) => sum + e.weight, 0);
+
+  if (scheduledWeight === 0) return evaluations;
+
+  // Calculate what we need from scheduled evaluations
+  const targetWeightedSum =
+    objective * (completedWeight + scheduledWeight) - completedWeightedSum;
+  const targetAverage = targetWeightedSum / scheduledWeight;
+
+  // If target is achievable (<=100), distribute it evenly; otherwise set to 100
+  const finalTarget = Math.min(100, Math.max(0, targetAverage));
+
+  return evaluations.map((e) =>
+    e.isScheduled
+      ? { ...e, targetGrade: Math.round(finalTarget * 100) / 100 }
+      : e
+  );
+};
+
 // Helper function to recalculate auto-weights
 const recalculateAutoWeights = (evaluations: Evaluation[]): Evaluation[] => {
   const manualWeightTotal = evaluations
@@ -60,6 +100,15 @@ const recalculateAutoWeights = (evaluations: Evaluation[]): Evaluation[] => {
   return evaluations.map((e) =>
     e.isAutoWeight ? { ...e, weight: Math.round(autoWeight * 100) / 100 } : e
   );
+};
+
+// Combined helper: recalculate both weights and targets
+const recalculateEvaluations = (
+  evaluations: Evaluation[],
+  objective: number
+): Evaluation[] => {
+  const withWeights = recalculateAutoWeights(evaluations);
+  return calculateTargetGrades(withWeights, objective);
 };
 
 export function CoursesProvider({ children }: { children: ReactNode }) {
@@ -83,17 +132,20 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
       const storedData = await AsyncStorage.getItem(STORAGE_KEY);
       if (storedData) {
         const parsedCourses = JSON.parse(storedData);
-        // Ensure all evaluations have isAutoWeight property (for backwards compatibility)
-        const coursesWithAutoWeight = parsedCourses.map((course: Course) => ({
+        // Ensure all evaluations have new properties (for backwards compatibility)
+        const coursesWithNewProps = parsedCourses.map((course: Course) => ({
           ...course,
           evaluations: course.evaluations.map((e: any) => ({
             ...e,
             isAutoWeight: e.isAutoWeight ?? false,
+            isScheduled: e.isScheduled ?? false,
+            note: e.note ?? null,
+            targetGrade: e.targetGrade ?? undefined,
           })),
         }));
-        setCourses(coursesWithAutoWeight);
+        setCourses(coursesWithNewProps);
       } else {
-        // Initialize with default data if nothing stored
+        // Initialize with default data
         const defaultCourses: Course[] = [
           {
             id: "1",
@@ -107,6 +159,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
                 weight: 33.33,
                 type: "travail",
                 isAutoWeight: true,
+                isScheduled: false,
               },
               {
                 id: "2",
@@ -115,6 +168,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
                 weight: 33.33,
                 type: "travail",
                 isAutoWeight: true,
+                isScheduled: false,
               },
               {
                 id: "3",
@@ -123,6 +177,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
                 weight: 33.34,
                 type: "examen",
                 isAutoWeight: true,
+                isScheduled: false,
               },
             ],
           },
@@ -157,7 +212,17 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
   const updateCourse = (id: string, name: string, objective: number) => {
     setCourses(
       courses.map((course) =>
-        course.id === id ? { ...course, name, objective } : course
+        course.id === id
+          ? {
+              ...course,
+              name,
+              objective,
+              evaluations: recalculateEvaluations(
+                course.evaluations,
+                objective
+              ),
+            }
+          : course
       )
     );
   };
@@ -184,7 +249,10 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
           const updatedEvaluations = [...course.evaluations, newEvaluation];
           return {
             ...course,
-            evaluations: recalculateAutoWeights(updatedEvaluations),
+            evaluations: recalculateEvaluations(
+              updatedEvaluations,
+              course.objective
+            ),
           };
         }
         return course;
@@ -205,7 +273,10 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
           );
           return {
             ...course,
-            evaluations: recalculateAutoWeights(updatedEvaluations),
+            evaluations: recalculateEvaluations(
+              updatedEvaluations,
+              course.objective
+            ),
           };
         }
         return course;
@@ -222,7 +293,10 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
           );
           return {
             ...course,
-            evaluations: recalculateAutoWeights(updatedEvaluations),
+            evaluations: recalculateEvaluations(
+              updatedEvaluations,
+              course.objective
+            ),
           };
         }
         return course;
