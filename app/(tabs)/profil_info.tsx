@@ -1,35 +1,41 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import React from "react";
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import React, { useState } from "react";
+import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import { stylesProfil } from './profil';
 
-
-export default function HomeScreen() {
+export default function Profil_info() {
     const colorScheme = useColorScheme();
     const isDarkMode = colorScheme == 'dark';
 
-    const [count, set_count] = React.useState(0);
-    const isModified = count % 2 == 0;
-    const  button_modified_text   = isModified ? 'Modifier' : 'Sauvegarder'
+    const [notModified, isNotModified] = useState(true);
+    
+    const [pseudo, setPseudo] = useState('Blabla');
+    const [pseudo_text, pseudo_text_change] = useState(pseudo);
 
-    const [pseudo_text, pseudo_text_change] = React.useState('Blabla');
-    const [email_text, email_text_change] = React.useState('example@gmail.com');
+    const [email, setEmail] = useState('example@gmail.com');
+    const [email_text, set_email_text] = useState(email);
 
-    const [password, set_password] = React.useState('mdp123');
-    const [show_password, set_show_password] = React.useState(true);
+    const [password, setPassword] = useState('mdp123');
+    const [password_text, set_password_text] = useState('mdp123');
+
+    const [show_password, set_show_password] = useState(true);
     const router = useRouter();
+    const [isDefaultImage, setIsDefaultImage] = useState(true);
+    const [clickGiveUp, setClickGiveUp] = useState(false);
+    const [textClick, setTextClick] = useState("Voulez-vous abandonner les modifications ?")
+    
+    const pageCancel = () => {
+        setClickGiveUp(!clickGiveUp)
+        setTextClick("Voulez-vous abandonner les modifications ?")
+        pseudo_text_change(pseudo)
+        set_password_text(password)
+        set_email_text(email)
+    }
 
-    const cancel_button = () => {
-        Alert.alert(
-            'Êtes-vous sûr(e) de vouloir annuler les modifications ?',
-            undefined,
-            [{
-                text: 'Oui',
-                style: 'cancel',
-            }, {
-                text: 'Non'
-            },
-            ])
+    const pageSave = () => {
+        setClickGiveUp(!clickGiveUp)
+        setTextClick("Voulez-vous sauvegarder les modifications ?")
     }
 
     const add_button = () => {
@@ -46,64 +52,125 @@ export default function HomeScreen() {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.buttonStyle}>
-            {isModified && (
-                <TouchableOpacity style={styles.go_back_button} onPress={() => router.push("/profil")}>
-                    <IonIcons name="return-down-back-outline" size={40} color={'black'}/>
-                </TouchableOpacity>)}
-            {!isModified && (
-                <TouchableOpacity style={styles.cancel_modification} onPress={cancel_button}>
-                    <Text>Abandonner</Text>
+        <ScrollView contentContainerStyle={styles.bodyStyle}>
+            <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
+            <Text></Text>
+            
+            {/* -------------------- Section boutons pour annuler/sauvegarder modif -------------------- */}
+            <View style={{position:"absolute", marginTop:650 }}>
+            <View>{!notModified && (<View style={[styles.drawHorLine, {backgroundColor: '#565681'}]}></View>)}</View>
+            
+            <View style={{flexDirection:'row',gap : "25%", alignSelf:'center'}}>
+            {!notModified && (
+                <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ? '#565681' : '#67348B'}]} onPress={pageCancel}>
+                    <Text style={{color: 'white', textAlign:'center'}}>Abandonner</Text>
+                </TouchableOpacity>)}  
+
+            {!notModified && (
+                <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ? '#565681' : '#67348B'}]} onPress={pageSave}>
+                    <Text style={{color: 'white', textAlign:'center'}}>Sauvegarder</Text>
                 </TouchableOpacity>)}
 
-
-            <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyTracker </Text>
-            <Text></Text>
-            <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight: 'bold'}}> Profil </Text>
-            <Text></Text>
-            <View style={styles.ImageProfile}>
-                <Image source={require("../../assets/images/image-profile.png")} style={styles.image}></Image>
             </View>
-            {!isModified && (
+
+            {/* Modals (/pop up) pour page si clique sur bouton abandonner ou sauvegarder les modifications */}
+                    <Modal transparent visible={clickGiveUp} animationType='none' >
+                        <View style={[stylesProfil.confPage, {backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(1,1,1,0.6)'}]}>
+                        
+                        <View style={[stylesProfil.confContener, {backgroundColor: isDarkMode ? '#565681' : 'white'}]}>
+                            <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}>
+                                {textClick} </Text>
+            
+                            <View style={{flexDirection:'row', alignContent:'center', alignSelf:'center', gap : "15%", marginTop:40 }}>
+                                <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#FFC943'}]}
+                                onPress={() => {isNotModified(!notModified), setClickGiveUp(!clickGiveUp), setPseudo(pseudo_text), setEmail(email_text), setPassword(password_text)}}>
+                                    <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Oui </Text>
+                                    </TouchableOpacity>
+            
+                                <TouchableOpacity style={[stylesProfil.clickButton, {backgroundColor: isDarkMode ? '#565681' : 'white', borderColor:'black'}]} onPress={()=>setClickGiveUp(!clickGiveUp)}>
+                                    <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Non </Text>
+                                    </TouchableOpacity>
+                            </View>            
+                            </View>
+                        </View>
+                    </Modal>   
+            <View>{!notModified && (<View style={[styles.drawHorLine, {backgroundColor: '#565681'}]}></View>)}</View>
+
+            </View>        
+            {/* -------------------- Fin section boutons pour annuler/sauvegarder modif -------------------- */}
+
+
+            
+            {/* -------------------- Affichage du nom de la page -------------------- */}
+            {!notModified && (
+            <View style={{flexDirection:'row', padding: 10}}>
+            <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight:'bold'}}> Mes informations </Text>
+            <Text></Text>
+            </View> )}
+
+            {notModified && (
+            <View style={{flexDirection:'row', padding: 10, gap: 80}}>
+            <TouchableOpacity style={[]} onPress={() => router.push("/profil")}>
+                    <IonIcons name="arrow-back-sharp" size={30} color={isDarkMode ? 'white' : 'black'}/>
+                </TouchableOpacity>
+            <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight:'bold', marginLeft:-30}}> Mes informations </Text>
+            <Text></Text>
+            </View> )}
+
+            {/* -------------------- Affichage image du profile -------------------- */}
+            <View style={styles.ImageProfile}>
+                
+            {isDefaultImage && <Image source={require("../../assets/images/image-profile.png")} style={styles.image}></Image>}
+            
+            </View>
+            {!notModified && (
                 <TouchableOpacity style={styles.add_picture} onPress={add_button}>
                     <IonIcons name={"image-outline"} size={28} color={'black'}/>
                 </TouchableOpacity>)}
-            <TouchableOpacity onPress={() => set_count(count + 1)}>
-                <View style={[styles.modify_button, {backgroundColor: isModified ? '#67348B' : '#61C36E'}]}>
-                    <Text style={{color: 'white', textAlign: 'center'}}>{button_modified_text}</Text>
+
+            {/* -------------------- Bouton pour modifier les informations de la page -------------------- */}
+            {notModified && (
+            <TouchableOpacity onPress={() => isNotModified(!notModified)}>
+                <View style={[styles.modify_button, styles.shadow, {backgroundColor:isDarkMode ? '#565681' : '#67348B'} ]}>
+                    <Text style={{color: 'white', textAlign: 'center'}}>Modifier</Text>
                 </View>
+            </TouchableOpacity>)}
 
-            </TouchableOpacity>
-
+            {/* -------------------- Section champs de texte -------------------- */}
             <View style={styles.input_field}>
+
+                {/* -------------------- Champs pseudo -------------------- */}
                 <View style={styles.box_input}>
                     <Text style={{color: isDarkMode ? 'white' : 'black'}}> Pseudo</Text>
                     <TextInput
-                        editable={!isModified}
-                        style={styles.input}
+                        editable={!notModified}
+                        style={[styles.input, {backgroundColor:notModified ? '#D9D9D9' : '#FFFFFF'}]}
                         placeholder="name123" defaultValue={pseudo_text}
                         onChangeText={pseudo_text_change}
                     />
                 </View>
+                
+                {/* -------------------- Champs courriel -------------------- */}
                 <View style={styles.box_input}>
                     <Text style={{color: isDarkMode ? 'white' : 'black'}}> Courriel</Text>
                     <TextInput
-                        editable={!isModified}
-                        style={styles.input}
+                        editable={!notModified}
+                        style={[styles.input, {backgroundColor:notModified ? '#D9D9D9' : '#FFFFFF'}]}
                         placeholder="example@gmail.com" defaultValue={email_text}
-                        onChangeText={email_text_change}
+                        onChangeText={set_email_text}
                     />
                 </View>
 
+                {/* -------------------- Champs mot de passe -------------------- */}
                 <View style={styles.box_input}>
                     <Text style={{color: isDarkMode ? 'white' : 'black'}}> Mot de passe</Text>
 
                     <View style={{flexDirection: 'row', position: 'relative', width: '100%',}}>
                         <TextInput
-                            editable={!isModified}
-                            style={styles.input}
-                            onChangeText={set_password}
-                            value={password}
+                            editable={!notModified}
+                        style={[styles.input, {backgroundColor:notModified ? '#D9D9D9' : '#FFFFFF'}]}
+                            onChangeText={set_password_text}
+                            value={password_text}
                             secureTextEntry={show_password}
                         />
                         <TouchableOpacity style={{position: 'absolute', right: 10, bottom: 10}}
@@ -112,31 +179,39 @@ export default function HomeScreen() {
                         </TouchableOpacity>
                     </View>
                     <View>
+                    {!notModified && (
                     <Text style={{color: 'red'}} >
                         Doit contenir :
-                    </Text>
+                    </Text>)}
+                    {!notModified && (
                     <Text style={{color: 'red'}}>
                         {'\u2022'} au minimum 8 caractères,{'\n'} 
                         {'\u2022'} une majuscule, {'\n'}  
                         {'\u2022'} une minuscule, {'\n'}
                         {'\u2022'} un caractère special {'\n'}
                     </Text>
-
+                    )}
                     </View>
                 </View>
-
             </View>
+            {/* -------------------- Fin section champs de texte -------------------- */}
 
     </ScrollView>
     )
 }
 
-
+{/* -------------------- Section Style -------------------- */}
 const styles = StyleSheet.create({
-    buttonStyle: {
+    bodyStyle: {
         padding: 100,
         alignItems: "center",
 
+    },
+    drawHorLine:{
+        backgroundColor:'black',
+        height:1,
+        marginVertical: 10,
+        width: '100%'
     },
     ImageProfile: {},
     image: {
@@ -147,36 +222,18 @@ const styles = StyleSheet.create({
         top: 10,
         marginTop: 10,
         padding: 10,
-        width: '100%',
         borderRadius: 20,
         borderWidth: 0,
         minWidth: 130
-
-    },
-    go_back_button: {
-        backgroundColor: '#C2E5FF',
-        width: '30%',
-        padding: 10,
-        position: 'absolute',
-        top: 60,
-        right: '155%',
-        borderRadius: 20,
-
-    },
-    cancel_modification: {
-        backgroundColor: 'red',
-        width: '50%',
-        right: '140%',
-        padding: 10,
-        position: 'absolute',
-        top: 60,
     },
     add_picture: {
-        backgroundColor: 'grey',
-        padding: 10,
+        borderColor: 'white',
+        borderWidth: 2,
+        backgroundColor: '#D9D9D9',
+        padding: 6,
         borderRadius: 20,
         position: 'absolute',
-        top: '100%',
+        top: '123%',
         left: '105%',
 
     },
@@ -196,6 +253,13 @@ const styles = StyleSheet.create({
     },
     box_input: {
         padding: 10,
-
     },
+    shadow :{
+        shadowColor: 'black',
+        shadowOpacity:0.1,
+        shadowOffset: {
+                width: 0,
+                height:3,
+        },
+        elevation: 3   }
 });
