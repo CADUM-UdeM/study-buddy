@@ -1,7 +1,7 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Modal, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
 import { stylesProfil } from "./profil";
 
 
@@ -13,7 +13,12 @@ const  button_start_text   = isRunning ? 'Pause' : 'Débuter'
 const colorScheme = useColorScheme();
 const isDarkMode = colorScheme == 'dark';
 
-{/* Fonction pour formattage du chrono */}
+const [defaultRepetition, setDefaultRepetition] = useState(3)
+const [defaultStudyTime, setDefaultStudyTime] = useState(60)
+const [defaultBreakTime, setDefaultBreakTime] = useState(10)
+
+
+{/* Fonction pour formatage du chronomètre */}
 const addZero = (num : number): string => { 
   if (num < 10) {
     return `0${num}`
@@ -22,15 +27,22 @@ const addZero = (num : number): string => {
       return `${num}` 
     }};
 
-const hours = addZero(0)
-const initMin = 25
-const [min, setMin] = useState(addZero(initMin))
-const [clickParam, setClickParam] = useState(false)
 
+const [initHours, setInitHours] = useState(0)
+const [hours, setHours] = useState(addZero(initHours))
+const [initMin, setInitMin] = useState(25)
+const [min, setMin] = useState(addZero(initMin))
 const sec = addZero(0)
-const numCycle = 3
-const breakDuration = 10
-const pomodoroDuration = 60
+
+const [clickParam, setClickParam] = useState(false)
+const [clickSelectStudy, setClickSelectStudy] = useState(false)
+const [clickSelectBreak, setClickSelectBreak] = useState(false)
+
+
+
+const [numCycle, setNumCycle] = useState(defaultRepetition)
+const [breakDuration, setBreakDuration] = useState(10)
+const [pomodoroDuration, setPomodoroDuration] = useState(defaultStudyTime)
 
 const start_button = () => {
       setIsRunning(true);
@@ -42,16 +54,26 @@ const pause_button = () => {
 const stop_button = () => {
       setIsRunning(false);
       setMin(addZero(initMin))
+      setHours(addZero(initHours))
 }
 
 const add_button = () => {
     if (Number(min) < 55){
-    setMin(addZero(Number(min) + 5))}
+        setMin(addZero(Number(min) + 5))}
+    /* On fixe un maximum de 3 heures et 55 minutes -------------------- */
+    else if (Number(hours) < 3){
+        setMin(addZero(Number(0)))
+        setHours(addZero(Number(hours) +1))
+    }
 }
+
 
 const min_button = () => {
     if (Number(min) > 0){
-      setMin(addZero(Number(min) - 5))}
+        setMin(addZero(Number(min) - 5))}
+    else if(Number(hours)> 0){
+        setMin(addZero(Number(55)))
+        setHours(addZero(Number(hours) -1))}
 }
 
 {/* Pour tourner le chrono */}
@@ -59,6 +81,27 @@ useEffect(() => {
   
 });
 
+
+
+{/* -------------------- Pour changer les paramètres du pomodoro  -------------------- */}
+
+const clickRepeat = (index : number) => {
+    setDefaultRepetition(index)
+}
+const clickStudyTime = (index : number) => {
+        setDefaultStudyTime(index)
+}
+const clickBreakTime = (index : number) => {
+        setDefaultBreakTime(index)
+}
+const updateTime = (hours:number, minutes : number) => {
+        const newMin = addZero(Number((minutes% 60)))
+        setMin(newMin)
+        setInitMin(Number(newMin))
+        const newHours = addZero(Number(hours + Math.floor(minutes/ 60)))
+        setHours(newHours)
+        setInitHours(Number(newHours))
+}
 
 return (
   
@@ -69,7 +112,8 @@ return (
         {/* -------------------- Section Chrono pomodoro  -------------------- */}
         <View style={[styles.timerSection, {borderColor: isDarkMode ? '#4D4D71' : '#B3B3B3'}]}>
 
-        <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:20, fontWeight:'bold', textAlign:'center', marginBottom:40, marginTop:20}}> Focus mode </Text>
+        <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:20, fontWeight:'bold', 
+          textAlign:'center', marginBottom:40, marginTop:20}}> Focus mode </Text>
         
         {/* -------------------- Partie Chrono -------------------- */}
         <View style={{flexDirection:'row', alignItems:'center',  justifyContent:'center', gap : "4%", }}>
@@ -96,7 +140,7 @@ return (
         <IonIcons name="options-outline" size={18} color={'black'} style={styles.setting_button}/>
         </TouchableOpacity>
 
-        {/* Modals (/pop up) pour page si clique sur bouton déconnexion */}
+        {/* Modals (/pop-up) pour page si clique sur bouton déconnexion */}
         <Modal transparent visible={clickParam} animationType='none' >
             <View style={[stylesProfil.confPage, {backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(1,1,1,0.6)'}]}>
             
@@ -105,53 +149,141 @@ return (
                     Réglez votre pomodoro </Text>
 
                 <View style={{padding:10, gap:20}}>
-                  <TouchableOpacity >
                   <View style={styles.paramContent}>
                   <Text>Temps d'étude</Text>
-                  <Text style={{paddingLeft:85, color:'#757575'}}> {pomodoroDuration} min</Text>
+
+                  {/* -------------------- Ouvre modal pour sélectionner le temps d'étude -------------------- */}
+                  <TouchableOpacity style={[styles.paramContent, styles.styleToSelectTime, {marginLeft:85,}]} onPress={()=>setClickSelectStudy(true)}>
+                  <Text style={{ color:'#757575'}}> {defaultStudyTime} min</Text>
+                  <IonIcons name='chevron-down' size={22} color="black"> </IonIcons>
+                  </TouchableOpacity>
                   </View>
+                  <Modal transparent visible={clickSelectStudy} animationType='none' >
+                  <TouchableOpacity style={[stylesProfil.confPage, {flex:1}]} onPress={() => setClickSelectStudy(false)}>
+                  <Pressable onPress={() =>{}}>
+                  <View style={[styles.styleSelectTime, stylesProfil.shadow, {}]}>
+                    <TouchableOpacity onPress={() =>{clickStudyTime(10)}} style={[styles.styleText,
+                        {backgroundColor: defaultStudyTime==10 ? 'grey' : '#D9D9D9'}]} >
+                        <Text style={{color: defaultStudyTime==10 ? 'white' : 'black'}}>10 min</Text>
+                    </TouchableOpacity >
+                    <TouchableOpacity onPress={() =>{clickStudyTime(20)}} style={[styles.styleText,
+                        {backgroundColor: defaultStudyTime==20 ? 'grey' : '#D9D9D9'}]} >
+                        <Text style={{color: defaultStudyTime==20 ? 'white' : 'black'}}>20 min</Text>
+                    </TouchableOpacity >
+                    <TouchableOpacity onPress={() =>{clickStudyTime(30)}} style={[styles.styleText,
+                        {backgroundColor: defaultStudyTime==30 ? 'grey' : '#D9D9D9'}]} >
+                        <Text style={{color: defaultStudyTime==30 ? 'white' : 'black'}}>30 min</Text>
+                    </TouchableOpacity > 
+                    <TouchableOpacity onPress={() =>{clickStudyTime(40)}} style={[styles.styleText,
+                        {backgroundColor: defaultStudyTime==40 ? 'grey' : '#D9D9D9'}]} >
+                        <Text style={{color: defaultStudyTime==40 ? 'white' : 'black'}}>40 min</Text>
+                    </TouchableOpacity >
+                    <TouchableOpacity onPress={() =>{clickStudyTime(50)}} style={[styles.styleText,
+                        {backgroundColor: defaultStudyTime==50 ? 'grey' : '#D9D9D9'}]} >
+                        <Text style={{color: defaultStudyTime==50 ? 'white' : 'black'}}>50 min</Text>
+                    </TouchableOpacity >  
+                    <TouchableOpacity onPress={() =>{clickStudyTime(60)}} style={[styles.styleText,
+                        {backgroundColor: defaultStudyTime==60 ? 'grey' : '#D9D9D9'}]} >
+                        <Text style={{color: defaultStudyTime==60 ? 'white' : 'black'}}>60 min</Text>
+                    </TouchableOpacity >    
+                  </View>
+                  </Pressable>
                   </TouchableOpacity>
 
-                  <TouchableOpacity >
+                  </Modal>
+
                   <View style={styles.paramContent}>
                   <Text>Temps de pause</Text>
-                  <Text style={{paddingLeft:75, color:'#757575'}}> {breakDuration} min</Text>
-                  </View>
+                  <TouchableOpacity style={[styles.paramContent, styles.styleToSelectTime, {marginLeft:72}]}
+                  onPress={()=>setClickSelectBreak(true)}>
+                  <Text style={{color:'#757575'}}> {defaultBreakTime} min</Text>
+                  <IonIcons name='chevron-down' size={22} color="black"> </IonIcons>
                   </TouchableOpacity>
+                  </View>
+                    {/* -------------------- Ouvre modal pour sélectionner le temps de pause -------------------- */}
+                    <Modal transparent visible={clickSelectBreak} animationType='none' >
+                        <TouchableOpacity style={[stylesProfil.confPage, {flex:1}]} onPress={() => setClickSelectBreak(false)}>
+                            <Pressable onPress={() =>{}}>
+                                <View style={[styles.styleSelectBreak, stylesProfil.shadow, {}]}>
+                                    <TouchableOpacity onPress={() =>{clickBreakTime(5)}} style={[styles.styleText,
+                                        {backgroundColor: defaultBreakTime==5 ? 'grey' : '#D9D9D9'}]} >
+                                        <Text style={{color: defaultBreakTime==5 ? 'white' : 'black'}}>5 min</Text>
+                                    </TouchableOpacity >
+                                    <TouchableOpacity onPress={() =>{clickBreakTime(10)}} style={[styles.styleText,
+                                        {backgroundColor: defaultBreakTime==10 ? 'grey' : '#D9D9D9'}]} >
+                                        <Text style={{color: defaultBreakTime==10 ? 'white' : 'black'}}>10 min</Text>
+                                    </TouchableOpacity >
+                                    <TouchableOpacity onPress={() =>{clickBreakTime(15)}} style={[styles.styleText,
+                                        {backgroundColor: defaultBreakTime==15 ? 'grey' : '#D9D9D9'}]} >
+                                        <Text style={{color: defaultBreakTime==15 ? 'white' : 'black'}}>15 min</Text>
+                                    </TouchableOpacity >
+                                    <TouchableOpacity onPress={() =>{clickBreakTime(20)}} style={[styles.styleText,
+                                        {backgroundColor: defaultBreakTime==20 ? 'grey' : '#D9D9D9'}]} >
+                                        <Text style={{color: defaultBreakTime==20 ? 'white' : 'black'}}>20 min</Text>
+                                    </TouchableOpacity >
+                                    <TouchableOpacity onPress={() =>{clickBreakTime(25)}} style={[styles.styleText,
+                                        {backgroundColor: defaultBreakTime==25 ? 'grey' : '#D9D9D9'}]} >
+                                        <Text style={{color: defaultBreakTime==25 ? 'white' : 'black'}}>25 min</Text>
+                                    </TouchableOpacity >
+                                    <TouchableOpacity onPress={() =>{clickBreakTime(30)}} style={[styles.styleText,
+                                        {backgroundColor: defaultBreakTime==30 ? 'grey' : '#D9D9D9'}]} >
+                                        <Text style={{color: defaultBreakTime==30 ? 'white' : 'black'}}>30 min</Text>
+                                    </TouchableOpacity >
+                                </View>
+                            </Pressable>
+                        </TouchableOpacity>
 
-                  <View style={[styles.paramContent, {flexDirection:'column',height:170}]}>
+                    </Modal>
+
+
+
+                    <View style={[styles.paramContent, {flexDirection:'column',height:170}]}>
+
+                  {/* -------------------- Selection du nombre de répétitions -------------------- */}
                   <Text style={{}}>Répétitions</Text>                  
                   <View style={{alignItems:'center', gap:2}}>
-                    <TouchableOpacity> 
-                      <Text>1</Text>
-                      </TouchableOpacity >
+                    <Pressable onPress={() =>{clickRepeat(1)}} style={[styles.selectRepetition, 
+                      {backgroundColor: defaultRepetition==1 ? 'grey' : '#D9D9D9'}]} > 
+                      <Text style={{color: defaultRepetition==1 ? 'white' : 'black'}}>1</Text>
+                      </Pressable >
 
-                    <TouchableOpacity> 
-                      <Text>2</Text>
-                      </TouchableOpacity > 
+                    <Pressable onPress={() =>{clickRepeat(2)}} style={[styles.selectRepetition, 
+                      {backgroundColor: defaultRepetition==2 ? 'grey' : '#D9D9D9'}]} > 
+                      <Text style={{color: defaultRepetition==2 ? 'white' : 'black'}}>2</Text>
+                      </Pressable > 
                     
-                      <TouchableOpacity> 
-                      <Text>3</Text>
-                      </TouchableOpacity >
+                    <Pressable onPress={() =>{clickRepeat(3)}} style={[styles.selectRepetition, 
+                      {backgroundColor: defaultRepetition==3 ? 'grey' : '#D9D9D9'}]}>
+                      <Text style={{color: defaultRepetition==3 ? 'white' : 'black'}}>3</Text>
+                      </Pressable >
 
-                      <TouchableOpacity> 
-                      <Text>4</Text>
-                      </TouchableOpacity >
+                    <Pressable onPress={() =>{clickRepeat(4)}} style={[styles.selectRepetition, 
+                      {backgroundColor: defaultRepetition==4 ? 'grey' : '#D9D9D9'}]}>
+                      <Text style={{color: defaultRepetition==4 ? 'white' : 'black'}}>4</Text>
+                      </Pressable >
                                           
-                      <TouchableOpacity> 
-                      <Text>5</Text>
-                      </TouchableOpacity >
+                      <Pressable onPress={() =>{clickRepeat(5)}} style={[styles.selectRepetition, 
+                      {backgroundColor: defaultRepetition==5 ? 'grey' : '#D9D9D9'}]}>
+                      <Text style={{color: defaultRepetition==5 ? 'white' : 'black'}}>5</Text>
+                      </Pressable >
                   </View>
                   </View>
                 </View>
                 
 
                 <View style={{flexDirection:'row', alignContent:'center', alignSelf:'center', gap : "5%", marginTop:40 }}>
-                    <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#9CAFEF'}]} onPress={()=> setClickParam(!clickParam)}>
+                    <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#9CAFEF'}]} 
+                    onPress={()=> {setClickParam(!clickParam); setNumCycle(defaultRepetition);
+                    setPomodoroDuration(defaultStudyTime); setBreakDuration(defaultBreakTime);
+                    updateTime(0, defaultStudyTime )}}>
+
                         <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> OK </Text>
                         </TouchableOpacity>
 
-                    <TouchableOpacity style={[stylesProfil.clickButton, {backgroundColor: isDarkMode ? '#565681' : 'white', borderColor:'black'}]} onPress={() => setClickParam(!clickParam)}>
+                    <TouchableOpacity style={[stylesProfil.clickButton, 
+                      {backgroundColor: isDarkMode ? '#565681' : 'white', borderColor:'black'}]} 
+                      onPress={() => {setClickParam(!clickParam); setDefaultRepetition(numCycle);
+                      setDefaultStudyTime(pomodoroDuration); setDefaultBreakTime(breakDuration)}}>
                         <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Annuler </Text>
                         </TouchableOpacity>
                 </View>
@@ -199,6 +331,11 @@ return (
 
 {/* -------------------- Section Style -------------------- */}
 const styles = StyleSheet.create({
+    styleText:{
+      alignItems:'center',
+      marginBottom: 10,
+      borderRadius:20,
+    },
     bodyStyle:{
       paddingTop: 100,
       padding:30,
@@ -264,5 +401,32 @@ const styles = StyleSheet.create({
       borderRadius:25,
       padding:10,
       flexDirection:'row',
+    },
+    selectRepetition:{
+      width:'80%',
+      height: 20,
+      borderRadius:20,
+      alignItems:'center',
+      margin:2
+    },
+    styleToSelectTime:{
+      marginTop:-10,
+      width:95
+    },
+    styleSelectTime:{
+      width:80,
+      height:200, 
+      marginLeft:200,
+      padding:10, 
+      marginTop:-100,
+      backgroundColor:'#D9D9D9',
+    },
+    styleSelectBreak:{
+        width:80,
+        height:200,
+        marginLeft:200,
+        padding:10,
+        marginTop:40,
+        backgroundColor:'#D9D9D9',
     }
 });
