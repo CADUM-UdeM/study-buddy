@@ -1,24 +1,37 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import {
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useColorScheme,
+    useWindowDimensions,
+    View
+} from "react-native";
 import { stylesProfil } from "./profil";
 
 
 export default function Pomodoro() {
 const router = useRouter();
+const {width, height} = useWindowDimensions()
+
 const [isRunning, setIsRunning] = useState(false)
 const [isLocked, setIsLocked] = useState(false)
 const  button_start_text   = isRunning ? 'Pause' : 'Débuter'
 const colorScheme = useColorScheme();
 const isDarkMode = colorScheme == 'dark';
+const [textMode, setTextMode] = useState('Focus Mode')
 
-const [defaultRepetition, setDefaultRepetition] = useState(3)
+const [defaultRepetition, setDefaultRepetition] = useState(2)
 const [defaultStudyTime, setDefaultStudyTime] = useState(60)
 const [defaultBreakTime, setDefaultBreakTime] = useState(10)
 
 
-{/* Fonction pour formatage du chronomètre */}
+{/* Fonction pour formatage du minuteur */}
 const addZero = (num : number): string => { 
   if (num < 10) {
     return `0${num}`
@@ -28,11 +41,11 @@ const addZero = (num : number): string => {
     }};
 
 
-const [initHours, setInitHours] = useState(0)
+const [initHours, setInitHours] = useState(1)
 const [hours, setHours] = useState(addZero(initHours))
-const [initMin, setInitMin] = useState(25)
+const [initMin, setInitMin] = useState(0)
 const [min, setMin] = useState(addZero(initMin))
-const sec = addZero(0)
+const [sec, setSec] = useState(addZero(0))
 
 const [clickParam, setClickParam] = useState(false)
 const [clickSelectStudy, setClickSelectStudy] = useState(false)
@@ -55,6 +68,9 @@ const stop_button = () => {
       setIsRunning(false);
       setMin(addZero(initMin))
       setHours(addZero(initHours))
+      setSec(addZero(0))
+
+
 }
 
 const add_button = () => {
@@ -69,21 +85,56 @@ const add_button = () => {
 
 
 const min_button = () => {
-    if (Number(min) > 0){
-        setMin(addZero(Number(min) - 5))}
-    else if(Number(hours)> 0){
+    if (Number(min) >= 5) {
+        setMin(addZero(Number(min) - 5))
+    } else if (Number(min) > 0 && Number(min) < 5) {
+        setMin(addZero(0))
+        setSec(addZero(0))
+    } else if (Number(hours) > 0) {
         setMin(addZero(Number(55)))
-        setHours(addZero(Number(hours) -1))}
+        setHours(addZero(Number(hours) - 1))
+    } else {
+        setMin(addZero(0))
+        setSec(addZero(0))
+        setHours(addZero(0))
+    }
 }
 
-{/* Pour tourner le chrono */}
+const [timeLeft, setTimeLeft] = useState(Number(hours)*60*60 + Number(min) *60+ Number(sec))
+{/* Pour tourner le minuteur */}
+
 useEffect(() => {
-  
-});
+        if(!isRunning) {
+            setTimeLeft(Number(hours)*60*60 + Number(min) *60+ Number(sec))}
+    }, [hours, min]);
+
+useEffect(() => {
+    if (timeLeft>0 && isRunning) {
+    const timer = setInterval(() => {
+        setTimeLeft((timeBefore) => timeBefore - 1)
+    }, 1000)
+    return () => clearInterval(timer)
+    }
+}, [timeLeft, isRunning])
+
+useEffect(() => {
+    timeLeftFormating(timeLeft)
+    }, [timeLeft]);
+
+const timeLeftFormating =
+    (seconds: number)=> {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    seconds = seconds % 60;
+
+    setMin(addZero(minutes))
+    setHours(addZero(hours))
+    setSec(addZero(seconds))
+    return [hours, minutes, seconds]
+}
 
 
-
-{/* -------------------- Pour changer les paramètres du pomodoro  -------------------- */}
+{/* -------------------- Pour changer les paramètres du pomodoro -------------------- */}
 
 const clickRepeat = (index : number) => {
     setDefaultRepetition(index)
@@ -101,46 +152,50 @@ const updateTime = (hours:number, minutes : number) => {
         const newHours = addZero(Number(hours + Math.floor(minutes/ 60)))
         setHours(newHours)
         setInitHours(Number(newHours))
+        setSec(addZero(Number(0)))
 }
 
 return (
-  
-        <View style ={styles.bodyStyle}> 
+    <ScrollView>
+    <View style ={styles.bodyStyle}>
         <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
-            <Text></Text>
-        
-        {/* -------------------- Section Chrono pomodoro  -------------------- */}
+            <Text> </Text>
+
+        {/* -------------------- Section Minuteur pomodoro  -------------------- */}
         <View style={[styles.timerSection, {borderColor: isDarkMode ? '#4D4D71' : '#B3B3B3'}]}>
 
         <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:20, fontWeight:'bold', 
-          textAlign:'center', marginBottom:40, marginTop:20}}> Focus mode </Text>
+          textAlign:'center', marginBottom:40, marginTop:20}}> {textMode} </Text>
         
-        {/* -------------------- Partie Chrono -------------------- */}
+        {/* -------------------- Partie Minuteur -------------------- */}
         <View style={{flexDirection:'row', alignItems:'center',  justifyContent:'center', gap : "4%", }}>
         
         {/*  Diminue le temps */}
-        <TouchableOpacity style={[styles.time_button]} onPress={min_button}>
-        <IonIcons name="remove-outline" size={35} color={isDarkMode ? '#B3B3B3' : '#757575'} style={styles.time_button}/>
+        <TouchableOpacity style={[styles.time_button, ]} onPress={min_button} disabled={isRunning}>
+        <IonIcons name="remove-outline" size={35} color={isDarkMode ? (isRunning ? '#959090': '#F2F2F2'):
+            (isRunning ? '#D8D6D6': '#757575')} style={styles.time_button}/>
         </TouchableOpacity>
 
         {/*  Minuteur */}
-        <View style={[styles.chrono, {borderColor:"#FFC943"}]}>
+        <View style={[styles.timer, {borderColor:"#FFC943"}]}>
         <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:30, alignSelf:'center', fontWeight:'bold'}}> {hours}:{min}:{sec} </Text>
         </View>
         
         {/*  Ajoute du temps */}
-        <TouchableOpacity style={[styles.time_button]} onPress={add_button}>
-        <IonIcons name="add-outline" size={35} color={isDarkMode ? '#B3B3B3' : '#757575'} style={styles.time_button}/>
+        <TouchableOpacity style={[styles.time_button, ]} onPress={add_button} disabled={isRunning}>
+        <IonIcons name="add-outline" size={35} color={isDarkMode ? (isRunning ? '#959090': '#F2F2F2') :
+            (isRunning ? '#D8D6D6': '#757575')} style={styles.time_button}/>
         </TouchableOpacity>
         </View>
 
-        {/*  Option Chrono */}
+        {/*  Option Minuteur */}
         <View style={{flexDirection:'row', justifyContent:'center',gap : "30%", marginTop:0 }}>
-        <TouchableOpacity onPress={()=> setClickParam(!clickParam)}>
-        <IonIcons name="options-outline" size={18} color={'black'} style={styles.setting_button}/>
+        <TouchableOpacity onPress={()=> setClickParam(!clickParam)} disabled={isRunning}>
+        <IonIcons name="options-outline" size={18} color={'black'} style={[styles.setting_button,
+            {backgroundColor: !isRunning ? '#FFC943':'#FFECBD'}]}/>
         </TouchableOpacity>
 
-        {/* Modals (/pop-up) pour page si clique sur bouton déconnexion */}
+        {/* Modals (/pop-up) pour page si clique sur bouton paramétrage */}
         <Modal transparent visible={clickParam} animationType='none' >
             <View style={[stylesProfil.confPage, {backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(1,1,1,0.6)'}]}>
             
@@ -152,14 +207,18 @@ return (
                   <View style={styles.paramContent}>
                   <Text>Temps d'étude</Text>
 
-                  {/* -------------------- Ouvre modal pour sélectionner le temps d'étude -------------------- */}
-                  <TouchableOpacity style={[styles.paramContent, styles.styleToSelectTime, {marginLeft:85,}]} onPress={()=>setClickSelectStudy(true)}>
+                  <TouchableOpacity style={[styles.paramContent, styles.styleToSelectTime,
+                      {marginLeft:85,}]} onPress={()=>setClickSelectStudy(true)}>
                   <Text style={{ color:'#757575'}}> {defaultStudyTime} min</Text>
                   <IonIcons name='chevron-down' size={22} color="black"> </IonIcons>
                   </TouchableOpacity>
                   </View>
-                  <Modal transparent visible={clickSelectStudy} animationType='none' >
-                  <TouchableOpacity style={[stylesProfil.confPage, {flex:1}]} onPress={() => setClickSelectStudy(false)}>
+
+                    {/* -------------------- Ouvre modal pour sélectionner le temps d'étude -------------------- */}
+                    <Modal transparent visible={clickSelectStudy} animationType='none' >
+                  <Pressable style={[stylesProfil.confPage, {flex:1}]} pointerEvents='box-only'  onPress={() =>
+                      setClickSelectStudy(false)} >
+
                   <Pressable onPress={() =>{}}>
                   <View style={[styles.styleSelectTime, stylesProfil.shadow, {}]}>
                     <TouchableOpacity onPress={() =>{clickStudyTime(10)}} style={[styles.styleText,
@@ -188,7 +247,7 @@ return (
                     </TouchableOpacity >    
                   </View>
                   </Pressable>
-                  </TouchableOpacity>
+                  </Pressable>
 
                   </Modal>
 
@@ -202,7 +261,8 @@ return (
                   </View>
                     {/* -------------------- Ouvre modal pour sélectionner le temps de pause -------------------- */}
                     <Modal transparent visible={clickSelectBreak} animationType='none' >
-                        <TouchableOpacity style={[stylesProfil.confPage, {flex:1}]} onPress={() => setClickSelectBreak(false)}>
+                        <Pressable style={[stylesProfil.confPage, {flex:1}]} pointerEvents='box-only'
+                                          onPress={() => setClickSelectBreak(false)}>
                             <Pressable onPress={() =>{}}>
                                 <View style={[styles.styleSelectBreak, stylesProfil.shadow, {}]}>
                                     <TouchableOpacity onPress={() =>{clickBreakTime(5)}} style={[styles.styleText,
@@ -231,7 +291,7 @@ return (
                                     </TouchableOpacity >
                                 </View>
                             </Pressable>
-                        </TouchableOpacity>
+                        </Pressable>
 
                     </Modal>
 
@@ -243,7 +303,7 @@ return (
                   <Text style={{}}>Répétitions</Text>                  
                   <View style={{alignItems:'center', gap:2}}>
                     <Pressable onPress={() =>{clickRepeat(1)}} style={[styles.selectRepetition, 
-                      {backgroundColor: defaultRepetition==1 ? 'grey' : '#D9D9D9'}]} > 
+                      {backgroundColor: defaultRepetition==1 ? 'grey' : '#D9D9D9'}] } >
                       <Text style={{color: defaultRepetition==1 ? 'white' : 'black'}}>1</Text>
                       </Pressable >
 
@@ -272,7 +332,7 @@ return (
                 
 
                 <View style={{flexDirection:'row', alignContent:'center', alignSelf:'center', gap : "5%", marginTop:40 }}>
-                    <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#9CAFEF'}]} 
+                    <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#9CAFEF'}]}
                     onPress={()=> {setClickParam(!clickParam); setNumCycle(defaultRepetition);
                     setPomodoroDuration(defaultStudyTime); setBreakDuration(defaultBreakTime);
                     updateTime(0, defaultStudyTime )}}>
@@ -280,7 +340,7 @@ return (
                         <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> OK </Text>
                         </TouchableOpacity>
 
-                    <TouchableOpacity style={[stylesProfil.clickButton, 
+                    <TouchableOpacity style={[stylesProfil.clickButton,
                       {backgroundColor: isDarkMode ? '#565681' : 'white', borderColor:'black'}]} 
                       onPress={() => {setClickParam(!clickParam); setDefaultRepetition(numCycle);
                       setDefaultStudyTime(pomodoroDuration); setDefaultBreakTime(breakDuration)}}>
@@ -309,7 +369,8 @@ return (
         
         {/* -------------------- Partie Boutons -------------------- */}
         <View style={{flexDirection:'row', alignContent:'center',gap : "20%", marginTop:40 }}>
-        <TouchableOpacity style={[styles.actionButton, {backgroundColor: isRunning ? '#9CAFEF' : '#9D75F2'}]} onPress={isRunning ? pause_button : start_button}>
+        <TouchableOpacity style={[styles.actionButton, {backgroundColor: isRunning ? '#9CAFEF' : '#9D75F2'}]}
+                          onPress={isRunning ? pause_button : start_button}>
         
         <Text style={{color: 'white', fontSize:18}}> {button_start_text} </Text>
         </TouchableOpacity>
@@ -319,14 +380,17 @@ return (
         </TouchableOpacity>
         </View>
         </View>
-      {/* -------------------- Fin Section Chrono pomodoro  -------------------- */}
+      {/* -------------------- Fin Section Minuteur pomodoro  -------------------- */}
       {/* -------------------- Section Historique pomodoro  -------------------- */}
       
-      <View>
-
+      <View style={{marginTop:30, alignSelf: 'flex-start'}}>
+          <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:20, fontWeight:'bold',
+              marginBottom:10, marginTop:20}}>Historique</Text>
+          <View style={[stylesProfil.drawHorLine, {width: width*0.6 , backgroundColor: isDarkMode ? 'white' : 'black'}]}></View>
       </View>
 
-</View>)}
+</View>
+ </ScrollView>)}
 
 
 {/* -------------------- Section Style -------------------- */}
@@ -352,7 +416,7 @@ const styles = StyleSheet.create({
       borderRadius:50,
       textAlign:'center'
     },
-    chrono:{
+    timer:{
       borderRadius: "100%",
       borderWidth: 2,
       width: 200,

@@ -1,7 +1,17 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, Modal, StyleSheet, Text, TouchableOpacity, View, useColorScheme } from "react-native";
+import {
+    Image,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+    useColorScheme,
+    Dimensions,
+    useWindowDimensions
+} from "react-native";
 
 
 export default function Profil() {
@@ -11,7 +21,7 @@ const isDarkMode = colorScheme == 'dark';
 const router = useRouter();
 const [clickLogOut, setClickLogOut] = useState(false);
 const [clickDelete, setDelete] = useState(false);
-
+const {width, height} = useWindowDimensions()
 const pageLogOut = ( )=> {
     setClickLogOut(!clickLogOut)
 }
@@ -21,6 +31,7 @@ const pageDeleteAccount = ( )=> {
 }
 
 return (
+
     <View style ={stylesProfil.bodyStyle}>
         
 
@@ -34,13 +45,13 @@ return (
         <Text></Text>
 
         {/* -------------------- Section body de la page profil -------------------- */}
-        <View style={[stylesProfil.drawHorLine, {backgroundColor: isDarkMode ? 'white' : 'black'}]}></View>
+        <View style={[stylesProfil.drawHorLine, { width:width*0.62, backgroundColor: isDarkMode ? 'white' : 'black'}]}></View>
         <View style={stylesProfil.alignIcon}>
         <View style={[stylesProfil.infoIcon, stylesProfil.shadow, {backgroundColor:isDarkMode ? '#565681' : '#F4F4F4'}]}>
         <View style={[]}>
         <IonIcons name="trophy-outline" size={23} color= {isDarkMode ? 'white' : 'black'}/>
         </View>
-        <Text style={[stylesProfil.textButton, {fontSize: 15, marginLeft:3, 
+        <Text style={[stylesProfil.textButton, {fontSize: 15, marginLeft:3,
             color: isDarkMode ? 'white' : 'black'}]}>10 Badges</Text>
         </View> 
         
@@ -48,12 +59,12 @@ return (
         <View style={[]}>
         <IonIcons name="alarm-outline" size={23} color= {isDarkMode ? 'white' : 'black'}/>
         </View>
-        <Text style={[stylesProfil.textButton, {fontSize: 15, marginLeft:0, marginRight:"15%", 
+        <Text style={[stylesProfil.textButton, {fontSize: 15, marginLeft:0, marginRight:"15%",
             color: isDarkMode ? 'white' : 'black'}]}>10 sessions complétés</Text>
         </View>
         </View>
 
-        <View style={[stylesProfil.drawHorLine, {backgroundColor: isDarkMode ? 'white' : 'black'}]}></View>
+        <View style={[stylesProfil.drawHorLine, {width:width*0.62, backgroundColor: isDarkMode ? 'white' : 'black'}]}></View>
         
         {/* -------------------- Section boutons clicables -------------------- */}
         <View style={stylesProfil.alignButton}>
@@ -136,7 +147,7 @@ return (
             </View>
 
             </View>
-        </Modal>    
+        </Modal>
 
         {/* -------------------- Fin Section body de la page profil -------------------- */}
 
@@ -148,7 +159,7 @@ return (
 {/* -------------------- Section Style -------------------- */}
 export const stylesProfil = StyleSheet.create({
     textButton:{
-        color:'black', fontSize:20, textAlign:'center', marginLeft:10 
+        color:'black', fontSize:20, textAlign:'center', marginLeft:10
     },
     infoIcon:{
         flexDirection:'row',
@@ -198,7 +209,7 @@ export const stylesProfil = StyleSheet.create({
     image:{
         width:120,
         height:120
-        
+
     },
     bodyStyle:{
         paddingTop: 100,

@@ -1,12 +1,16 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme } from "react-native";
+import {
+    Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme,
+    useWindowDimensions
+} from "react-native";
 import { stylesProfil } from './profil';
 
 export default function Profil_info() {
     const colorScheme = useColorScheme();
     const isDarkMode = colorScheme == 'dark';
+    const {width, height} = useWindowDimensions()
 
     const [notModified, isNotModified] = useState(true);
     
@@ -52,55 +56,12 @@ export default function Profil_info() {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.bodyStyle}>
+
+          <ScrollView contentContainerStyle={[styles.bodyStyle, ]} >
             <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
             <Text></Text>
-            
-            {/* -------------------- Section boutons pour annuler/sauvegarder modif -------------------- */}
-            <View style={{position:"absolute", marginTop:650 }}>
-            <View>{!notModified && (<View style={[styles.drawHorLine, {backgroundColor: '#565681'}]}></View>)}</View>
-            
-            <View style={{flexDirection:'row',gap : "25%", alignSelf:'center'}}>
-            {!notModified && (
-                <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ? '#565681' : '#67348B'}]} onPress={pageCancel}>
-                    <Text style={{color: 'white', textAlign:'center'}}>Abandonner</Text>
-                </TouchableOpacity>)}  
-
-            {!notModified && (
-                <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ? '#565681' : '#67348B'}]} onPress={pageSave}>
-                    <Text style={{color: 'white', textAlign:'center'}}>Sauvegarder</Text>
-                </TouchableOpacity>)}
-
-            </View>
-
-            {/* Modals (/pop up) pour page si clique sur bouton abandonner ou sauvegarder les modifications */}
-                    <Modal transparent visible={clickGiveUp} animationType='none' >
-                        <View style={[stylesProfil.confPage, {backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(1,1,1,0.6)'}]}>
-                        
-                        <View style={[stylesProfil.confContener, {backgroundColor: isDarkMode ? '#565681' : 'white'}]}>
-                            <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}>
-                                {textClick} </Text>
-            
-                            <View style={{flexDirection:'row', alignContent:'center', alignSelf:'center', gap : "15%", marginTop:40 }}>
-                                <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#FFC943'}]}
-                                onPress={() => {isNotModified(!notModified), setClickGiveUp(!clickGiveUp), setPseudo(pseudo_text), setEmail(email_text), setPassword(password_text)}}>
-                                    <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Oui </Text>
-                                    </TouchableOpacity>
-            
-                                <TouchableOpacity style={[stylesProfil.clickButton, {backgroundColor: isDarkMode ? '#565681' : 'white', borderColor:'black'}]} onPress={()=>setClickGiveUp(!clickGiveUp)}>
-                                    <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Non </Text>
-                                    </TouchableOpacity>
-                            </View>            
-                            </View>
-                        </View>
-                    </Modal>   
-            <View>{!notModified && (<View style={[styles.drawHorLine, {backgroundColor: '#565681'}]}></View>)}</View>
-
-            </View>        
-            {/* -------------------- Fin section boutons pour annuler/sauvegarder modif -------------------- */}
 
 
-            
             {/* -------------------- Affichage du nom de la page -------------------- */}
             {!notModified && (
             <View style={{flexDirection:'row', padding: 10}}>
@@ -165,7 +126,7 @@ export default function Profil_info() {
                 <View style={styles.box_input}>
                     <Text style={{color: isDarkMode ? 'white' : 'black'}}> Mot de passe</Text>
 
-                    <View style={{flexDirection: 'row', position: 'relative', width: '100%',}}>
+                    <View style={{flexDirection: 'row', width: 100, alignItems:'center'}}>
                         <TextInput
                             editable={!notModified}
                         style={[styles.input, {backgroundColor:notModified ? '#D9D9D9' : '#FFFFFF'}]}
@@ -173,7 +134,8 @@ export default function Profil_info() {
                             value={password_text}
                             secureTextEntry={show_password}
                         />
-                        <TouchableOpacity style={{position: 'absolute', right: 10, bottom: 10}}
+                        {/* ICI */}
+                        <TouchableOpacity style={{ marginLeft:-40}}
                                         onPress={() => set_show_password(!show_password)}>
                             <IonIcons name={show_password ? "eye" : "eye-off"} size={28} color={'black'}/>
                         </TouchableOpacity>
@@ -195,6 +157,48 @@ export default function Profil_info() {
                 </View>
             </View>
             {/* -------------------- Fin section champs de texte -------------------- */}
+              {/* -------------------- Section boutons pour annuler/sauvegarder modif -------------------- */}
+              <View style={{ marginTop:240, marginBottom: 10 }}>
+                  <View>{!notModified && (<View style={[styles.drawHorLine, {width:width*0.75, backgroundColor: '#565681'}]}></View>)}</View>
+
+                  <View style={{flexDirection:'row',gap : "25%", alignSelf:'center'}}>
+                      {!notModified && (
+                          <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ? '#565681' : '#67348B'}]} onPress={pageCancel}>
+                              <Text style={{color: 'white', textAlign:'center'}}>Abandonner</Text>
+                          </TouchableOpacity>)}
+
+                      {!notModified && (
+                          <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ? '#565681' : '#67348B'}]} onPress={pageSave}>
+                              <Text style={{color: 'white', textAlign:'center'}}>Sauvegarder</Text>
+                          </TouchableOpacity>)}
+
+                  </View>
+
+                  {/* Modals (/pop up) pour page si clique sur bouton abandonner ou sauvegarder les modifications */}
+                  <Modal transparent visible={clickGiveUp} animationType='none' >
+                      <View style={[stylesProfil.confPage, {backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(1,1,1,0.6)'}]}>
+
+                          <View style={[stylesProfil.confContener, {backgroundColor: isDarkMode ? '#565681' : 'white'}]}>
+                              <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}>
+                                  {textClick} </Text>
+
+                              <View style={{flexDirection:'row', alignContent:'center', alignSelf:'center', gap : "15%", marginTop:40 }}>
+                                  <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#FFC943'}]}
+                                                    onPress={() => {isNotModified(!notModified), setClickGiveUp(!clickGiveUp), setPseudo(pseudo_text), setEmail(email_text), setPassword(password_text)}}>
+                                      <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Oui </Text>
+                                  </TouchableOpacity>
+
+                                  <TouchableOpacity style={[stylesProfil.clickButton, {backgroundColor: isDarkMode ? '#565681' : 'white', borderColor:'black'}]} onPress={()=>setClickGiveUp(!clickGiveUp)}>
+                                      <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Non </Text>
+                                  </TouchableOpacity>
+                              </View>
+                          </View>
+                      </View>
+                  </Modal>
+                  <View>{!notModified && (<View style={[styles.drawHorLine, {width:width*0.75, backgroundColor: '#565681'}]}></View>)}</View>
+
+              </View>
+              {/* -------------------- Fin section boutons pour annuler/sauvegarder modif -------------------- */}
 
     </ScrollView>
     )
@@ -205,7 +209,7 @@ const styles = StyleSheet.create({
     bodyStyle: {
         padding: 100,
         alignItems: "center",
-
+        paddingBottom: 0
     },
     drawHorLine:{
         backgroundColor:'black',
@@ -232,10 +236,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#D9D9D9',
         padding: 6,
         borderRadius: 20,
-        position: 'absolute',
-        top: '123%',
-        left: '105%',
-
+        marginTop:-40,
+        marginLeft:90
     },
     input: {
         backgroundColor: '#D9D9D9',
@@ -243,13 +245,13 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         borderWidth: 1,
         padding: 10,
-        flex: 1
+        flexGrow: 1
     },
 
     input_field: {
-        position: 'absolute',
-        top: '145%',
-        left: '20%'
+        height:50,
+        marginTop: 20,
+        marginBottom: 30,
     },
     box_input: {
         padding: 10,
