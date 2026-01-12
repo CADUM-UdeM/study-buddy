@@ -1,3 +1,4 @@
+import { Evaluation, useCourses } from "@/app/context/CoursesContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -13,7 +14,6 @@ import {
   View,
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
-import { Evaluation, useCourses } from "../context/CoursesContext";
 
 export default function DetailsCours() {
   const router = useRouter();

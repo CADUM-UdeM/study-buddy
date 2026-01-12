@@ -91,7 +91,7 @@ export default function Donnees() {
 
   const navigateToCourseDetails = (courseId: string) => {
     router.push({
-      pathname: "/detailscours",
+      pathname: "../detailscours",
       params: { courseId },
     });
   };
