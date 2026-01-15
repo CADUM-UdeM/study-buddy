@@ -51,9 +51,11 @@ export function useGPA() {
       averagePercentage,
       totalCredits,
       courseCount: coursesWithGrades.length,
-      gpaDisplay: settings.gpaFormat === '4.0'
+      gpaDisplay: settings.gpaFormat === 'percentage'
+        ? `${averagePercentage.toFixed(1)}%`
+        : settings.gpaFormat === '4.0'
         ? overallGPA.toFixed(2)
-        : `${averagePercentage.toFixed(1)}%`
+        : overallGPA.toFixed(2) // Default to 4.3
     };
   };
 

@@ -15,7 +15,7 @@ export interface GradeBoundary {
 }
 
 export interface Settings {
-  gpaFormat: "4.0" | "percentage";
+  gpaFormat: "4.0" | "4.3" | "percentage";
   gradeBoundaries: GradeBoundary[];
 }
 
@@ -33,7 +33,7 @@ const SettingsContext = createContext<SettingsContextType | undefined>(
 
 const STORAGE_KEY = "@app_settings";
 
-const DEFAULT_GRADE_BOUNDARIES: GradeBoundary[] = [
+const DEFAULT_GRADE_BOUNDARIES_4_0: GradeBoundary[] = [
   { letter: "A+", min: 95, max: 100, gpa: 4.0 },
   { letter: "A", min: 90, max: 94, gpa: 4.0 },
   { letter: "A-", min: 85, max: 89, gpa: 3.7 },
@@ -48,9 +48,34 @@ const DEFAULT_GRADE_BOUNDARIES: GradeBoundary[] = [
   { letter: "F", min: 0, max: 44, gpa: 0.0 },
 ];
 
+const DEFAULT_GRADE_BOUNDARIES_4_3: GradeBoundary[] = [
+  { letter: "A", min: 95, max: 100, gpa: 4.3 },
+  { letter: "A-", min: 90, max: 94, gpa: 4.0 },
+  { letter: "B+", min: 85, max: 89, gpa: 3.7 },
+  { letter: "B", min: 80, max: 84, gpa: 3.3 },
+  { letter: "B-", min: 75, max: 79, gpa: 3.0 },
+  { letter: "C+", min: 70, max: 74, gpa: 2.7 },
+  { letter: "C", min: 65, max: 69, gpa: 2.3 },
+  { letter: "C-", min: 60, max: 64, gpa: 2.0 },
+  { letter: "D+", min: 55, max: 59, gpa: 1.7 },
+  { letter: "D", min: 50, max: 54, gpa: 1.3 },
+  { letter: "F", min: 0, max: 49, gpa: 0.0 },
+];
+
 const DEFAULT_SETTINGS: Settings = {
-  gpaFormat: "4.0",
-  gradeBoundaries: DEFAULT_GRADE_BOUNDARIES,
+  gpaFormat: "4.3",
+  gradeBoundaries: DEFAULT_GRADE_BOUNDARIES_4_3,
+};
+
+// Helper function to get boundaries based on GPA format
+const getDefaultBoundariesForFormat = (format: string): GradeBoundary[] => {
+  switch (format) {
+    case "4.3":
+      return DEFAULT_GRADE_BOUNDARIES_4_3;
+    case "4.0":
+    default:
+      return DEFAULT_GRADE_BOUNDARIES_4_0;
+  }
 };
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
@@ -74,7 +99,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       const storedData = await AsyncStorage.getItem(STORAGE_KEY);
       if (storedData) {
         const parsedSettings = JSON.parse(storedData);
-        setSettings({ ...DEFAULT_SETTINGS, ...parsedSettings });
+        const mergedSettings = { ...DEFAULT_SETTINGS, ...parsedSettings };
+
+        // Convert percentage format to 4.3 if it's the old default
+        if (mergedSettings.gpaFormat === "percentage") {
+          mergedSettings.gpaFormat = "4.3";
+          mergedSettings.gradeBoundaries = DEFAULT_GRADE_BOUNDARIES_4_3;
+        }
+
+        setSettings(mergedSettings);
       }
     } catch (error) {
       console.error("Failed to load settings:", error);
@@ -92,7 +125,16 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
 
   const updateSettings = (newSettings: Partial<Settings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
+    setSettings((prev) => {
+      const updated = { ...prev, ...newSettings };
+      // If gpaFormat changed, update gradeBoundaries to match the format
+      if (newSettings.gpaFormat && !newSettings.gradeBoundaries) {
+        updated.gradeBoundaries = getDefaultBoundariesForFormat(
+          newSettings.gpaFormat
+        );
+      }
+      return updated;
+    });
   };
 
   const getLetterGrade = (percentage: number): string => {
