@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  Alert,
   Modal,
   Pressable,
   ScrollView,
@@ -11,59 +12,117 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { Course, useCourses } from "../context/CoursesContext";
 
 export default function Donnees() {
+  const { courses, addCourse, updateCourse, deleteCourse, isLoading } =
+    useCourses();
   const router = useRouter();
-  const [courses, setCourses] = useState([
-    { id: "1", name: "Placeholder Cours" },
-  ]);
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
+  const [courseObjective, setCourseObjective] = useState("");
+  const [courseCredits, setCourseCredits] = useState("");
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
 
-  const handleAddCourse = () => {
-    if (courseName.trim()) {
-      const newCourse = {
-        id: Date.now().toString(),
-        name: courseName.trim(),
-      };
-      setCourses([...courses, newCourse]);
-      setCourseName("");
-      setModalVisible(false);
+  const validateObjective = (value: string): number | null => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num < 0 || num > 100) {
+      Alert.alert("Erreur", "L'objectif doit être entre 0 et 100%");
+      return null;
     }
+    return num;
+  };
+
+  const validateCredits = (value: string): number | null => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0) {
+      Alert.alert("Erreur", "Les crédits doivent être un nombre positif");
+      return null;
+    }
+    return num;
+  };
+
+  const handleAddCourse = () => {
+    if (!courseName.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un nom de cours");
+      return;
+    }
+
+    if (!courseObjective.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un objectif");
+      return;
+    }
+
+    if (!courseCredits.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer les crédits");
+      return;
+    }
+
+    const objective = validateObjective(courseObjective);
+    if (objective === null) return;
+
+    const credits = validateCredits(courseCredits);
+    if (credits === null) return;
+
+    addCourse(courseName.trim(), objective, credits);
+    setCourseName("");
+    setCourseObjective("");
+    setCourseCredits("");
+    setModalVisible(false);
   };
 
   const handleDeleteCourse = (id: string) => {
-    setCourses(courses.filter((course) => course.id !== id));
+    deleteCourse(id);
     setMenuVisible(null);
   };
 
-  const handleEditCourse = (course: { id: string; name: string }) => {
+  const handleEditCourse = (course: Course) => {
     setEditingCourse(course);
     setCourseName(course.name);
+    setCourseObjective(course.objective.toString());
+    setCourseCredits(course.credits.toString());
     setMenuVisible(null);
     setEditModalVisible(true);
   };
 
   const handleUpdateCourse = () => {
-    if (courseName.trim() && editingCourse) {
-      setCourses(
-        courses.map((course) =>
-          course.id === editingCourse.id
-            ? { ...course, name: courseName.trim() }
-            : course
-        )
-      );
-      setCourseName("");
-      setEditModalVisible(false);
-      setEditingCourse(null);
+    if (!courseName.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un nom de cours");
+      return;
     }
+
+    if (!courseObjective.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer un objectif");
+      return;
+    }
+
+    if (!courseCredits.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer les crédits");
+      return;
+    }
+
+    const objective = validateObjective(courseObjective);
+    if (objective === null || !editingCourse) return;
+
+    const credits = validateCredits(courseCredits);
+    if (credits === null) return;
+
+    updateCourse(editingCourse.id, courseName.trim(), objective, credits);
+    setCourseName("");
+    setCourseObjective("");
+    setCourseCredits("");
+    setEditModalVisible(false);
+    setEditingCourse(null);
+  };
+
+  const navigateToCourseDetails = (courseId: string) => {
+    router.push({
+      pathname: "../detailscours",
+      params: { courseId },
+    });
   };
 
   return (
@@ -86,7 +145,7 @@ export default function Donnees() {
         {courses.map((course) => (
           <Pressable
             key={course.id}
-            onPress={() => router.push("/detailscours")}
+            onPress={() => navigateToCourseDetails(course.id)}
             style={{ width: "100%", alignItems: "center" }}
           >
             <View style={styles.coursContainer}>
@@ -104,7 +163,13 @@ export default function Donnees() {
                   size={20}
                 />
               </TouchableOpacity>
-              <Text style={styles.coursText}>{course.name}</Text>
+              <Text
+                style={styles.coursText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {course.name}
+              </Text>
               <Ionicons
                 style={styles.chevRight}
                 name="chevron-forward"
@@ -147,12 +212,30 @@ export default function Donnees() {
               autoFocus
             />
 
+            <TextInput
+              style={styles.input}
+              placeholder="Objectif (%)"
+              value={courseObjective}
+              onChangeText={setCourseObjective}
+              keyboardType="numeric"
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Crédits"
+              value={courseCredits}
+              onChangeText={setCourseCredits}
+              keyboardType="numeric"
+            />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setModalVisible(false);
                   setCourseName("");
+                  setCourseObjective("");
+                  setCourseCredits("");
                 }}
               >
                 <Text style={styles.cancelButtonText}>Annuler</Text>
@@ -174,13 +257,20 @@ export default function Donnees() {
         animationType="slide"
         transparent={true}
         visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}
+        onRequestClose={() => {
+          setEditModalVisible(false);
+          setCourseName("");
+          setCourseObjective("");
+          setCourseCredits("");
+          setEditingCourse(null);
+        }}
       >
         <Pressable
           style={styles.modalOverlay}
           onPress={() => {
             setEditModalVisible(false);
             setCourseName("");
+            setCourseObjective("");
             setEditingCourse(null);
           }}
         >
@@ -198,12 +288,30 @@ export default function Donnees() {
               autoFocus
             />
 
+            <TextInput
+              style={styles.input}
+              placeholder="Objectif (%)"
+              value={courseObjective}
+              onChangeText={setCourseObjective}
+              keyboardType="numeric"
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Crédits"
+              value={courseCredits}
+              onChangeText={setCourseCredits}
+              keyboardType="numeric"
+            />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
                 onPress={() => {
                   setEditModalVisible(false);
                   setCourseName("");
+                  setCourseObjective("");
+                  setCourseCredits("");
                   setEditingCourse(null);
                 }}
               >
@@ -300,6 +408,8 @@ const styles = StyleSheet.create({
   },
   coursText: {
     fontSize: 16,
+    flex: 1,
+    marginRight: 30,
   },
   addCoursButton: {
     backgroundColor: "#5900a1ff",

@@ -1,12 +1,15 @@
-import './global.css';
-import {Stack} from "expo-router";
+import { Stack } from "expo-router";
+import { CoursesProvider } from "./context/CoursesContext";
+import { SettingsProvider } from "./context/SettingsContext";
 
-const RootLayout = () => {
-  return <Stack>
-      <Stack.Screen
-          name="(tabs)"
-          options={{
-              headerShown: false,
-      }} />
-    </Stack>;
+export default function RootLayout() {
+  return (
+    <SettingsProvider>
+      <CoursesProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </CoursesProvider>
+    </SettingsProvider>
+  );
 }
