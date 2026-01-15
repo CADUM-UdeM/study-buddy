@@ -3,7 +3,9 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -97,223 +99,245 @@ export default function Donnees() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
-      {/* Header - anchored to top */}
-      <View>
-        <Text style={styles.title}>Donnees D'etudes</Text>
-        <View style={styles.divider} />
-      </View>
+  <View style={{ flex: 1, backgroundColor: "white" }}>
+    {/* Header - anchored to top */}
+    <View>
+      <Text style={styles.title}>Donnees D'etudes</Text>
+      <View style={styles.divider} />
+    </View>
 
-      {/* Scrollable content in the middle */}
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          justifyContent: "flex-start",
-          alignItems: "center",
-          paddingTop: 20,
-        }}
-      >
-        {courses.map((course) => (
-          <Pressable
-            key={course.id}
-            onPress={() => navigateToCourseDetails(course.id)}
-            style={{ width: "100%", alignItems: "center" }}
-          >
-            <View style={styles.coursContainer}>
-              <TouchableOpacity
-                onPress={(e) => {
-                  e.stopPropagation();
-                  const { pageY, pageX } = e.nativeEvent;
-                  setMenuPosition({ top: pageY, left: pageX });
-                  setMenuVisible(course.id);
-                }}
-              >
-                <Ionicons
-                  style={styles.more}
-                  name="ellipsis-vertical"
-                  size={20}
-                />
-              </TouchableOpacity>
-              <Text
-                style={styles.coursText}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {course.name}
-              </Text>
-              <Ionicons
-                style={styles.chevRight}
-                name="chevron-forward"
-                size={20}
-              />
-            </View>
-          </Pressable>
-        ))}
-
-        <TouchableOpacity
-          style={styles.addCoursButton}
-          onPress={() => setModalVisible(true)}
-        >
-          <Text style={styles.addCoursText}>+ Ajouter un cours</Text>
-        </TouchableOpacity>
-      </ScrollView>
-
-      {/* Modal for adding courses */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
+    {/* Scrollable content in the middle */}
+    <ScrollView
+      contentContainerStyle={{
+        flexGrow: 1,
+        justifyContent: "flex-start",
+        alignItems: "center",
+        paddingTop: 20,
+      }}
+    >
+      {courses.map((course) => (
         <Pressable
-          style={styles.modalOverlay}
-          onPress={() => setModalVisible(false)}
+          key={course.id}
+          onPress={() => navigateToCourseDetails(course.id)}
+          style={{ width: "100%", alignItems: "center" }}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <Text style={styles.modalTitle}>Ajouter un cours</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom du cours"
-              value={courseName}
-              onChangeText={setCourseName}
-              autoFocus
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Objectif (%)"
-              value={courseObjective}
-              onChangeText={setCourseObjective}
-              keyboardType="numeric"
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setModalVisible(false);
-                  setCourseName("");
-                  setCourseObjective("");
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleAddCourse}
-              >
-                <Text style={styles.addButtonText}>Ajouter</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* Modal for editing courses */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => {
-            setEditModalVisible(false);
-            setCourseName("");
-            setCourseObjective("");
-            setEditingCourse(null);
-          }}
-        >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <Text style={styles.modalTitle}>Modifier le cours</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom du cours"
-              value={courseName}
-              onChangeText={setCourseName}
-              autoFocus
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Objectif (%)"
-              value={courseObjective}
-              onChangeText={setCourseObjective}
-              keyboardType="numeric"
-            />
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setEditModalVisible(false);
-                  setCourseName("");
-                  setCourseObjective("");
-                  setEditingCourse(null);
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleUpdateCourse}
-              >
-                <Text style={styles.addButtonText}>Modifier</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
-
-      {/* Overlay to close menu when clicking outside */}
-      {menuVisible && (
-        <>
-          <Pressable
-            style={styles.menuOverlay}
-            onPress={() => setMenuVisible(null)}
-          />
-          <View
-            style={[
-              styles.dropdownMenu,
-              { top: menuPosition.top, left: menuPosition.left },
-            ]}
-          >
+          <View style={styles.coursContainer}>
             <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                const course = courses.find((c) => c.id === menuVisible);
-                if (course) handleEditCourse(course);
+              onPress={(e) => {
+                e.stopPropagation();
+                const { pageY, pageX } = e.nativeEvent;
+                setMenuPosition({ top: pageY, left: pageX });
+                setMenuVisible(course.id);
               }}
             >
-              <Ionicons name="create-outline" size={18} color="#333" />
-              <Text style={styles.menuText}>Modifier</Text>
+              <Ionicons style={styles.more} name="ellipsis-vertical" size={20} />
             </TouchableOpacity>
-            <View style={styles.menuDivider} />
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleDeleteCourse(menuVisible)}
+
+            <Text
+              style={styles.coursText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
-              <Ionicons name="trash-outline" size={18} color="#d32f2f" />
-              <Text style={[styles.menuText, { color: "#d32f2f" }]}>
-                Supprimer
-              </Text>
-            </TouchableOpacity>
+              {course.name}
+            </Text>
+
+            <Ionicons
+              style={styles.chevRight}
+              name="chevron-forward"
+              size={20}
+            />
           </View>
-        </>
-      )}
-    </View>
-  );
+        </Pressable>
+      ))}
+
+      <TouchableOpacity
+        style={styles.addCoursButton}
+        onPress={() => setModalVisible(true)}
+      >
+        <Text style={styles.addCoursText}>+ Ajouter un cours</Text>
+      </TouchableOpacity>
+    </ScrollView>
+
+    {/* Modal for adding courses */}
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={modalVisible}
+      onRequestClose={() => setModalVisible(false)}
+    >
+      <Pressable
+        style={styles.modalOverlay}
+        onPress={() => setModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, width: "100%", alignItems: "center", justifyContent: "center" }}
+        >
+          <Pressable
+            style={styles.modalContent}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              <Text style={styles.modalTitle}>Ajouter un cours</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Nom du cours"
+                value={courseName}
+                onChangeText={setCourseName}
+                autoFocus
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Objectif (%)"
+                value={courseObjective}
+                onChangeText={setCourseObjective}
+                keyboardType="numeric"
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => {
+                    setModalVisible(false);
+                    setCourseName("");
+                    setCourseObjective("");
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Annuler</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.addButton]}
+                  onPress={handleAddCourse}
+                >
+                  <Text style={styles.addButtonText}>Ajouter</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Pressable>
+    </Modal>
+
+    {/* Modal for editing courses */}
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={editModalVisible}
+      onRequestClose={() => setEditModalVisible(false)}
+    >
+      <Pressable
+        style={styles.modalOverlay}
+        onPress={() => {
+          setEditModalVisible(false);
+          setCourseName("");
+          setCourseObjective("");
+          setEditingCourse(null);
+        }}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1, width: "100%", alignItems: "center", justifyContent: "center" }}
+        >
+          <Pressable
+            style={styles.modalContent}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <ScrollView
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 20 }}
+            >
+              <Text style={styles.modalTitle}>Modifier le cours</Text>
+
+              <TextInput
+                style={styles.input}
+                placeholder="Nom du cours"
+                value={courseName}
+                onChangeText={setCourseName}
+                autoFocus
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="Objectif (%)"
+                value={courseObjective}
+                onChangeText={setCourseObjective}
+                keyboardType="numeric"
+              />
+
+              <View style={styles.modalButtons}>
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.cancelButton]}
+                  onPress={() => {
+                    setEditModalVisible(false);
+                    setCourseName("");
+                    setCourseObjective("");
+                    setEditingCourse(null);
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Annuler</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={[styles.modalButton, styles.addButton]}
+                  onPress={handleUpdateCourse}
+                >
+                  <Text style={styles.addButtonText}>Modifier</Text>
+                </TouchableOpacity>
+              </View>
+            </ScrollView>
+          </Pressable>
+        </KeyboardAvoidingView>
+      </Pressable>
+    </Modal>
+
+    {/* Overlay to close menu when clicking outside */}
+    {menuVisible && (
+      <>
+        <Pressable
+          style={styles.menuOverlay}
+          onPress={() => setMenuVisible(null)}
+        />
+        <View
+          style={[
+            styles.dropdownMenu,
+            { top: menuPosition.top, left: menuPosition.left },
+          ]}
+        >
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              const course = courses.find((c) => c.id === menuVisible);
+              if (course) handleEditCourse(course);
+            }}
+          >
+            <Ionicons name="create-outline" size={18} color="#333" />
+            <Text style={styles.menuText}>Modifier</Text>
+          </TouchableOpacity>
+
+          <View style={styles.menuDivider} />
+
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => handleDeleteCourse(menuVisible)}
+          >
+            <Ionicons name="trash-outline" size={18} color="#d32f2f" />
+            <Text style={[styles.menuText, { color: "#d32f2f" }]}>
+              Supprimer
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </>
+    )}
+  </View>
+);
 }
 
 const styles = StyleSheet.create({

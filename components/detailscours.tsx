@@ -4,7 +4,9 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -563,242 +565,270 @@ export default function DetailsCours() {
       </ScrollView>
 
       {/* Add Evaluation Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={modalVisible}
+  onRequestClose={() => setModalVisible(false)}
+>
+  <Pressable
+    style={styles.modalOverlay}
+    onPress={() => {
+      setModalVisible(false);
+      resetForm();
+    }}
+  >
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{
+        flex: 1,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Pressable
+        style={[styles.modalContent, { maxHeight: "80%" }]}
+        onPress={(e) => e.stopPropagation()}
       >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => {
-            setModalVisible(false);
-            resetForm();
-          }}
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
+          <Text style={styles.modalTitle}>Ajouter une évaluation</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Nom de l'évaluation"
+            value={evalName}
+            onChangeText={setEvalName}
+            autoFocus
+          />
+
+          {/* Scheduled Toggle */}
+          <TouchableOpacity
+            style={styles.scheduledToggle}
+            onPress={() => setIsScheduled(!isScheduled)}
           >
-            <Text style={styles.modalTitle}>Ajouter une évaluation</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom de l'évaluation"
-              value={evalName}
-              onChangeText={setEvalName}
-              autoFocus
-            />
-
-            {/* Scheduled Toggle */}
-            <TouchableOpacity
-              style={styles.scheduledToggle}
-              onPress={() => setIsScheduled(!isScheduled)}
-            >
-              <View style={styles.checkboxContainer}>
-                <View
-                  style={[
-                    styles.checkbox,
-                    isScheduled && styles.checkboxChecked,
-                  ]}
-                >
-                  {isScheduled && (
-                    <Ionicons name="checkmark" size={16} color="white" />
-                  )}
-                </View>
-                <Text style={styles.checkboxLabel}>
-                  Évaluation planifiée (note à venir)
-                </Text>
+            <View style={styles.checkboxContainer}>
+              <View
+                style={[styles.checkbox, isScheduled && styles.checkboxChecked]}
+              >
+                {isScheduled && (
+                  <Ionicons name="checkmark" size={16} color="white" />
+                )}
               </View>
+              <Text style={styles.checkboxLabel}>
+                Évaluation planifiée (note à venir)
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {renderGradeInput()}
+
+          <TextInput
+            style={styles.input}
+            placeholder="Pondération (%) - Auto si vide"
+            value={evalWeight}
+            onChangeText={setEvalWeight}
+            keyboardType="numeric"
+          />
+
+          <View style={styles.typeSelector}>
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                evalType === "travail" && styles.typeButtonActive,
+              ]}
+              onPress={() => setEvalType("travail")}
+            >
+              <Text
+                style={[
+                  styles.typeButtonText,
+                  evalType === "travail" && styles.typeButtonTextActive,
+                ]}
+              >
+                Travail
+              </Text>
             </TouchableOpacity>
 
-            {renderGradeInput()}
-
-            <TextInput
-              style={styles.input}
-              placeholder="Pondération (%) - Auto si vide"
-              value={evalWeight}
-              onChangeText={setEvalWeight}
-              keyboardType="numeric"
-            />
-
-            <View style={styles.typeSelector}>
-              <TouchableOpacity
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                evalType === "examen" && styles.typeButtonActive,
+              ]}
+              onPress={() => setEvalType("examen")}
+            >
+              <Text
                 style={[
-                  styles.typeButton,
-                  evalType === "travail" && styles.typeButtonActive,
+                  styles.typeButtonText,
+                  evalType === "examen" && styles.typeButtonTextActive,
                 ]}
-                onPress={() => setEvalType("travail")}
               >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "travail" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Travail
-                </Text>
-              </TouchableOpacity>
+                Examen
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  evalType === "examen" && styles.typeButtonActive,
-                ]}
-                onPress={() => setEvalType("examen")}
-              >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "examen" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Examen
-                </Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => {
+                setModalVisible(false);
+                resetForm();
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Annuler</Text>
+            </TouchableOpacity>
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setModalVisible(false);
-                  resetForm();
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.addButton]}
+              onPress={handleAddEvaluation}
+            >
+              <Text style={styles.addButtonText}>Ajouter</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Pressable>
+    </KeyboardAvoidingView>
+  </Pressable>
+</Modal>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleAddEvaluation}
-              >
-                <Text style={styles.addButtonText}>Ajouter</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
 
       {/* Edit Evaluation Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}
+<Modal
+  animationType="slide"
+  transparent={true}
+  visible={editModalVisible}
+  onRequestClose={() => setEditModalVisible(false)}
+>
+  <Pressable
+    style={styles.modalOverlay}
+    onPress={() => {
+      setEditModalVisible(false);
+      resetForm();
+      setEditingEvalId(null);
+    }}
+  >
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{
+        flex: 1,
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
+      <Pressable
+        style={[styles.modalContent, { maxHeight: "80%" }]}
+        onPress={(e) => e.stopPropagation()}
       >
-        <Pressable
-          style={styles.modalOverlay}
-          onPress={() => {
-            setEditModalVisible(false);
-            resetForm();
-            setEditingEvalId(null);
-          }}
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
+          <Text style={styles.modalTitle}>Modifier l'évaluation</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="Nom de l'évaluation"
+            value={evalName}
+            onChangeText={setEvalName}
+            autoFocus
+          />
+
+          {/* Scheduled Toggle */}
+          <TouchableOpacity
+            style={styles.scheduledToggle}
+            onPress={() => setIsScheduled(!isScheduled)}
           >
-            <Text style={styles.modalTitle}>Modifier l'évaluation</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom de l'évaluation"
-              value={evalName}
-              onChangeText={setEvalName}
-              autoFocus
-            />
-
-            {/* Scheduled Toggle */}
-            <TouchableOpacity
-              style={styles.scheduledToggle}
-              onPress={() => setIsScheduled(!isScheduled)}
-            >
-              <View style={styles.checkboxContainer}>
-                <View
-                  style={[
-                    styles.checkbox,
-                    isScheduled && styles.checkboxChecked,
-                  ]}
-                >
-                  {isScheduled && (
-                    <Ionicons name="checkmark" size={16} color="white" />
-                  )}
-                </View>
-                <Text style={styles.checkboxLabel}>
-                  Évaluation planifiée (note à venir)
-                </Text>
+            <View style={styles.checkboxContainer}>
+              <View
+                style={[styles.checkbox, isScheduled && styles.checkboxChecked]}
+              >
+                {isScheduled && (
+                  <Ionicons name="checkmark" size={16} color="white" />
+                )}
               </View>
+              <Text style={styles.checkboxLabel}>
+                Évaluation planifiée (note à venir)
+              </Text>
+            </View>
+          </TouchableOpacity>
+
+          {renderGradeInput()}
+
+          <TextInput
+            style={styles.input}
+            placeholder="Pondération (%) - Auto si vide"
+            value={evalWeight}
+            onChangeText={setEvalWeight}
+            keyboardType="numeric"
+          />
+
+          <View style={styles.typeSelector}>
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                evalType === "travail" && styles.typeButtonActive,
+              ]}
+              onPress={() => setEvalType("travail")}
+            >
+              <Text
+                style={[
+                  styles.typeButtonText,
+                  evalType === "travail" && styles.typeButtonTextActive,
+                ]}
+              >
+                Travail
+              </Text>
             </TouchableOpacity>
 
-            {renderGradeInput()}
-
-            <TextInput
-              style={styles.input}
-              placeholder="Pondération (%) - Auto si vide"
-              value={evalWeight}
-              onChangeText={setEvalWeight}
-              keyboardType="numeric"
-            />
-
-            <View style={styles.typeSelector}>
-              <TouchableOpacity
+            <TouchableOpacity
+              style={[
+                styles.typeButton,
+                evalType === "examen" && styles.typeButtonActive,
+              ]}
+              onPress={() => setEvalType("examen")}
+            >
+              <Text
                 style={[
-                  styles.typeButton,
-                  evalType === "travail" && styles.typeButtonActive,
+                  styles.typeButtonText,
+                  evalType === "examen" && styles.typeButtonTextActive,
                 ]}
-                onPress={() => setEvalType("travail")}
               >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "travail" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Travail
-                </Text>
-              </TouchableOpacity>
+                Examen
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  evalType === "examen" && styles.typeButtonActive,
-                ]}
-                onPress={() => setEvalType("examen")}
-              >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "examen" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Examen
-                </Text>
-              </TouchableOpacity>
-            </View>
+          <View style={styles.modalButtons}>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.cancelButton]}
+              onPress={() => {
+                setEditModalVisible(false);
+                resetForm();
+                setEditingEvalId(null);
+              }}
+            >
+              <Text style={styles.cancelButtonText}>Annuler</Text>
+            </TouchableOpacity>
 
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setEditModalVisible(false);
-                  resetForm();
-                  setEditingEvalId(null);
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.modalButton, styles.addButton]}
+              onPress={handleUpdateEvaluation}
+            >
+              <Text style={styles.addButtonText}>Modifier</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </Pressable>
+    </KeyboardAvoidingView>
+  </Pressable>
+</Modal>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleUpdateEvaluation}
-              >
-                <Text style={styles.addButtonText}>Modifier</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
-      </Modal>
 
       {/* Context Menu */}
       {menuVisible && (
