@@ -21,6 +21,7 @@ export default function Donnees() {
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
   const [courseObjective, setCourseObjective] = useState("");
+  const [courseCredits, setCourseCredits] = useState("");
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingCourse, setEditingCourse] = useState<Course | null>(null);
@@ -30,6 +31,15 @@ export default function Donnees() {
     const num = parseFloat(value);
     if (isNaN(num) || num < 0 || num > 100) {
       Alert.alert("Erreur", "L'objectif doit être entre 0 et 100%");
+      return null;
+    }
+    return num;
+  };
+
+  const validateCredits = (value: string): number | null => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0) {
+      Alert.alert("Erreur", "Les crédits doivent être un nombre positif");
       return null;
     }
     return num;
@@ -46,12 +56,21 @@ export default function Donnees() {
       return;
     }
 
+    if (!courseCredits.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer les crédits");
+      return;
+    }
+
     const objective = validateObjective(courseObjective);
     if (objective === null) return;
 
-    addCourse(courseName.trim(), objective);
+    const credits = validateCredits(courseCredits);
+    if (credits === null) return;
+
+    addCourse(courseName.trim(), objective, credits);
     setCourseName("");
     setCourseObjective("");
+    setCourseCredits("");
     setModalVisible(false);
   };
 
@@ -64,6 +83,7 @@ export default function Donnees() {
     setEditingCourse(course);
     setCourseName(course.name);
     setCourseObjective(course.objective.toString());
+    setCourseCredits(course.credits.toString());
     setMenuVisible(null);
     setEditModalVisible(true);
   };
@@ -79,12 +99,21 @@ export default function Donnees() {
       return;
     }
 
+    if (!courseCredits.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer les crédits");
+      return;
+    }
+
     const objective = validateObjective(courseObjective);
     if (objective === null || !editingCourse) return;
 
-    updateCourse(editingCourse.id, courseName.trim(), objective);
+    const credits = validateCredits(courseCredits);
+    if (credits === null) return;
+
+    updateCourse(editingCourse.id, courseName.trim(), objective, credits);
     setCourseName("");
     setCourseObjective("");
+    setCourseCredits("");
     setEditModalVisible(false);
     setEditingCourse(null);
   };
@@ -191,6 +220,14 @@ export default function Donnees() {
               keyboardType="numeric"
             />
 
+            <TextInput
+              style={styles.input}
+              placeholder="Crédits"
+              value={courseCredits}
+              onChangeText={setCourseCredits}
+              keyboardType="numeric"
+            />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -198,6 +235,7 @@ export default function Donnees() {
                   setModalVisible(false);
                   setCourseName("");
                   setCourseObjective("");
+                  setCourseCredits("");
                 }}
               >
                 <Text style={styles.cancelButtonText}>Annuler</Text>
@@ -219,7 +257,13 @@ export default function Donnees() {
         animationType="slide"
         transparent={true}
         visible={editModalVisible}
-        onRequestClose={() => setEditModalVisible(false)}
+        onRequestClose={() => {
+          setEditModalVisible(false);
+          setCourseName("");
+          setCourseObjective("");
+          setCourseCredits("");
+          setEditingCourse(null);
+        }}
       >
         <Pressable
           style={styles.modalOverlay}
@@ -252,6 +296,14 @@ export default function Donnees() {
               keyboardType="numeric"
             />
 
+            <TextInput
+              style={styles.input}
+              placeholder="Crédits"
+              value={courseCredits}
+              onChangeText={setCourseCredits}
+              keyboardType="numeric"
+            />
+
             <View style={styles.modalButtons}>
               <TouchableOpacity
                 style={[styles.modalButton, styles.cancelButton]}
@@ -259,6 +311,7 @@ export default function Donnees() {
                   setEditModalVisible(false);
                   setCourseName("");
                   setCourseObjective("");
+                  setCourseCredits("");
                   setEditingCourse(null);
                 }}
               >
