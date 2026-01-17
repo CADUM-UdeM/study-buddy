@@ -17,6 +17,12 @@ export interface GradeBoundary {
 export interface Settings {
   gpaFormat: "4.0" | "4.3" | "percentage";
   gradeBoundaries: GradeBoundary[];
+  showStudyTime: boolean;
+  showStreak: boolean;
+  showGPA: boolean;
+  showAverage: boolean;
+  showCourseCount: boolean;
+  isDarkMode: boolean;
 }
 
 interface SettingsContextType {
@@ -65,6 +71,12 @@ const DEFAULT_GRADE_BOUNDARIES_4_3: GradeBoundary[] = [
 const DEFAULT_SETTINGS: Settings = {
   gpaFormat: "4.3",
   gradeBoundaries: DEFAULT_GRADE_BOUNDARIES_4_3,
+  showStudyTime: true,
+  showStreak: true,
+  showGPA: true,
+  showAverage: true,
+  showCourseCount: true,
+  isDarkMode: true,
 };
 
 // Helper function to get boundaries based on GPA format
