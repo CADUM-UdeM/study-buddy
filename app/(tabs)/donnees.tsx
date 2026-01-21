@@ -131,7 +131,7 @@ export default function Donnees() {
     <View style={{ flex: 1, backgroundColor: "white" }}>
       {/* Header - anchored to top */}
       <View>
-        <Text style={styles.title}>Donnees D'etudes</Text>
+        <Text style={styles.title}>Mes Cours</Text>
         <View style={styles.divider} />
       </View>
 
@@ -202,7 +202,12 @@ export default function Donnees() {
         >
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1, width: "100%", alignItems: "center", justifyContent: "center" }}
+            style={{
+              flex: 1,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             <Pressable
               style={styles.modalContent}
@@ -290,7 +295,12 @@ export default function Donnees() {
         >
           <KeyboardAvoidingView
             behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{ flex: 1, width: "100%", alignItems: "center", justifyContent: "center" }}
+            style={{
+              flex: 1,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             <Pressable
               style={styles.modalContent}
