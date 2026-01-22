@@ -47,24 +47,6 @@ export default function Donnees() {
     return num;
   };
 
-  const validateObjective = (value: string): number | null => {
-    const num = parseFloat(value);
-    if (isNaN(num) || num < 0 || num > 100) {
-      Alert.alert("Erreur", "L'objectif doit être entre 0 et 100%");
-      return null;
-    }
-    return num;
-  };
-
-  const validateCredits = (value: string): number | null => {
-    const num = parseFloat(value);
-    if (isNaN(num) || num <= 0) {
-      Alert.alert("Erreur", "Les crédits doivent être un nombre positif");
-      return null;
-    }
-    return num;
-  };
-
   const handleAddCourse = () => {
     if (!courseName.trim()) {
       Alert.alert("Erreur", "Veuillez entrer un nom de cours");
@@ -96,7 +78,6 @@ export default function Donnees() {
 
   const handleDeleteCourse = (id: string) => {
     deleteCourse(id);
-    setMenuVisible(null);
   };
 
   const handleEditCourse = (course: Course) => {
@@ -104,7 +85,6 @@ export default function Donnees() {
     setCourseName(course.name);
     setCourseObjective(course.objective.toString());
     setCourseCredits(course.credits.toString());
-    setMenuVisible(null);
     setEditModalVisible(true);
   };
 
