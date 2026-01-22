@@ -40,32 +40,34 @@ const SettingsContext = createContext<SettingsContextType | undefined>(
 const STORAGE_KEY = "@app_settings";
 
 const DEFAULT_GRADE_BOUNDARIES_4_0: GradeBoundary[] = [
-  { letter: "A+", min: 95, max: 100, gpa: 4.0 },
-  { letter: "A", min: 90, max: 94, gpa: 4.0 },
-  { letter: "A-", min: 85, max: 89, gpa: 3.7 },
-  { letter: "B+", min: 80, max: 84, gpa: 3.3 },
-  { letter: "B", min: 75, max: 79, gpa: 3.0 },
-  { letter: "B-", min: 70, max: 74, gpa: 2.7 },
-  { letter: "C+", min: 65, max: 69, gpa: 2.3 },
-  { letter: "C", min: 60, max: 64, gpa: 2.0 },
-  { letter: "C-", min: 55, max: 59, gpa: 1.7 },
-  { letter: "D+", min: 50, max: 54, gpa: 1.3 },
-  { letter: "D", min: 45, max: 49, gpa: 1.0 },
-  { letter: "F", min: 0, max: 44, gpa: 0.0 },
+  { letter: "A+", min: 90, max: 100, gpa: 4.0 },
+  { letter: "A", min: 85, max: 89, gpa: 4.0 },
+  { letter: "A-", min: 80, max: 84, gpa: 3.7 },
+  { letter: "B+", min: 77, max: 79, gpa: 3.3 },
+  { letter: "B", min: 73, max: 76, gpa: 3.0 },
+  { letter: "B-", min: 70, max: 72, gpa: 2.7 },
+  { letter: "C+", min: 67, max: 69, gpa: 2.3 },
+  { letter: "C", min: 63, max: 66, gpa: 2.0 },
+  { letter: "C-", min: 60, max: 62, gpa: 1.7 },
+  { letter: "D+", min: 57, max: 59, gpa: 1.3 },
+  { letter: "D", min: 50, max: 56, gpa: 1.0 },
+  { letter: "F", min: 0, max: 49, gpa: 0.0 },
 ];
 
 const DEFAULT_GRADE_BOUNDARIES_4_3: GradeBoundary[] = [
-  { letter: "A", min: 95, max: 100, gpa: 4.3 },
-  { letter: "A-", min: 90, max: 94, gpa: 4.0 },
-  { letter: "B+", min: 85, max: 89, gpa: 3.7 },
-  { letter: "B", min: 80, max: 84, gpa: 3.3 },
-  { letter: "B-", min: 75, max: 79, gpa: 3.0 },
-  { letter: "C+", min: 70, max: 74, gpa: 2.7 },
-  { letter: "C", min: 65, max: 69, gpa: 2.3 },
-  { letter: "C-", min: 60, max: 64, gpa: 2.0 },
-  { letter: "D+", min: 55, max: 59, gpa: 1.7 },
-  { letter: "D", min: 50, max: 54, gpa: 1.3 },
-  { letter: "F", min: 0, max: 49, gpa: 0.0 },
+  { letter: "A+", min: 90, max: 100, gpa: 4.3 },
+  { letter: "A", min: 85, max: 89, gpa: 4.0 },
+  { letter: "A-", min: 80, max: 84, gpa: 3.7 },
+  { letter: "B+", min: 77, max: 79, gpa: 3.3 },
+  { letter: "B", min: 73, max: 76, gpa: 3.0 },
+  { letter: "B-", min: 70, max: 72, gpa: 2.7 },
+  { letter: "C+", min: 67, max: 69, gpa: 2.3 },
+  { letter: "C", min: 63, max: 66, gpa: 2.0 },
+  { letter: "C-", min: 60, max: 62, gpa: 1.7 },
+  { letter: "D+", min: 57, max: 59, gpa: 1.3 },
+  { letter: "D", min: 50, max: 56, gpa: 1.0 },
+  { letter: "E", min: 35, max: 49, gpa: 0.5 },
+  { letter: "F", min: 0, max: 34, gpa: 0.0 },
 ];
 
 const DEFAULT_SETTINGS: Settings = {
@@ -117,6 +119,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         if (mergedSettings.gpaFormat === "percentage") {
           mergedSettings.gpaFormat = "4.3";
           mergedSettings.gradeBoundaries = DEFAULT_GRADE_BOUNDARIES_4_3;
+        } else {
+          // Ensure gradeBoundaries match the current format
+          mergedSettings.gradeBoundaries = getDefaultBoundariesForFormat(
+            mergedSettings.gpaFormat
+          );
         }
 
         setSettings(mergedSettings);
@@ -139,8 +146,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings((prev) => {
       const updated = { ...prev, ...newSettings };
-      // If gpaFormat changed, update gradeBoundaries to match the format
-      if (newSettings.gpaFormat && !newSettings.gradeBoundaries) {
+      // If gpaFormat changed, always update gradeBoundaries to match the format
+      if (newSettings.gpaFormat && newSettings.gpaFormat !== prev.gpaFormat) {
         updated.gradeBoundaries = getDefaultBoundariesForFormat(
           newSettings.gpaFormat
         );
@@ -150,17 +157,49 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   };
 
   const getLetterGrade = (percentage: number): string => {
-    const boundary = settings.gradeBoundaries.find(
+    // Find exact match first
+    const exactMatch = settings.gradeBoundaries.find(
       (b) => percentage >= b.min && percentage <= b.max
     );
-    return boundary ? boundary.letter : "F";
+    if (exactMatch) return exactMatch.letter;
+    
+    // If no exact match (due to gaps between boundaries), find the nearest boundary
+    // Prefer boundaries where percentage is >= min (i.e., the lower boundary of a gap)
+    const lowerBoundary = settings.gradeBoundaries
+      .filter((b) => percentage >= b.min)
+      .sort((a, b) => b.min - a.min)[0];
+    
+    if (lowerBoundary) return lowerBoundary.letter;
+    
+    // If percentage is below all boundaries, return the lowest boundary's letter
+    const lowestBoundary = settings.gradeBoundaries.reduce((lowest, current) =>
+      current.min < lowest.min ? current : lowest
+    );
+    
+    return lowestBoundary ? lowestBoundary.letter : "F";
   };
 
   const getGPAFromPercentage = (percentage: number): number => {
-    const boundary = settings.gradeBoundaries.find(
+    // Find exact match first
+    const exactMatch = settings.gradeBoundaries.find(
       (b) => percentage >= b.min && percentage <= b.max
     );
-    return boundary ? boundary.gpa : 0.0;
+    if (exactMatch) return exactMatch.gpa;
+    
+    // If no exact match (due to gaps between boundaries), find the nearest boundary
+    // Prefer boundaries where percentage is >= min (i.e., the lower boundary of a gap)
+    const lowerBoundary = settings.gradeBoundaries
+      .filter((b) => percentage >= b.min)
+      .sort((a, b) => b.min - a.min)[0];
+    
+    if (lowerBoundary) return lowerBoundary.gpa;
+    
+    // If percentage is below all boundaries, return the lowest boundary's GPA
+    const lowestBoundary = settings.gradeBoundaries.reduce((lowest, current) =>
+      current.min < lowest.min ? current : lowest
+    );
+    
+    return lowestBoundary ? lowestBoundary.gpa : 0.0;
   };
 
   return (

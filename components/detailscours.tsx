@@ -1,4 +1,5 @@
 import { Evaluation, useCourses } from "@/app/context/CoursesContext";
+import { useSettings } from "@/app/context/SettingsContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -22,6 +23,7 @@ export default function DetailsCours() {
 
   const { getCourse, addEvaluation, updateEvaluation, deleteEvaluation } =
     useCourses();
+  const { getLetterGrade } = useSettings();
   const course = getCourse(courseId);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -451,6 +453,13 @@ export default function DetailsCours() {
           >
             {() => <Text style={styles.percentText}>{currentGrade}%</Text>}
           </AnimatedCircularProgress>
+
+          {completed.length > 0 && (
+            <View style={styles.letterGradeContainer}>
+              <Text style={styles.letterGradeLabel}>Note de lettre:</Text>
+              <Text style={styles.letterGrade}>{getLetterGrade(currentGrade)}</Text>
+            </View>
+          )}
 
           <Text style={styles.objectif}>Objectif: {course.objective}%</Text>
           <Text style={styles.totalWeight}>
@@ -903,6 +912,20 @@ const styles = StyleSheet.create({
   },
   percentText: {
     fontSize: 32,
+    fontWeight: "bold",
+    color: "#7f3dff",
+  },
+  letterGradeContainer: {
+    marginTop: 12,
+    alignItems: "center",
+  },
+  letterGradeLabel: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+  },
+  letterGrade: {
+    fontSize: 28,
     fontWeight: "bold",
     color: "#7f3dff",
   },
