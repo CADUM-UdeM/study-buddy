@@ -1,6 +1,6 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import {
     Alert, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, useColorScheme,
     useWindowDimensions
@@ -20,11 +20,13 @@ export default function Profil_info() {
     const [email, setEmail] = useState('example@gmail.com');
     const [email_text, set_email_text] = useState(email);
 
-    const [password, setPassword] = useState('mdp123');
-    const [password_text, set_password_text] = useState('mdp123');
+    const [password, setPassword] = useState('MDP123test');
+    const [password_text, set_password_text] = useState('MDP123test');
 
     const [show_password, set_show_password] = useState(true);
     const router = useRouter();
+    const [isPasswordCorrect, setIsPasswordCorrect] = useState(true);
+
     const [isDefaultImage, setIsDefaultImage] = useState(true);
     const [clickGiveUp, setClickGiveUp] = useState(false);
     const [textClick, setTextClick] = useState("Voulez-vous abandonner les modifications ?")
@@ -55,6 +57,17 @@ export default function Profil_info() {
             ])
     }
 
+    useEffect(() => {
+        if(password_text.length < 8
+            || !/[a-z]/.test(password_text)
+            || !/[A-Z]/.test(password_text)
+            || !/[0-9]/.test(password_text)) {
+            setIsPasswordCorrect(false)
+        }
+        else {
+            setIsPasswordCorrect(true)
+        }
+    }, [password_text]);
     return (
 
           <ScrollView contentContainerStyle={[styles.bodyStyle, ]} >
@@ -134,23 +147,22 @@ export default function Profil_info() {
                             value={password_text}
                             secureTextEntry={show_password}
                         />
-                        {/* ICI */}
                         <TouchableOpacity style={{ marginLeft:-40}}
                                         onPress={() => set_show_password(!show_password)}>
                             <IonIcons name={show_password ? "eye" : "eye-off"} size={28} color={'black'}/>
                         </TouchableOpacity>
                     </View>
                     <View>
-                    {!notModified && (
-                    <Text style={{color: 'red'}} >
-                        Doit contenir :
+                    {!notModified && !isPasswordCorrect && (
+                    <Text style={{color: 'red', marginTop:10}} >
+                        Doit contenir  au minimum :
                     </Text>)}
-                    {!notModified && (
+                    {!notModified && !isPasswordCorrect && (
                     <Text style={{color: 'red'}}>
-                        {'\u2022'} au minimum 8 caractères,{'\n'} 
+                        {'\u2022'} 8 caractères,{'\n'}
                         {'\u2022'} une majuscule, {'\n'}  
                         {'\u2022'} une minuscule, {'\n'}
-                        {'\u2022'} un caractère special {'\n'}
+                        {'\u2022'} un chiffre  {'\n'}
                     </Text>
                     )}
                     </View>
@@ -168,7 +180,9 @@ export default function Profil_info() {
                           </TouchableOpacity>)}
 
                       {!notModified && (
-                          <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ? '#565681' : '#67348B'}]} onPress={pageSave}>
+                          <TouchableOpacity style={[styles.modify_button, {marginTop: 0, top:0, backgroundColor:isDarkMode ?
+                                  (isPasswordCorrect  ? '#565681' : 'grey') : (isPasswordCorrect  ? '#67348B' : 'grey')}]}
+                                            onPress={pageSave} disabled={!isPasswordCorrect}>
                               <Text style={{color: 'white', textAlign:'center'}}>Sauvegarder</Text>
                           </TouchableOpacity>)}
 
@@ -250,7 +264,6 @@ const styles = StyleSheet.create({
 
     input_field: {
         height:50,
-        marginTop: 20,
         marginBottom: 30,
     },
     box_input: {

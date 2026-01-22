@@ -10,7 +10,7 @@ import {
     View,
     useColorScheme,
     Dimensions,
-    useWindowDimensions
+    useWindowDimensions, ScrollView
 } from "react-native";
 
 
@@ -32,7 +32,7 @@ const pageDeleteAccount = ( )=> {
 
 return (
 
-    <View style ={stylesProfil.bodyStyle}>
+    <ScrollView contentContainerStyle={stylesProfil.bodyStyle}>
         
 
     <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
@@ -151,7 +151,7 @@ return (
 
         {/* -------------------- Fin Section body de la page profil -------------------- */}
 
-    </View>
+    </ScrollView>
 )
 }
 
@@ -214,6 +214,7 @@ export const stylesProfil = StyleSheet.create({
     bodyStyle:{
         paddingTop: 100,
         padding:100,
+        paddingBottom:0,
         alignItems: "center",
     },
     shadow:{

@@ -1,15 +1,13 @@
-import Graphics from "@/components/acceuil/Graphics";
 import { Link, useRouter } from "expo-router";
-import { Pressable, ScrollView, Text, TouchableOpacity, View } from "react-native";
-
+import { Pressable, ScrollView, Text, View } from "react-native";
+import Graphics from "../../components/acceuil/Graphics";
+import "../global.css";
 
 export default function Accueil() {
     const router = useRouter();
 
-
-
     return (
-        <View className="flex-1 bg-dark-primary px-5 pt-16">
+        <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
             <Text className="text-xl text-white font-bold mb-4 text-center">
                 Bienvenue !
             </Text>
@@ -18,7 +16,7 @@ export default function Accueil() {
             <Graphics
                 title="Temps d’étude"
                 values={[25, 54, 73, 38, 95, 40, 66]}
-                labels={["L","M","M","J","V","S","D"]}
+                labels={["L", "M", "M", "J", "V", "S", "D"]}
                 height={130}
             />
 
@@ -48,11 +46,13 @@ export default function Accueil() {
                 </Text>
             </Pressable>
 
-              <TouchableOpacity onPress={() => router.push("/(tabs)/donnees")} className="mt-3 rounded-2xl border border-violet-200 py-4">
-                  <Text className="text-center font-medium">Voir mes données</Text>
-              </TouchableOpacity>
+            <Link href="/(tabs)/donnees" asChild>
+                <Pressable className="mt-3 rounded-2xl border border-violet-200 py-4">
+                    <Text className="text-center font-medium">Voir mes données</Text>
+                </Pressable>
+            </Link>
 
             <View className="h-10" />
-        </View>
+        </ScrollView>
     );
 }
