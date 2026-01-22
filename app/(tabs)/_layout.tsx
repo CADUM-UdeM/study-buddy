@@ -58,12 +58,6 @@ export default function TabLayout() {
           ),
         })}
       />
-      <Tabs.Screen
-        name="detailscours"
-        options={{
-          href: null,
-        }}
-      />
     </Tabs>
   );
 }
