@@ -1,5 +1,6 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
-import { useRouter } from "expo-router";
+import { usePreventRemove, useNavigation } from '@react-navigation/native';
+
 import React, { useEffect, useState, } from "react";
 import {
     Modal,
@@ -11,14 +12,14 @@ import {
     useColorScheme,
     useWindowDimensions,
     View,
-    TextInput,
+    TextInput, Alert,
 } from "react-native";
 import { stylesProfil } from "./profil";
 
 
 export default function Pomodoro() {
 
-const router = useRouter();
+
 const {width, height} = useWindowDimensions()
 const [isRunning, setIsRunning] = useState(false)
 const [isLocked, setIsLocked] = useState(false)
@@ -28,7 +29,7 @@ const isDarkMode = colorScheme == 'dark';
 const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
 
 const [defaultRepetition, setDefaultRepetition] = useState(2)
-const [defaultStudyTime, setDefaultStudyTime] = useState('60')
+const [defaultStudyTime, setDefaultStudyTime] = useState('30')
 const [defaultBreakTime, setDefaultBreakTime] = useState('10')
 const [inBreakTime, setInBreakTime] = useState(false)
 
@@ -42,12 +43,14 @@ const addZero = (num : number): string => {
     }};
 
 
-const [initHours, setInitHours] = useState(1)
+const [initHours, setInitHours] = useState(0)
 const [hours, setHours] = useState(addZero(initHours))
-const [initMin, setInitMin] = useState(0)
+const [initMin, setInitMin] = useState(30)
 const [min, setMin] = useState(addZero(initMin))
 const [initSec, setInitSec] = useState(0)
 const [sec, setSec] = useState(addZero(initSec))
+
+const [isTimeLeftNoEnought, setIsTimeLeftNoEnought] = useState(false)
 
 const [clickParam, setClickParam] = useState(false)
 const [clickSelectStudy, setClickSelectStudy] = useState(false)
@@ -89,6 +92,7 @@ const add_button = () => {
 
 
 const min_button = () => {
+
     if (Number(min) >= 5) {
         setMin(addZero(Number(min) - 5))
     } else if (Number(min) > 0 && Number(min) < 5) {
@@ -97,8 +101,11 @@ const min_button = () => {
     } else if (Number(hours) > 0) {
         setMin(addZero(Number(55)))
         setHours(addZero(Number(hours) - 1))
-    } else {
+    } else if (timeLeft == 0) {
+        setIsRunning(false)
 
+    }
+    else {
         setMin(addZero(0))
         setSec(addZero(0))
         setHours(addZero(0))
@@ -134,6 +141,7 @@ useEffect(() => {
 
         setInBreakTime(!inBreakTime)
     }
+
     else {
         setIsRunning(false)
         if (remainingCycle ===0 && timeLeft === 0 ) {
@@ -241,8 +249,18 @@ useEffect(() => {
 
 const days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
 
+{/* Pour tourner le minuteur --------------------*/}
+useEffect(() => {
+        if(timeLeft <= 300) {
+            setIsTimeLeftNoEnought(true)
+        }
+        else {
+            setIsTimeLeftNoEnought(false)
+        }
+    }, [timeLeft]);
 
-return (
+
+    return (
     <ScrollView>
     <View style ={styles.bodyStyle}>
         <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
@@ -259,9 +277,9 @@ return (
         <View style={{flexDirection:'row', alignItems:'center',  justifyContent:'center', gap : "4%", }}>
         
         {/*  Diminue le temps */}
-        <TouchableOpacity style={[styles.time_button, ]} onPress={min_button} disabled={isRunning || timeLeft == 0}>
-        <IonIcons name="remove-outline" size={35} color={isDarkMode ? ((isRunning || timeLeft == 0) ? '#959090': '#F2F2F2'):
-            ((isRunning || timeLeft == 0) ? '#D8D6D6': '#757575')} style={styles.time_button}/>
+        <TouchableOpacity style={[styles.time_button, ]} onPress={min_button} disabled={isRunning || timeLeft == 0 || isTimeLeftNoEnought }>
+        <IonIcons name="remove-outline" size={35} color={isDarkMode ? ((isRunning || timeLeft == 0 || isTimeLeftNoEnought) ? '#959090': '#F2F2F2'):
+            ((isRunning || timeLeft == 0|| isTimeLeftNoEnought) ? '#D8D6D6': '#757575')} style={styles.time_button}/>
         </TouchableOpacity>
 
         {/*  Minuteur */}
@@ -277,11 +295,16 @@ return (
         </View>
 
         {/*  Option Minuteur */}
-        <View style={{flexDirection:'row', justifyContent:'center',gap : "30%", marginTop:0 }}>
-        <TouchableOpacity onPress={()=> setClickParam(!clickParam)} disabled={isRunning}>
+        <View style={{flexDirection:'row', gap:45, marginTop:20 }}>
+        <TouchableOpacity onPress={()=> setClickParam(!clickParam)} disabled={isRunning} style={{marginLeft:20}}>
         <IonIcons name="options-outline" size={18} color={'black'} style={[styles.setting_button,
             {backgroundColor: !isRunning ? '#FFC943':'#FFECBD'}]}/>
         </TouchableOpacity>
+        <View style={{backgroundColor:'#FFC943', padding: 5, borderRadius:10}}>
+            <Text style={{}}>
+                Cycle restant : {remainingCycle}
+            </Text>
+        </View>
 
         {/* Modals (/pop-up) pour page si clique sur bouton paramétrage */}
         <Modal transparent visible={clickParam} animationType='none' >
@@ -448,10 +471,7 @@ return (
             </View>
         </Modal> 
 
-        <TouchableOpacity>
-        <IonIcons name={isLocked ? "lock-closed-outline": "lock-open-outline"} size={18} color={'black'} 
-        style={[styles.setting_button, {backgroundColor: isLocked ? '#FFC943':'#FFECBD'}]} onPress={() => setIsLocked(!isLocked)}/>
-        </TouchableOpacity>
+
         </View>
 
         <View style={styles.infoBloc}>
@@ -503,7 +523,8 @@ return (
 
             </View>
         </Modal>
-        <ScrollView  horizontal={false} style={{marginLeft: -15, marginRight:-10}} showsHorizontalScrollIndicator={false} >
+        <ScrollView  horizontal={true} style={{marginLeft: -15, marginRight:-10}} showsHorizontalScrollIndicator={false} >
+            <ScrollView horizontal={false}>
             {sessions.map((session) => (
 
                     <View key={session.id} style={{borderWidth:2, borderColor:isDarkMode ? 'white': 'black',
@@ -533,6 +554,7 @@ return (
             <View>
 
             </View>
+            </ScrollView>
         </ScrollView>
 </View>
 
