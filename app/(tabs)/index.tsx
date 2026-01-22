@@ -1,10 +1,13 @@
 import { Link, useRouter } from "expo-router";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import { useGPA } from "../../app/hooks/useGPA";
 import Graphics from "../../components/accueil/Graphics";
 import "../global.css";
 
 export default function Accueil() {
   const router = useRouter();
+  const { calculateOverallStats } = useGPA();
+  const overallStats = calculateOverallStats();
 
   return (
     <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
@@ -35,6 +38,20 @@ export default function Accueil() {
         <Text className="text-neutral-600">Moyenne actuelle :</Text>
         <Text className="text-2xl font-semibold text-violet-600">72%</Text>
       </View>
+
+      {/* --- GPA Section --- */}
+      {overallStats && (
+        <View className="rounded-2xl bg-green-100 p-4 mb-3">
+          <Text className="text-neutral-600">GPA Global :</Text>
+          <Text className="text-2xl font-semibold text-green-600">
+            {overallStats.gpaDisplay}
+          </Text>
+          <Text className="text-sm text-neutral-500 mt-1">
+            {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
+            crédits
+          </Text>
+        </View>
+      )}
 
       {/* --- Actions --- */}
       <Pressable
