@@ -516,8 +516,7 @@ return (
                                                       style={{ marginTop: 10, marginBottom:10,alignSelf:'center',
                                                           backgroundColor:'#FF4141', borderRadius:40, marginRight:10}}/>}
                         <View >
-                            <Text style={{fontWeight:'bold'}} > {days[new Date().getDay()]} {new Date().getDay()}
-                                {new Date().toLocaleString('fr-FR', { month: 'long' })} {new Date().getFullYear()}</Text>
+                            <Text style={{fontWeight:'bold'}} > {days[new Date().getDay()]} {new Date().getDay()} {new Date().toLocaleString('fr-FR', { month: 'long' })} {new Date().getFullYear()}</Text>
                             <View style={{ flexDirection:'row', }}>
                                 <Text style={{color:'grey'}}>Durée:{session.durationSession} min Pause:{session.breakSession} min Répétitions:{session.repeatSession}</Text>
                                 <TouchableOpacity style={{alignSelf:'center', marginLeft:5, backgroundColor:isDarkMode ? '#4D4D71': '#D9D9D9',
