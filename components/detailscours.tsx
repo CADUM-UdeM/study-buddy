@@ -989,7 +989,7 @@ function EvaluationCard({
   const confirmDelete = () => {
     Alert.alert(
       "Supprimer l’évaluation",
-      `Veux-tu vraiment "${item.name}" ?`,
+      `Souhaitez-vous vraiment supprimer "${item.name}" ?`,
       [
         {
           text: "Annuler",
