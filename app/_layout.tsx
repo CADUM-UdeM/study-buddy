@@ -3,31 +3,31 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import {
-  SafeAreaProvider,
-  SafeAreaView
+    SafeAreaProvider,
+    SafeAreaView
 } from 'react-native-safe-area-context';
 import './global.css';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 
 export const unstable_settings = {
-  anchor: '(tabs)',
+    anchor: '(tabs)',
 };
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
+    const colorScheme = useColorScheme();
 
-  return (
-    <SafeAreaProvider>
-      <SafeAreaView className="flex-1">
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </SafeAreaView>
-    </SafeAreaProvider>
-  );
+    return (
+        <SafeAreaProvider>
+            <SafeAreaView className="flex-1">
+                <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+                    <Stack>
+                        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+                    </Stack>
+                    <StatusBar style="auto" />
+                </ThemeProvider>
+            </SafeAreaView>
+        </SafeAreaProvider>
+    );
 }
