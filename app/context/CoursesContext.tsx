@@ -16,6 +16,7 @@ export interface Evaluation {
   isAutoWeight: boolean;
   isScheduled: boolean; // true if this is a future assignment
   targetGrade?: number; // calculated target grade for scheduled evaluations
+  date?: string; // format "YYYY-MM-DD"
 }
 
 export interface Course {
@@ -44,7 +45,7 @@ interface CoursesContextType {
   updateEvaluation: (
     courseId: string,
     evaluationId: string,
-    evaluation: Omit<Evaluation, "id">
+    evaluation: Omit<Evaluation, "id">,
   ) => void;
   deleteEvaluation: (courseId: string, evaluationId: string) => void;
   calculateCourseGrade: (courseId: string) => number | null;
@@ -63,10 +64,10 @@ const STORAGE_KEY = "@courses_data";
 // Helper function to calculate target grades for scheduled evaluations
 const calculateTargetGrades = (
   evaluations: Evaluation[],
-  objective: number
+  objective: number,
 ): Evaluation[] => {
   const completed = evaluations.filter(
-    (e) => !e.isScheduled && e.note !== null
+    (e) => !e.isScheduled && e.note !== null,
   );
   const scheduled = evaluations.filter((e) => e.isScheduled);
 
@@ -76,7 +77,7 @@ const calculateTargetGrades = (
   const completedWeight = completed.reduce((sum, e) => sum + e.weight, 0);
   const completedWeightedSum = completed.reduce(
     (sum, e) => sum + e.note! * e.weight,
-    0
+    0,
   );
 
   const scheduledWeight = scheduled.reduce((sum, e) => sum + e.weight, 0);
@@ -94,7 +95,7 @@ const calculateTargetGrades = (
   return evaluations.map((e) =>
     e.isScheduled
       ? { ...e, targetGrade: Math.round(finalTarget * 100) / 100 }
-      : e
+      : e,
   );
 };
 
@@ -113,14 +114,14 @@ const recalculateAutoWeights = (evaluations: Evaluation[]): Evaluation[] => {
     autoWeightCount > 0 ? remainingWeight / autoWeightCount : 0;
 
   return evaluations.map((e) =>
-    e.isAutoWeight ? { ...e, weight: Math.round(autoWeight * 100) / 100 } : e
+    e.isAutoWeight ? { ...e, weight: Math.round(autoWeight * 100) / 100 } : e,
   );
 };
 
 // Combined helper: recalculate both weights and targets
 const recalculateEvaluations = (
   evaluations: Evaluation[],
-  objective: number
+  objective: number,
 ): Evaluation[] => {
   const withWeights = recalculateAutoWeights(evaluations);
   return calculateTargetGrades(withWeights, objective);
@@ -246,11 +247,11 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
               session: sessionId,
               evaluations: recalculateEvaluations(
                 course.evaluations,
-                objective
+                objective,
               ),
             }
-          : course
-      )
+          : course,
+      ),
     );
   };
 
@@ -271,7 +272,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
 
   const addEvaluation = (
     courseId: string,
-    evaluation: Omit<Evaluation, "id">
+    evaluation: Omit<Evaluation, "id">,
   ) => {
     setCourses(
       courses.map((course) => {
@@ -285,36 +286,36 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
             ...course,
             evaluations: recalculateEvaluations(
               updatedEvaluations,
-              course.objective
+              course.objective,
             ),
           };
         }
         return course;
-      })
+      }),
     );
   };
 
   const updateEvaluation = (
     courseId: string,
     evaluationId: string,
-    evaluation: Omit<Evaluation, "id">
+    evaluation: Omit<Evaluation, "id">,
   ) => {
     setCourses(
       courses.map((course) => {
         if (course.id === courseId) {
           const updatedEvaluations = course.evaluations.map((e) =>
-            e.id === evaluationId ? { ...evaluation, id: evaluationId } : e
+            e.id === evaluationId ? { ...evaluation, id: evaluationId } : e,
           );
           return {
             ...course,
             evaluations: recalculateEvaluations(
               updatedEvaluations,
-              course.objective
+              course.objective,
             ),
           };
         }
         return course;
-      })
+      }),
     );
   };
 
@@ -323,19 +324,75 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
       courses.map((course) => {
         if (course.id === courseId) {
           const updatedEvaluations = course.evaluations.filter(
-            (e) => e.id !== evaluationId
+            (e) => e.id !== evaluationId,
           );
           return {
             ...course,
             evaluations: recalculateEvaluations(
               updatedEvaluations,
-              course.objective
+              course.objective,
             ),
           };
         }
         return course;
-      })
+      }),
     );
+  };
+
+  const calculateCourseGrade = (courseId: string): number | null => {
+    const course = getCourse(courseId);
+    if (!course || course.evaluations.length === 0) return null;
+
+    const completedEvaluations = course.evaluations.filter(
+      (e) => !e.isScheduled && e.note !== null,
+    );
+
+    if (completedEvaluations.length === 0) return null;
+
+    const totalWeight = completedEvaluations.reduce(
+      (sum, e) => sum + e.weight,
+      0,
+    );
+    const weightedSum = completedEvaluations.reduce(
+      (sum, e) => sum + e.note! * e.weight,
+      0,
+    );
+
+    return totalWeight > 0 ? weightedSum / totalWeight : null;
+  };
+
+  const calculateOverallGPA = (): {
+    gpa: number;
+    totalCredits: number;
+    averageGrade: number;
+  } | null => {
+    const coursesWithGrades = courses
+      .map((course) => ({
+        course,
+        grade: calculateCourseGrade(course.id),
+      }))
+      .filter((item) => item.grade !== null);
+
+    if (coursesWithGrades.length === 0) return null;
+
+    const totalCredits = coursesWithGrades.reduce(
+      (sum, item) => sum + item.course.credits,
+      0,
+    );
+    const weightedGPASum = coursesWithGrades.reduce((sum, item) => {
+      // We'll need to get GPA from percentage using settings context
+      // For now, return basic calculation - this will be enhanced when used with settings
+      return sum + item.grade! * item.course.credits;
+    }, 0);
+
+    const averageGrade = weightedGPASum / totalCredits;
+
+    // For now, return the average grade - GPA conversion will happen in components using settings
+    return {
+      gpa: averageGrade / 25, // Rough conversion for 4.0 scale (100% = 4.0)
+      totalCredits,
+      averageGrade,
+    };
   };
 
   const calculateCourseGrade = (courseId: string): number | null => {

@@ -1,11 +1,15 @@
 import { Evaluation, useCourses } from "@/app/context/CoursesContext";
 import { useSettings } from "@/app/context/SettingsContext";
 import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Alert,
+  Animated,
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -15,6 +19,7 @@ import {
   View,
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
+import { Swipeable } from "react-native-gesture-handler";
 
 export default function DetailsCours() {
   const router = useRouter();
@@ -28,21 +33,24 @@ export default function DetailsCours() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [menuVisible, setMenuVisible] = useState<string | null>(null);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
   const [editingEvalId, setEditingEvalId] = useState<string | null>(null);
 
   // Form state
   const [evalName, setEvalName] = useState("");
   const [isScheduled, setIsScheduled] = useState(false);
   const [gradeMode, setGradeMode] = useState<"percentage" | "fraction">(
-    "percentage"
+    "percentage",
   );
   const [evalNote, setEvalNote] = useState("");
   const [evalNumerator, setEvalNumerator] = useState("");
   const [evalDenominator, setEvalDenominator] = useState("");
   const [evalWeight, setEvalWeight] = useState("");
   const [evalType, setEvalType] = useState<"travail" | "examen">("travail");
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+
+  const [evalDate, setEvalDate] = useState<Date | null>(null);
+  const [tempDate, setTempDate] = useState<Date>(new Date());
 
   // Error handling if course not found
   if (!course) {
@@ -104,7 +112,7 @@ export default function DetailsCours() {
       if (!evalNumerator.trim() || !evalDenominator.trim()) {
         Alert.alert(
           "Erreur",
-          "Veuillez entrer la note obtenue et la note totale"
+          "Veuillez entrer la note obtenue et la note totale",
         );
         return null;
       }
@@ -129,7 +137,7 @@ export default function DetailsCours() {
       if (numerator > denominator) {
         Alert.alert(
           "Erreur",
-          "La note obtenue ne peut pas dépasser la note totale"
+          "La note obtenue ne peut pas dépasser la note totale",
         );
         return null;
       }
@@ -142,7 +150,7 @@ export default function DetailsCours() {
   // Validate weight for manual entries only
   const validateManualWeight = (
     value: string,
-    excludeId?: string
+    excludeId?: string,
   ): number | null => {
     const num = parseFloat(value);
     if (isNaN(num) || num < 0 || num > 100) {
@@ -156,7 +164,7 @@ export default function DetailsCours() {
         "Erreur",
         `La pondération manuelle totale ne peut pas dépasser 100%. Actuellement: ${currentManualTotal}%. Disponible: ${
           100 - currentManualTotal
-        }%`
+        }%`,
       );
       return null;
     }
@@ -167,7 +175,7 @@ export default function DetailsCours() {
   // Calculate current grade (only from completed evaluations)
   const calculateGrade = () => {
     const completed = course.evaluations.filter(
-      (e) => !e.isScheduled && e.note !== null
+      (e) => !e.isScheduled && e.note !== null,
     );
     if (completed.length === 0) return 0;
 
@@ -176,7 +184,7 @@ export default function DetailsCours() {
 
     const weightedSum = completed.reduce(
       (sum, e) => sum + e.note! * e.weight,
-      0
+      0,
     );
 
     return Math.round(weightedSum / totalWeight);
@@ -187,7 +195,7 @@ export default function DetailsCours() {
   // Generate encouragement message
   const getEncouragementMessage = () => {
     const completed = course.evaluations.filter(
-      (e) => !e.isScheduled && e.note !== null
+      (e) => !e.isScheduled && e.note !== null,
     );
     const scheduled = course.evaluations.filter((e) => e.isScheduled);
 
@@ -204,7 +212,7 @@ export default function DetailsCours() {
     if (scheduled.length > 0) {
       const target = scheduled[0].targetGrade || 100;
       return `🎯 Cible pour évaluations à venir: ${target.toFixed(
-        1
+        1,
       )}% pour atteindre ${course.objective}%`;
     }
 
@@ -220,6 +228,17 @@ export default function DetailsCours() {
       return "📚 Il y a encore du travail, mais vous pouvez y arriver! Restez motivé!";
     }
   };
+  const normalizeDateOrNull = (value: string): string | null => {
+    const v = value.trim();
+    if (!v) return null; // date facultative
+    // format simple YYYY-MM-DD
+    const ok = /^\d{4}-\d{2}-\d{2}$/.test(v);
+    if (!ok) {
+      Alert.alert("Erreur", "Format de date invalide. Utilise YYYY-MM-DD.");
+      return null;
+    }
+    return v;
+  };
 
   const handleAddEvaluation = () => {
     if (!evalName.trim()) {
@@ -229,6 +248,10 @@ export default function DetailsCours() {
 
     const note = validateNote();
     if (note === null && !isScheduled) return;
+
+    const dateString = evalDate
+      ? evalDate.toISOString().slice(0, 10) // "YYYY-MM-DD"
+      : undefined;
 
     let weight: number;
     let isAutoWeight: boolean;
@@ -252,6 +275,7 @@ export default function DetailsCours() {
       type: evalType,
       isAutoWeight,
       isScheduled,
+      date: dateString,
     });
 
     resetForm();
@@ -268,6 +292,9 @@ export default function DetailsCours() {
 
     const note = validateNote();
     if (note === null && !isScheduled) return;
+    const dateString = evalDate
+      ? evalDate.toISOString().slice(0, 10) // "YYYY-MM-DD"
+      : undefined;
 
     let weight: number;
     let isAutoWeight: boolean;
@@ -291,6 +318,7 @@ export default function DetailsCours() {
       type: evalType,
       isAutoWeight,
       isScheduled,
+      date: dateString,
     });
 
     resetForm();
@@ -300,7 +328,6 @@ export default function DetailsCours() {
 
   const handleDeleteEvaluation = (evaluationId: string) => {
     deleteEvaluation(courseId, evaluationId);
-    setMenuVisible(null);
   };
 
   const handleEditEvaluation = (evaluation: Evaluation) => {
@@ -313,8 +340,8 @@ export default function DetailsCours() {
     setEvalDenominator("");
     setEvalWeight(evaluation.isAutoWeight ? "" : evaluation.weight.toString());
     setEvalType(evaluation.type);
-    setMenuVisible(null);
     setEditModalVisible(true);
+    setEvalDate(evaluation.date ? new Date(evaluation.date) : null);
   };
 
   const resetForm = () => {
@@ -326,10 +353,11 @@ export default function DetailsCours() {
     setEvalDenominator("");
     setEvalWeight("");
     setEvalType("travail");
+    setEvalDate(null);
   };
 
   const completed = course.evaluations.filter(
-    (e) => !e.isScheduled && e.note !== null
+    (e) => !e.isScheduled && e.note !== null,
   );
   const scheduled = course.evaluations.filter((e) => e.isScheduled);
 
@@ -340,7 +368,7 @@ export default function DetailsCours() {
 
   const totalWeight = getTotalWeight();
   const autoWeightCount = course.evaluations.filter(
-    (e) => e.isAutoWeight
+    (e) => e.isAutoWeight,
   ).length;
   const manualWeightTotal = course.evaluations
     .filter((e) => !e.isAutoWeight)
@@ -426,6 +454,13 @@ export default function DetailsCours() {
       </>
     );
   };
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString("fr-CA", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: "white" }}>
@@ -493,16 +528,13 @@ export default function DetailsCours() {
         {/* Completed Works Section */}
         {completedWorks.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Travaux</Text>
+            <Text style={styles.sectionTitle}>Devoirs</Text>
             {completedWorks.map((item) => (
               <EvaluationCard
                 key={item.id}
                 item={item}
-                onMenuPress={(e) => {
-                  const { pageY, pageX } = e.nativeEvent;
-                  setMenuPosition({ top: pageY, left: pageX });
-                  setMenuVisible(item.id);
-                }}
+                onPress={() => handleEditEvaluation(item)}
+                onDelete={(id) => handleDeleteEvaluation(id)}
               />
             ))}
           </>
@@ -516,11 +548,8 @@ export default function DetailsCours() {
               <EvaluationCard
                 key={item.id}
                 item={item}
-                onMenuPress={(e) => {
-                  const { pageY, pageX } = e.nativeEvent;
-                  setMenuPosition({ top: pageY, left: pageX });
-                  setMenuVisible(item.id);
-                }}
+                onPress={() => handleEditEvaluation(item)}
+                onDelete={(id) => handleDeleteEvaluation(id)}
               />
             ))}
           </>
@@ -534,11 +563,8 @@ export default function DetailsCours() {
               <EvaluationCard
                 key={item.id}
                 item={item}
-                onMenuPress={(e) => {
-                  const { pageY, pageX } = e.nativeEvent;
-                  setMenuPosition({ top: pageY, left: pageX });
-                  setMenuVisible(item.id);
-                }}
+                onPress={() => handleEditEvaluation(item)}
+                onDelete={(id) => handleDeleteEvaluation(id)}
               />
             ))}
           </>
@@ -552,11 +578,8 @@ export default function DetailsCours() {
               <EvaluationCard
                 key={item.id}
                 item={item}
-                onMenuPress={(e) => {
-                  const { pageY, pageX } = e.nativeEvent;
-                  setMenuPosition({ top: pageY, left: pageX });
-                  setMenuVisible(item.id);
-                }}
+                onPress={() => handleEditEvaluation(item)}
+                onDelete={(id) => handleDeleteEvaluation(id)}
               />
             ))}
           </>
@@ -585,108 +608,179 @@ export default function DetailsCours() {
             resetForm();
           }}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{
+              flex: 1,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Text style={styles.modalTitle}>Ajouter une évaluation</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom de l'évaluation"
-              value={evalName}
-              onChangeText={setEvalName}
-              autoFocus
-            />
-
-            {/* Scheduled Toggle */}
-            <TouchableOpacity
-              style={styles.scheduledToggle}
-              onPress={() => setIsScheduled(!isScheduled)}
+            <Pressable
+              style={[styles.modalContent, { maxHeight: "80%" }]}
+              onPress={(e) => e.stopPropagation()}
             >
-              <View style={styles.checkboxContainer}>
-                <View
-                  style={[
-                    styles.checkbox,
-                    isScheduled && styles.checkboxChecked,
-                  ]}
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              >
+                <Text style={styles.modalTitle}>Ajouter une évaluation</Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nom de l'évaluation"
+                  value={evalName}
+                  onChangeText={setEvalName}
+                  autoFocus
+                />
+                <TouchableOpacity
+                  style={styles.dateField}
+                  onPress={() => {
+                    setTempDate(evalDate ?? new Date());
+                    setShowDatePicker(true);
+                  }}
                 >
-                  {isScheduled && (
-                    <Ionicons name="checkmark" size={16} color="white" />
-                  )}
+                  <Ionicons name="calendar-outline" size={18} color="#555" />
+                  <Text style={styles.dateFieldText}>
+                    {evalDate
+                      ? evalDate.toLocaleDateString("fr-CA", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })
+                      : "Choisir une date"}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Scheduled Toggle */}
+                <TouchableOpacity
+                  style={styles.scheduledToggle}
+                  onPress={() => setIsScheduled(!isScheduled)}
+                >
+                  <View style={styles.checkboxContainer}>
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isScheduled && styles.checkboxChecked,
+                      ]}
+                    >
+                      {isScheduled && (
+                        <Ionicons name="checkmark" size={16} color="white" />
+                      )}
+                    </View>
+                    <Text style={styles.checkboxLabel}>
+                      Évaluation planifiée (note à venir)
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                {renderGradeInput()}
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Pondération (%) - Auto si vide"
+                  value={evalWeight}
+                  onChangeText={setEvalWeight}
+                  keyboardType="numeric"
+                />
+
+                <View style={styles.typeSelector}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      evalType === "travail" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setEvalType("travail")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        evalType === "travail" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Devoir
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      evalType === "examen" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setEvalType("examen")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        evalType === "examen" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Examen
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <Text style={styles.checkboxLabel}>
-                  Évaluation planifiée (note à venir)
-                </Text>
-              </View>
-            </TouchableOpacity>
 
-            {renderGradeInput()}
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => {
+                      setModalVisible(false);
+                      resetForm();
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>Annuler</Text>
+                  </TouchableOpacity>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Pondération (%) - Auto si vide"
-              value={evalWeight}
-              onChangeText={setEvalWeight}
-              keyboardType="numeric"
-            />
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.addButton]}
+                    onPress={handleAddEvaluation}
+                  >
+                    <Text style={styles.addButtonText}>Ajouter</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
 
-            <View style={styles.typeSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  evalType === "travail" && styles.typeButtonActive,
-                ]}
-                onPress={() => setEvalType("travail")}
-              >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "travail" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Travail
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  evalType === "examen" && styles.typeButtonActive,
-                ]}
-                onPress={() => setEvalType("examen")}
-              >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "examen" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Examen
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setModalVisible(false);
-                  resetForm();
+        {modalVisible && (
+          <Modal visible={showDatePicker} transparent animationType="slide">
+            <Pressable
+              style={styles.modalOverlay}
+              onPress={() => setShowDatePicker(false)}
+            >
+              <View
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: 20,
+                  padding: 20,
+                  width: "90%",
                 }}
               >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleAddEvaluation}
-              >
-                <Text style={styles.addButtonText}>Ajouter</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
+                <Text style={styles.sheetTitle}>Choisir une date</Text>
+                <DateTimePicker
+                  value={tempDate}
+                  mode="date"
+                  display="spinner"
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) setTempDate(selectedDate);
+                  }}
+                />
+                <TouchableOpacity
+                  style={styles.confirmDateButton}
+                  onPress={() => {
+                    setEvalDate(tempDate);
+                    setShowDatePicker(false);
+                  }}
+                >
+                  <Text style={styles.confirmDateText}>Confirmer</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Modal>
+        )}
       </Modal>
 
       {/* Edit Evaluation Modal */}
@@ -704,149 +798,176 @@ export default function DetailsCours() {
             setEditingEvalId(null);
           }}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{
+              flex: 1,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
-            <Text style={styles.modalTitle}>Modifier l'évaluation</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom de l'évaluation"
-              value={evalName}
-              onChangeText={setEvalName}
-              autoFocus
-            />
-
-            {/* Scheduled Toggle */}
-            <TouchableOpacity
-              style={styles.scheduledToggle}
-              onPress={() => setIsScheduled(!isScheduled)}
+            <Pressable
+              style={[styles.modalContent, { maxHeight: "80%" }]}
+              onPress={(e) => e.stopPropagation()}
             >
-              <View style={styles.checkboxContainer}>
-                <View
-                  style={[
-                    styles.checkbox,
-                    isScheduled && styles.checkboxChecked,
-                  ]}
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+              >
+                <Text style={styles.modalTitle}>Modifier l'évaluation</Text>
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nom de l'évaluation"
+                  value={evalName}
+                  onChangeText={setEvalName}
+                  autoFocus
+                />
+                <TouchableOpacity
+                  style={styles.dateField}
+                  onPress={() => {
+                    setTempDate(evalDate ?? new Date());
+                    setShowDatePicker(true);
+                  }}
                 >
-                  {isScheduled && (
-                    <Ionicons name="checkmark" size={16} color="white" />
-                  )}
+                  <Ionicons name="calendar-outline" size={18} color="#555" />
+                  <Text style={styles.dateFieldText}>
+                    {evalDate ? formatDate(evalDate) : "Choisir une date"}
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Scheduled Toggle */}
+                <TouchableOpacity
+                  style={styles.scheduledToggle}
+                  onPress={() => setIsScheduled(!isScheduled)}
+                >
+                  <View style={styles.checkboxContainer}>
+                    <View
+                      style={[
+                        styles.checkbox,
+                        isScheduled && styles.checkboxChecked,
+                      ]}
+                    >
+                      {isScheduled && (
+                        <Ionicons name="checkmark" size={16} color="white" />
+                      )}
+                    </View>
+                    <Text style={styles.checkboxLabel}>
+                      Évaluation planifiée (note à venir)
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+
+                {renderGradeInput()}
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Pondération (%) - Auto si vide"
+                  value={evalWeight}
+                  onChangeText={setEvalWeight}
+                  keyboardType="numeric"
+                />
+
+                <View style={styles.typeSelector}>
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      evalType === "travail" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setEvalType("travail")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        evalType === "travail" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Devoir
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[
+                      styles.typeButton,
+                      evalType === "examen" && styles.typeButtonActive,
+                    ]}
+                    onPress={() => setEvalType("examen")}
+                  >
+                    <Text
+                      style={[
+                        styles.typeButtonText,
+                        evalType === "examen" && styles.typeButtonTextActive,
+                      ]}
+                    >
+                      Examen
+                    </Text>
+                  </TouchableOpacity>
                 </View>
-                <Text style={styles.checkboxLabel}>
-                  Évaluation planifiée (note à venir)
-                </Text>
-              </View>
-            </TouchableOpacity>
 
-            {renderGradeInput()}
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => {
+                      setEditModalVisible(false);
+                      resetForm();
+                      setEditingEvalId(null);
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>Annuler</Text>
+                  </TouchableOpacity>
 
-            <TextInput
-              style={styles.input}
-              placeholder="Pondération (%) - Auto si vide"
-              value={evalWeight}
-              onChangeText={setEvalWeight}
-              keyboardType="numeric"
-            />
-
-            <View style={styles.typeSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  evalType === "travail" && styles.typeButtonActive,
-                ]}
-                onPress={() => setEvalType("travail")}
-              >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "travail" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Travail
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[
-                  styles.typeButton,
-                  evalType === "examen" && styles.typeButtonActive,
-                ]}
-                onPress={() => setEvalType("examen")}
-              >
-                <Text
-                  style={[
-                    styles.typeButtonText,
-                    evalType === "examen" && styles.typeButtonTextActive,
-                  ]}
-                >
-                  Examen
-                </Text>
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setEditModalVisible(false);
-                  resetForm();
-                  setEditingEvalId(null);
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.addButton]}
+                    onPress={handleUpdateEvaluation}
+                  >
+                    <Text style={styles.addButtonText}>Modifier</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
+        </Pressable>
+        {editModalVisible && (
+          <Modal visible={showDatePicker} transparent animationType="slide">
+            <Pressable
+              style={styles.modalOverlay}
+              onPress={() => setShowDatePicker(false)}
+            >
+              <View
+                style={{
+                  backgroundColor: "white",
+                  borderRadius: 20,
+                  padding: 20,
+                  width: "90%",
                 }}
               >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleUpdateEvaluation}
-              >
-                <Text style={styles.addButtonText}>Modifier</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
-        </Pressable>
+                <Text style={styles.sheetTitle}>Choisir une date</Text>
+                <DateTimePicker
+                  value={tempDate}
+                  mode="date"
+                  display="spinner"
+                  onChange={(event, selectedDate) => {
+                    if (selectedDate) setTempDate(selectedDate);
+                  }}
+                />
+                <TouchableOpacity
+                  style={styles.confirmDateButton}
+                  onPress={() => {
+                    setEvalDate(tempDate);
+                    setShowDatePicker(false);
+                  }}
+                >
+                  <Text style={styles.confirmDateText}>Confirmer</Text>
+                </TouchableOpacity>
+              </View>
+            </Pressable>
+          </Modal>
+        )}
       </Modal>
 
       {/* Context Menu */}
-      {menuVisible && (
-        <>
-          <Pressable
-            style={styles.menuOverlay}
-            onPress={() => setMenuVisible(null)}
-          />
-          <View
-            style={[
-              styles.dropdownMenu,
-              { top: menuPosition.top, left: menuPosition.left },
-            ]}
-          >
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                const evaluation = course.evaluations.find(
-                  (e) => e.id === menuVisible
-                );
-                if (evaluation) handleEditEvaluation(evaluation);
-              }}
-            >
-              <Ionicons name="create-outline" size={18} color="#333" />
-              <Text style={styles.menuText}>Modifier</Text>
-            </TouchableOpacity>
-            <View style={styles.menuDivider} />
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleDeleteEvaluation(menuVisible)}
-            >
-              <Ionicons name="trash-outline" size={18} color="#d32f2f" />
-              <Text style={[styles.menuText, { color: "#d32f2f" }]}>
-                Supprimer
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
     </View>
   );
 }
@@ -854,46 +975,160 @@ export default function DetailsCours() {
 // Card component
 function EvaluationCard({
   item,
-  onMenuPress,
+  onPress,
+  onDelete,
 }: {
   item: Evaluation;
-  onMenuPress: (e: any) => void;
+  onPress: () => void;
+  onDelete: (id: string) => void;
 }) {
+  const swipeRef = useRef<Swipeable>(null);
+  const parseLocalDate = (s: string) => {
+    const [y, m, d] = s.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  };
+  const displayDate = item.date
+    ? parseLocalDate(item.date).toLocaleDateString("fr-CA", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
+  const confirmDelete = () => {
+    Alert.alert(
+      "Supprimer l’évaluation",
+      `Souhaitez-vous vraiment supprimer "${item.name}" ?`,
+      [
+        {
+          text: "Annuler",
+          style: "cancel",
+          onPress: () => swipeRef.current?.close(),
+        },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => {
+            onDelete(item.id);
+            swipeRef.current?.close();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
+    // dragX est négatif quand on swipe vers la gauche
+    const reveal = dragX.interpolate({
+      inputRange: [-120, -60, 0],
+      outputRange: [1, 0.6, 0],
+      extrapolate: "clamp",
+    });
+
+    const iconScale = dragX.interpolate({
+      inputRange: [-120, -60, 0],
+      outputRange: [1, 0.9, 0.4],
+      extrapolate: "clamp",
+    });
+
+    const iconTranslateX = dragX.interpolate({
+      inputRange: [-120, -60, 0],
+      outputRange: [0, 2, 20],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <View
+        style={{
+          width: 88, // zone d’action plus petite
+          marginBottom: 12,
+          justifyContent: "center",
+          alignItems: "flex-end",
+        }}
+      >
+        <Animated.View
+          style={{
+            height: "60%",
+            width: "65%",
+            borderRadius: 12,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#f30000ff",
+            opacity: reveal,
+          }}
+        >
+          <Animated.View
+            style={{
+              transform: [{ scale: iconScale }, { translateX: iconTranslateX }],
+            }}
+          >
+            <Ionicons name="trash-outline" size={22} color="white" />
+          </Animated.View>
+        </Animated.View>
+      </View>
+    );
+  };
+
   const isScheduled = item.isScheduled;
   const displayGrade = isScheduled
     ? `Cible: ${item.targetGrade?.toFixed(1) || "100"}%`
     : `${item.note}%`;
 
   return (
-    <View style={[styles.card, isScheduled && styles.scheduledCard]}>
-      <TouchableOpacity onPress={onMenuPress}>
-        <Ionicons name="ellipsis-vertical" size={20} color="#555" />
-      </TouchableOpacity>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.cardTitle} numberOfLines={1} ellipsizeMode="tail">
-          {item.name}
-        </Text>
-        <Text style={styles.cardWeight}>
-          Pondération {item.weight.toFixed(2)}%
-          {item.isAutoWeight && (
-            <Text style={{ color: "#666", fontSize: 11 }}> (auto)</Text>
-          )}
-        </Text>
-      </View>
+    <Swipeable
+      ref={swipeRef}
+      renderRightActions={renderRightActions}
+      rightThreshold={70} // swipe “assez loin” => open => confirm
+      friction={2}
+      overshootRight={false}
+      onSwipeableOpen={(direction) => {
+        if (direction === "right") confirmDelete();
+      }}
+    >
+      <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
+        <View style={[styles.card, isScheduled && styles.scheduledCard]}>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={styles.cardTitle}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.name}
+            </Text>
 
-      <View
-        style={[
-          styles.noteBadge,
-          isScheduled
-            ? { backgroundColor: "#e3d5ff" }
-            : { backgroundColor: item.note! >= 75 ? "#c8f7c5" : "#f7c5c5" },
-        ]}
-      >
-        <Text style={[styles.noteText, isScheduled && { color: "#7f3dff" }]}>
-          {displayGrade}
-        </Text>
-      </View>
-    </View>
+            <Text style={styles.cardWeight}>
+              Pondération {item.weight.toFixed(2)}%
+              {item.isAutoWeight && (
+                <Text style={{ color: "#666", fontSize: 11 }}> (auto)</Text>
+              )}
+            </Text>
+
+            {displayDate && (
+              <Text style={styles.cardDate}>📅 {displayDate}</Text>
+            )}
+          </View>
+
+          <View
+            style={[
+              styles.noteBadge,
+              isScheduled
+                ? { backgroundColor: "#e3d5ff" }
+                : { backgroundColor: item.note! >= 75 ? "#c8f7c5" : "#f7c5c5" },
+            ]}
+          >
+            <Text
+              style={[styles.noteText, isScheduled && { color: "#7f3dff" }]}
+            >
+              {displayGrade}
+            </Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    </Swipeable>
   );
 }
 
@@ -1201,5 +1436,44 @@ const styles = StyleSheet.create({
     bottom: 0,
     backgroundColor: "transparent",
     zIndex: 1000,
+  },
+  cardDate: {
+    fontSize: 12,
+    color: "#666",
+    marginTop: 2,
+  },
+  dateField: {
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  dateFieldText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  sheetTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    textAlign: "center",
+    marginBottom: 15,
+  },
+
+  confirmDateButton: {
+    backgroundColor: "#5900a1ff",
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 20,
+    alignItems: "center",
+  },
+
+  confirmDateText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

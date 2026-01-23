@@ -1,17 +1,21 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
-    Alert,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
+import { Swipeable } from "react-native-gesture-handler";
 import { Course, useCourses } from "../context/CoursesContext";
 import { useSessions } from "../context/SessionsContext";
 
@@ -119,7 +123,6 @@ export default function Donnees() {
 
   const handleDeleteCourse = (id: string) => {
     deleteCourse(id);
-    setMenuVisible(null);
   };
 
   const handleEditCourse = (course: Course) => {
@@ -231,7 +234,7 @@ export default function Donnees() {
     <View style={{ flex: 1, backgroundColor: "white" }}>
       {/* Header - anchored to top */}
       <View>
-        <Text style={styles.title}>Donnees D'etudes</Text>
+        <Text style={styles.title}>Mes Cours</Text>
         <View style={styles.divider} />
       </View>
 
@@ -359,9 +362,14 @@ export default function Donnees() {
           style={styles.modalOverlay}
           onPress={() => setModalVisible(false)}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{
+              flex: 1,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             <Text style={styles.modalTitle}>Ajouter un cours</Text>
 
@@ -437,18 +445,64 @@ export default function Donnees() {
                   setCourseCredits("");
                   setSelectedSessionId(null);
                 }}
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
+                <Text style={styles.modalTitle}>Ajouter un cours</Text>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleAddCourse}
-              >
-                <Text style={styles.addButtonText}>Ajouter</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nom du cours"
+                  value={courseName}
+                  onChangeText={setCourseName}
+                  autoFocus
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Objectif (%)"
+                  value={courseObjective}
+                  onChangeText={setCourseObjective}
+                  keyboardType="numeric"
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Crédits"
+                  value={courseCredits}
+                  onChangeText={setCourseCredits}
+                  keyboardType="numeric"
+                />
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => {
+                      setModalVisible(false);
+                      setCourseName("");
+                      setCourseObjective("");
+                      setCourseCredits("");
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>Annuler</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.addButton]}
+                    onPress={handleAddCourse}
+                  >
+                    <Text style={styles.addButtonText}>Ajouter</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
 
@@ -471,12 +525,18 @@ export default function Donnees() {
             setEditModalVisible(false);
             setCourseName("");
             setCourseObjective("");
+            setCourseCredits("");
             setEditingCourse(null);
           }}
         >
-          <Pressable
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{
+              flex: 1,
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
           >
             <Text style={styles.modalTitle}>Modifier le cours</Text>
 
@@ -556,52 +616,248 @@ export default function Donnees() {
                   setSelectedSessionId(null);
                   setEditingCourse(null);
                 }}
+            <Pressable
+              style={styles.modalContent}
+              onPress={(e) => e.stopPropagation()}
+            >
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
-              </TouchableOpacity>
+                <Text style={styles.modalTitle}>Modifier le cours</Text>
 
-              <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
-                onPress={handleUpdateCourse}
-              >
-                <Text style={styles.addButtonText}>Modifier</Text>
-              </TouchableOpacity>
-            </View>
-          </Pressable>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Nom du cours"
+                  value={courseName}
+                  onChangeText={setCourseName}
+                  autoFocus
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Objectif (%)"
+                  value={courseObjective}
+                  onChangeText={setCourseObjective}
+                  keyboardType="numeric"
+                />
+
+                <TextInput
+                  style={styles.input}
+                  placeholder="Crédits"
+                  value={courseCredits}
+                  onChangeText={setCourseCredits}
+                  keyboardType="numeric"
+                />
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.cancelButton]}
+                    onPress={() => {
+                      setEditModalVisible(false);
+                      setCourseName("");
+                      setCourseObjective("");
+                      setCourseCredits("");
+                      setEditingCourse(null);
+                    }}
+                  >
+                    <Text style={styles.cancelButtonText}>Annuler</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={[styles.modalButton, styles.addButton]}
+                    onPress={handleUpdateCourse}
+                  >
+                    <Text style={styles.addButtonText}>Modifier</Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </Pressable>
+          </KeyboardAvoidingView>
         </Pressable>
       </Modal>
+    </View>
+  );
+  function CourseCard({
+    course,
+    onPress,
+    onEdit,
+    onDelete,
+  }: {
+    course: Course;
+    onPress: () => void;
+    onEdit: () => void;
+    onDelete: () => void;
+  }) {
+    const swipeRef = useRef<Swipeable>(null);
 
-      {/* Overlay to close menu when clicking outside */}
-      {menuVisible && (
-        <>
-          <Pressable
-            style={styles.menuOverlay}
-            onPress={() => setMenuVisible(null)}
-          />
-          <View
-            style={[
-              styles.dropdownMenu,
-              { top: menuPosition.top, left: menuPosition.left },
-            ]}
+    const confirmDelete = () => {
+      Alert.alert(
+        "Supprimer le cours",
+        `Souhaitez-vous vraiment supprimer "${course.name}" ?`,
+        [
+          {
+            text: "Annuler",
+            style: "cancel",
+            onPress: () => swipeRef.current?.close(),
+          },
+          {
+            text: "Supprimer",
+            style: "destructive",
+            onPress: () => {
+              onDelete();
+              swipeRef.current?.close();
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+    };
+
+    const handleEdit = () => {
+      onEdit();
+      swipeRef.current?.close();
+    };
+
+    const renderLeftActions = (
+      progress: Animated.AnimatedInterpolation<number>,
+      dragX: Animated.AnimatedInterpolation<number>,
+    ) => {
+      const reveal = dragX.interpolate({
+        inputRange: [0, 60, 120],
+        outputRange: [0, 2, 1],
+        extrapolate: "clamp",
+      });
+
+      const iconScale = dragX.interpolate({
+        inputRange: [0, 60, 120],
+        outputRange: [0.4, 0.9, 1],
+        extrapolate: "clamp",
+      });
+
+      const iconTranslateX = dragX.interpolate({
+        inputRange: [0, 60, 120],
+        outputRange: [-20, -2, 0],
+        extrapolate: "clamp",
+      });
+
+      return (
+        <View
+          style={{
+            width: 88,
+            marginBottom: 12,
+            justifyContent: "center",
+            alignItems: "flex-start",
+          }}
+        >
+          <Animated.View
+            style={{
+              height: "60%",
+              width: "65%",
+              borderRadius: 12,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "rgb(64, 64, 64)",
+              opacity: reveal,
+            }}
           >
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => {
-                const course = displayedCourses.find((c) => c.id === menuVisible);
-                if (course) handleEditCourse(course);
+            <Animated.View
+              style={{
+                transform: [
+                  { scale: iconScale },
+                  { translateX: iconTranslateX },
+                ],
               }}
             >
-              <Ionicons name="create-outline" size={18} color="#333" />
-              <Text style={styles.menuText}>Modifier</Text>
-            </TouchableOpacity>
-            <View style={styles.menuDivider} />
-            <TouchableOpacity
-              style={styles.menuItem}
-              onPress={() => handleDeleteCourse(menuVisible)}
+              <Ionicons name="pencil-outline" size={22} color="white" />
+            </Animated.View>
+          </Animated.View>
+        </View>
+      );
+    };
+
+    const renderRightActions = (
+      progress: Animated.AnimatedInterpolation<number>,
+      dragX: Animated.AnimatedInterpolation<number>,
+    ) => {
+      const reveal = dragX.interpolate({
+        inputRange: [-120, -60, 0],
+        outputRange: [1, 0.6, 0],
+        extrapolate: "clamp",
+      });
+
+      const iconScale = dragX.interpolate({
+        inputRange: [-120, -60, 0],
+        outputRange: [1, 0.9, 0.4],
+        extrapolate: "clamp",
+      });
+
+      const iconTranslateX = dragX.interpolate({
+        inputRange: [-120, -60, 0],
+        outputRange: [0, 2, 20],
+        extrapolate: "clamp",
+      });
+
+      return (
+        <View
+          style={{
+            width: 88,
+            marginBottom: 12,
+            justifyContent: "center",
+            alignItems: "flex-end",
+          }}
+        >
+          <Animated.View
+            style={{
+              height: "60%",
+              width: "65%",
+              borderRadius: 12,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#f30000ff",
+              opacity: reveal,
+            }}
+          >
+            <Animated.View
+              style={{
+                transform: [
+                  { scale: iconScale },
+                  { translateX: iconTranslateX },
+                ],
+              }}
             >
-              <Ionicons name="trash-outline" size={18} color="#d32f2f" />
-              <Text style={[styles.menuText, { color: "#d32f2f" }]}>
-                Supprimer
+              <Ionicons name="trash-outline" size={22} color="white" />
+            </Animated.View>
+          </Animated.View>
+        </View>
+      );
+    };
+
+    return (
+      <View style={{ width: "100%", paddingHorizontal: 30 }}>
+        <Swipeable
+          ref={swipeRef}
+          renderLeftActions={renderLeftActions}
+          renderRightActions={renderRightActions}
+          leftThreshold={70}
+          rightThreshold={70}
+          friction={2}
+          overshootLeft={false}
+          overshootRight={false}
+          onSwipeableOpen={(direction) => {
+            if (direction === "right") confirmDelete();
+            if (direction === "left") handleEdit();
+          }}
+        >
+          <Pressable onPress={onPress} onLongPress={onEdit}>
+            <View style={styles.coursContainer}>
+              <Text
+                style={styles.coursText}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {course.name}
               </Text>
             </TouchableOpacity>
           </View>
@@ -777,15 +1033,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignSelf: "center",
   },
-  coursContainer: {
-    backgroundColor: "lightgray",
-    paddingVertical: 25,
-    paddingHorizontal: 10,
-    width: "80%",
-    borderRadius: 15,
-    flexDirection: "row",
-    margin: 5,
-  },
+
   more: {
     paddingHorizontal: 10,
   },
@@ -794,11 +1042,7 @@ const styles = StyleSheet.create({
     right: 10,
     top: 25,
   },
-  coursText: {
-    fontSize: 16,
-    flex: 1,
-    marginRight: 30,
-  },
+
   addCoursButton: {
     backgroundColor: "#5900a1ff",
     paddingVertical: 20,
@@ -1016,5 +1260,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#999",
     marginTop: 8,
+  coursContainer: {
+    backgroundColor: "lightgray",
+    paddingVertical: 25,
+    paddingHorizontal: 14,
+    width: "100%",
+    borderRadius: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+
+  coursText: {
+    fontSize: 16,
+    flex: 1,
+    marginRight: 12,
   },
 });

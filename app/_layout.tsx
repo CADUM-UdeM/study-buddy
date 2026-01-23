@@ -1,3 +1,4 @@
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack } from "expo-router";
 import { CoursesProvider } from "./context/CoursesContext";
 import { SettingsProvider } from "./context/SettingsContext";
