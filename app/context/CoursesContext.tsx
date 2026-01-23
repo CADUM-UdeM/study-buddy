@@ -30,15 +30,17 @@ export interface Course {
 
 interface CoursesContextType {
   courses: Course[];
-  addCourse: (name: string, objective: number, credits: number) => void;
+  addCourse: (name: string, objective: number, credits: number, sessionId?: string) => void;
   updateCourse: (
     id: string,
     name: string,
     objective: number,
     credits: number,
+    sessionId?: string
   ) => void;
   deleteCourse: (id: string) => void;
   getCourse: (id: string) => Course | undefined;
+  getCoursesBySession: (sessionId: string | null) => Course[];
   addEvaluation: (courseId: string, evaluation: Omit<Evaluation, "id">) => void;
   updateEvaluation: (
     courseId: string,
@@ -47,7 +49,7 @@ interface CoursesContextType {
   ) => void;
   deleteEvaluation: (courseId: string, evaluationId: string) => void;
   calculateCourseGrade: (courseId: string) => number | null;
-  calculateOverallGPA: () => {
+  calculateOverallGPA: (sessionId?: string | null) => {
     gpa: number;
     totalCredits: number;
     averageGrade: number;
@@ -215,12 +217,13 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addCourse = (name: string, objective: number, credits: number) => {
+  const addCourse = (name: string, objective: number, credits: number, sessionId?: string) => {
     const newCourse: Course = {
       id: Date.now().toString(),
       name,
       objective,
       credits,
+      session: sessionId,
       evaluations: [],
     };
     setCourses([...courses, newCourse]);
@@ -231,6 +234,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     name: string,
     objective: number,
     credits: number,
+    sessionId?: string
   ) => {
     setCourses(
       courses.map((course) =>
@@ -240,6 +244,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
               name,
               objective,
               credits,
+              session: sessionId,
               evaluations: recalculateEvaluations(
                 course.evaluations,
                 objective,
@@ -256,6 +261,13 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
 
   const getCourse = (id: string) => {
     return courses.find((course) => course.id === id);
+  };
+
+  const getCoursesBySession = (sessionId: string | null): Course[] => {
+    if (sessionId === null) {
+      return courses.filter((course) => !course.session);
+    }
+    return courses.filter((course) => course.session === sessionId);
   };
 
   const addEvaluation = (
@@ -383,6 +395,66 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     };
   };
 
+  const calculateCourseGrade = (courseId: string): number | null => {
+    const course = getCourse(courseId);
+    if (!course || course.evaluations.length === 0) return null;
+
+    const completedEvaluations = course.evaluations.filter(
+      (e) => !e.isScheduled && e.note !== null
+    );
+
+    if (completedEvaluations.length === 0) return null;
+
+    const totalWeight = completedEvaluations.reduce(
+      (sum, e) => sum + e.weight,
+      0
+    );
+    const weightedSum = completedEvaluations.reduce(
+      (sum, e) => sum + e.note! * e.weight,
+      0
+    );
+
+    return totalWeight > 0 ? weightedSum / totalWeight : null;
+  };
+
+  const calculateOverallGPA = (sessionId?: string | null): {
+    gpa: number;
+    totalCredits: number;
+    averageGrade: number;
+  } | null => {
+    const coursesToCalculate = sessionId !== undefined
+      ? getCoursesBySession(sessionId)
+      : courses;
+
+    const coursesWithGrades = coursesToCalculate
+      .map((course) => ({
+        course,
+        grade: calculateCourseGrade(course.id),
+      }))
+      .filter((item) => item.grade !== null);
+
+    if (coursesWithGrades.length === 0) return null;
+
+    const totalCredits = coursesWithGrades.reduce(
+      (sum, item) => sum + item.course.credits,
+      0
+    );
+    const weightedGPASum = coursesWithGrades.reduce((sum, item) => {
+      // We'll need to get GPA from percentage using settings context
+      // For now, return basic calculation - this will be enhanced when used with settings
+      return sum + item.grade! * item.course.credits;
+    }, 0);
+
+    const averageGrade = weightedGPASum / totalCredits;
+
+    // For now, return the average grade - GPA conversion will happen in components using settings
+    return {
+      gpa: averageGrade / 25, // Rough conversion for 4.0 scale (100% = 4.0)
+      totalCredits,
+      averageGrade,
+    };
+  };
+
   return (
     <CoursesContext.Provider
       value={{
@@ -391,6 +463,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
         updateCourse,
         deleteCourse,
         getCourse,
+        getCoursesBySession,
         addEvaluation,
         updateEvaluation,
         deleteEvaluation,
