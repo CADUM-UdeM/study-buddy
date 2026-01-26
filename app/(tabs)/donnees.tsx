@@ -371,80 +371,6 @@ export default function Donnees() {
               justifyContent: "center",
             }}
           >
-            <Text style={styles.modalTitle}>Ajouter un cours</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom du cours"
-              value={courseName}
-              onChangeText={setCourseName}
-              autoFocus
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Objectif (%)"
-              value={courseObjective}
-              onChangeText={setCourseObjective}
-              keyboardType="numeric"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Crédits"
-              value={courseCredits}
-              onChangeText={setCourseCredits}
-              keyboardType="numeric"
-            />
-
-            <Text style={styles.label}>Session</Text>
-            <View style={styles.sessionPicker}>
-              {sessions.map((session) => {
-                const isSelected =
-                  selectedSessionId === session.id ||
-                  (selectedSessionId === null &&
-                    activeSession?.id === session.id);
-                return (
-                  <TouchableOpacity
-                    key={session.id}
-                    style={[
-                      styles.sessionOption,
-                      isSelected && styles.sessionOptionActive,
-                    ]}
-                    onPress={() =>
-                      setSelectedSessionId(
-                        isSelected && selectedSessionId === session.id
-                          ? null
-                          : session.id
-                      )
-                    }
-                  >
-                    <Text
-                      style={[
-                        styles.sessionOptionText,
-                        isSelected && styles.sessionOptionTextActive,
-                      ]}
-                    >
-                      {session.name}
-                    </Text>
-                    {isSelected && (
-                      <Ionicons name="checkmark" size={18} color="white" />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setModalVisible(false);
-                  setCourseName("");
-                  setCourseObjective("");
-                  setCourseCredits("");
-                  setSelectedSessionId(null);
-                }}
             <Pressable
               style={styles.modalContent}
               onPress={(e) => e.stopPropagation()}
@@ -480,6 +406,44 @@ export default function Donnees() {
                   keyboardType="numeric"
                 />
 
+                <Text style={styles.label}>Session</Text>
+                <View style={styles.sessionPicker}>
+                  {sessions.map((session) => {
+                    const isSelected =
+                      selectedSessionId === session.id ||
+                      (selectedSessionId === null &&
+                        activeSession?.id === session.id);
+                    return (
+                      <TouchableOpacity
+                        key={session.id}
+                        style={[
+                          styles.sessionOption,
+                          isSelected && styles.sessionOptionActive,
+                        ]}
+                        onPress={() =>
+                          setSelectedSessionId(
+                            isSelected && selectedSessionId === session.id
+                              ? null
+                              : session.id
+                          )
+                        }
+                      >
+                        <Text
+                          style={[
+                            styles.sessionOptionText,
+                            isSelected && styles.sessionOptionTextActive,
+                          ]}
+                        >
+                          {session.name}
+                        </Text>
+                        {isSelected && (
+                          <Ionicons name="checkmark" size={18} color="white" />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.cancelButton]}
@@ -488,6 +452,7 @@ export default function Donnees() {
                       setCourseName("");
                       setCourseObjective("");
                       setCourseCredits("");
+                      setSelectedSessionId(null);
                     }}
                   >
                     <Text style={styles.cancelButtonText}>Annuler</Text>
@@ -538,84 +503,6 @@ export default function Donnees() {
               justifyContent: "center",
             }}
           >
-            <Text style={styles.modalTitle}>Modifier le cours</Text>
-
-            <TextInput
-              style={styles.input}
-              placeholder="Nom du cours"
-              value={courseName}
-              onChangeText={setCourseName}
-              autoFocus
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Objectif (%)"
-              value={courseObjective}
-              onChangeText={setCourseObjective}
-              keyboardType="numeric"
-            />
-
-            <TextInput
-              style={styles.input}
-              placeholder="Crédits"
-              value={courseCredits}
-              onChangeText={setCourseCredits}
-              keyboardType="numeric"
-            />
-
-            <Text style={styles.label}>Session</Text>
-            <View style={styles.sessionPicker}>
-              {sessions.map((session) => {
-                const isSelected =
-                  selectedSessionId === session.id ||
-                  (selectedSessionId === null &&
-                    editingCourse?.session === session.id) ||
-                  (selectedSessionId === null &&
-                    !editingCourse?.session &&
-                    activeSession?.id === session.id);
-                return (
-                  <TouchableOpacity
-                    key={session.id}
-                    style={[
-                      styles.sessionOption,
-                      isSelected && styles.sessionOptionActive,
-                    ]}
-                    onPress={() =>
-                      setSelectedSessionId(
-                        isSelected && selectedSessionId === session.id
-                          ? null
-                          : session.id
-                      )
-                    }
-                  >
-                    <Text
-                      style={[
-                        styles.sessionOptionText,
-                        isSelected && styles.sessionOptionTextActive,
-                      ]}
-                    >
-                      {session.name}
-                    </Text>
-                    {isSelected && (
-                      <Ionicons name="checkmark" size={18} color="white" />
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setEditModalVisible(false);
-                  setCourseName("");
-                  setCourseObjective("");
-                  setCourseCredits("");
-                  setSelectedSessionId(null);
-                  setEditingCourse(null);
-                }}
             <Pressable
               style={styles.modalContent}
               onPress={(e) => e.stopPropagation()}
@@ -651,6 +538,47 @@ export default function Donnees() {
                   keyboardType="numeric"
                 />
 
+                <Text style={styles.label}>Session</Text>
+                <View style={styles.sessionPicker}>
+                  {sessions.map((session) => {
+                    const isSelected =
+                      selectedSessionId === session.id ||
+                      (selectedSessionId === null &&
+                        editingCourse?.session === session.id) ||
+                      (selectedSessionId === null &&
+                        !editingCourse?.session &&
+                        activeSession?.id === session.id);
+                    return (
+                      <TouchableOpacity
+                        key={session.id}
+                        style={[
+                          styles.sessionOption,
+                          isSelected && styles.sessionOptionActive,
+                        ]}
+                        onPress={() =>
+                          setSelectedSessionId(
+                            isSelected && selectedSessionId === session.id
+                              ? null
+                              : session.id
+                          )
+                        }
+                      >
+                        <Text
+                          style={[
+                            styles.sessionOptionText,
+                            isSelected && styles.sessionOptionTextActive,
+                          ]}
+                        >
+                          {session.name}
+                        </Text>
+                        {isSelected && (
+                          <Ionicons name="checkmark" size={18} color="white" />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
                     style={[styles.modalButton, styles.cancelButton]}
@@ -659,6 +587,7 @@ export default function Donnees() {
                       setCourseName("");
                       setCourseObjective("");
                       setCourseCredits("");
+                      setSelectedSessionId(null);
                       setEditingCourse(null);
                     }}
                   >
@@ -677,192 +606,6 @@ export default function Donnees() {
           </KeyboardAvoidingView>
         </Pressable>
       </Modal>
-    </View>
-  );
-  function CourseCard({
-    course,
-    onPress,
-    onEdit,
-    onDelete,
-  }: {
-    course: Course;
-    onPress: () => void;
-    onEdit: () => void;
-    onDelete: () => void;
-  }) {
-    const swipeRef = useRef<Swipeable>(null);
-
-    const confirmDelete = () => {
-      Alert.alert(
-        "Supprimer le cours",
-        `Souhaitez-vous vraiment supprimer "${course.name}" ?`,
-        [
-          {
-            text: "Annuler",
-            style: "cancel",
-            onPress: () => swipeRef.current?.close(),
-          },
-          {
-            text: "Supprimer",
-            style: "destructive",
-            onPress: () => {
-              onDelete();
-              swipeRef.current?.close();
-            },
-          },
-        ],
-        { cancelable: true },
-      );
-    };
-
-    const handleEdit = () => {
-      onEdit();
-      swipeRef.current?.close();
-    };
-
-    const renderLeftActions = (
-      progress: Animated.AnimatedInterpolation<number>,
-      dragX: Animated.AnimatedInterpolation<number>,
-    ) => {
-      const reveal = dragX.interpolate({
-        inputRange: [0, 60, 120],
-        outputRange: [0, 2, 1],
-        extrapolate: "clamp",
-      });
-
-      const iconScale = dragX.interpolate({
-        inputRange: [0, 60, 120],
-        outputRange: [0.4, 0.9, 1],
-        extrapolate: "clamp",
-      });
-
-      const iconTranslateX = dragX.interpolate({
-        inputRange: [0, 60, 120],
-        outputRange: [-20, -2, 0],
-        extrapolate: "clamp",
-      });
-
-      return (
-        <View
-          style={{
-            width: 88,
-            marginBottom: 12,
-            justifyContent: "center",
-            alignItems: "flex-start",
-          }}
-        >
-          <Animated.View
-            style={{
-              height: "60%",
-              width: "65%",
-              borderRadius: 12,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "rgb(64, 64, 64)",
-              opacity: reveal,
-            }}
-          >
-            <Animated.View
-              style={{
-                transform: [
-                  { scale: iconScale },
-                  { translateX: iconTranslateX },
-                ],
-              }}
-            >
-              <Ionicons name="pencil-outline" size={22} color="white" />
-            </Animated.View>
-          </Animated.View>
-        </View>
-      );
-    };
-
-    const renderRightActions = (
-      progress: Animated.AnimatedInterpolation<number>,
-      dragX: Animated.AnimatedInterpolation<number>,
-    ) => {
-      const reveal = dragX.interpolate({
-        inputRange: [-120, -60, 0],
-        outputRange: [1, 0.6, 0],
-        extrapolate: "clamp",
-      });
-
-      const iconScale = dragX.interpolate({
-        inputRange: [-120, -60, 0],
-        outputRange: [1, 0.9, 0.4],
-        extrapolate: "clamp",
-      });
-
-      const iconTranslateX = dragX.interpolate({
-        inputRange: [-120, -60, 0],
-        outputRange: [0, 2, 20],
-        extrapolate: "clamp",
-      });
-
-      return (
-        <View
-          style={{
-            width: 88,
-            marginBottom: 12,
-            justifyContent: "center",
-            alignItems: "flex-end",
-          }}
-        >
-          <Animated.View
-            style={{
-              height: "60%",
-              width: "65%",
-              borderRadius: 12,
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#f30000ff",
-              opacity: reveal,
-            }}
-          >
-            <Animated.View
-              style={{
-                transform: [
-                  { scale: iconScale },
-                  { translateX: iconTranslateX },
-                ],
-              }}
-            >
-              <Ionicons name="trash-outline" size={22} color="white" />
-            </Animated.View>
-          </Animated.View>
-        </View>
-      );
-    };
-
-    return (
-      <View style={{ width: "100%", paddingHorizontal: 30 }}>
-        <Swipeable
-          ref={swipeRef}
-          renderLeftActions={renderLeftActions}
-          renderRightActions={renderRightActions}
-          leftThreshold={70}
-          rightThreshold={70}
-          friction={2}
-          overshootLeft={false}
-          overshootRight={false}
-          onSwipeableOpen={(direction) => {
-            if (direction === "right") confirmDelete();
-            if (direction === "left") handleEdit();
-          }}
-        >
-          <Pressable onPress={onPress} onLongPress={onEdit}>
-            <View style={styles.coursContainer}>
-              <Text
-                style={styles.coursText}
-                numberOfLines={1}
-                ellipsizeMode="tail"
-              >
-                {course.name}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
 
       {/* Session Menu */}
       {sessionMenuVisible && (
@@ -890,7 +633,11 @@ export default function Donnees() {
             <View style={styles.menuDivider} />
             <TouchableOpacity
               style={styles.menuItem}
-              onPress={() => handleDeleteSession(sessionMenuVisible)}
+              onPress={() => {
+                if (sessionMenuVisible) {
+                  handleDeleteSession(sessionMenuVisible);
+                }
+              }}
             >
               <Ionicons name="trash-outline" size={18} color="#d32f2f" />
               <Text style={[styles.menuText, { color: "#d32f2f" }]}>
@@ -1260,6 +1007,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#999",
     marginTop: 8,
+  },
   coursContainer: {
     backgroundColor: "lightgray",
     paddingVertical: 25,
