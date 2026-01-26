@@ -305,40 +305,13 @@ export default function Donnees() {
         ) : (
           <>
             {displayedCourses.map((course) => (
-              <Pressable
+              <CourseCard
                 key={course.id}
+                course={course}
                 onPress={() => navigateToCourseDetails(course.id)}
-                style={{ width: "100%", alignItems: "center" }}
-              >
-                <View style={styles.coursContainer}>
-                  <TouchableOpacity
-                    onPress={(e) => {
-                      e.stopPropagation();
-                      const { pageY, pageX } = e.nativeEvent;
-                      setMenuPosition({ top: pageY, left: pageX });
-                      setMenuVisible(course.id);
-                    }}
-                  >
-                    <Ionicons
-                      style={styles.more}
-                      name="ellipsis-vertical"
-                      size={20}
-                    />
-                  </TouchableOpacity>
-                  <Text
-                    style={styles.coursText}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {course.name}
-                  </Text>
-                  <Ionicons
-                    style={styles.chevRight}
-                    name="chevron-forward"
-                    size={20}
-                  />
-                </View>
-              </Pressable>
+                onEdit={() => handleEditCourse(course)}
+                onDelete={() => handleDeleteCourse(course.id)}
+              />
             ))}
           </>
         )}
@@ -756,6 +729,195 @@ export default function Donnees() {
           </Pressable>
         </Pressable>
       </Modal>
+    </View>
+  );
+}
+
+function CourseCard({
+  course,
+  onPress,
+  onEdit,
+  onDelete,
+}: {
+  course: Course;
+  onPress: () => void;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const swipeRef = useRef<Swipeable>(null);
+
+  const confirmDelete = () => {
+    Alert.alert(
+      "Supprimer le cours",
+      `Souhaitez-vous vraiment supprimer "${course.name}" ?`,
+      [
+        {
+          text: "Annuler",
+          style: "cancel",
+          onPress: () => swipeRef.current?.close(),
+        },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => {
+            onDelete();
+            swipeRef.current?.close();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  };
+
+  const handleEdit = () => {
+    onEdit();
+    swipeRef.current?.close();
+  };
+
+  const renderLeftActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
+    const reveal = dragX.interpolate({
+      inputRange: [0, 60, 120],
+      outputRange: [0, 2, 1],
+      extrapolate: "clamp",
+    });
+
+    const iconScale = dragX.interpolate({
+      inputRange: [0, 60, 120],
+      outputRange: [0.4, 0.9, 1],
+      extrapolate: "clamp",
+    });
+
+    const iconTranslateX = dragX.interpolate({
+      inputRange: [0, 60, 120],
+      outputRange: [-20, -2, 0],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <View
+        style={{
+          width: 88,
+          marginBottom: 12,
+          justifyContent: "center",
+          alignItems: "flex-start",
+        }}
+      >
+        <Animated.View
+          style={{
+            height: "60%",
+            width: "65%",
+            borderRadius: 12,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgb(64, 64, 64)",
+            opacity: reveal,
+          }}
+        >
+          <Animated.View
+            style={{
+              transform: [
+                { scale: iconScale },
+                { translateX: iconTranslateX },
+              ],
+            }}
+          >
+            <Ionicons name="pencil-outline" size={22} color="white" />
+          </Animated.View>
+        </Animated.View>
+      </View>
+    );
+  };
+
+  const renderRightActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>,
+  ) => {
+    const reveal = dragX.interpolate({
+      inputRange: [-120, -60, 0],
+      outputRange: [1, 0.6, 0],
+      extrapolate: "clamp",
+    });
+
+    const iconScale = dragX.interpolate({
+      inputRange: [-120, -60, 0],
+      outputRange: [1, 0.9, 0.4],
+      extrapolate: "clamp",
+    });
+
+    const iconTranslateX = dragX.interpolate({
+      inputRange: [-120, -60, 0],
+      outputRange: [0, 2, 20],
+      extrapolate: "clamp",
+    });
+
+    return (
+      <View
+        style={{
+          width: 88,
+          marginBottom: 12,
+          justifyContent: "center",
+          alignItems: "flex-end",
+        }}
+      >
+        <Animated.View
+          style={{
+            height: "60%",
+            width: "65%",
+            borderRadius: 12,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#f30000ff",
+            opacity: reveal,
+          }}
+        >
+          <Animated.View
+            style={{
+              transform: [
+                { scale: iconScale },
+                { translateX: iconTranslateX },
+              ],
+            }}
+          >
+            <Ionicons name="trash-outline" size={22} color="white" />
+          </Animated.View>
+        </Animated.View>
+      </View>
+    );
+  };
+
+  return (
+    <View style={{ width: "100%", paddingHorizontal: 30 }}>
+      <Swipeable
+        ref={swipeRef}
+        renderLeftActions={renderLeftActions}
+        renderRightActions={renderRightActions}
+        leftThreshold={70}
+        rightThreshold={70}
+        friction={2}
+        overshootLeft={false}
+        overshootRight={false}
+        onSwipeableOpen={(direction) => {
+          if (direction === "right") confirmDelete();
+          if (direction === "left") handleEdit();
+        }}
+      >
+        <Pressable onPress={onPress} onLongPress={onEdit}>
+          <View style={styles.coursContainer}>
+            <Text
+              style={styles.coursText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {course.name}
+            </Text>
+
+            <Ionicons name="chevron-forward" size={20} />
+          </View>
+        </Pressable>
+      </Swipeable>
     </View>
   );
 }
