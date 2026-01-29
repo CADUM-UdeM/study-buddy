@@ -6,6 +6,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { GradeBoundary } from "./SettingsContext";
 
 export interface Evaluation {
   id: string;
@@ -26,6 +27,7 @@ export interface Course {
   credits: number; // credits field
   session?: string; // optional session field
   evaluations: Evaluation[];
+  customGradeBoundaries?: GradeBoundary[]; // optional course-specific grade boundaries
 }
 
 interface CoursesContextType {
@@ -48,6 +50,7 @@ interface CoursesContextType {
     evaluation: Omit<Evaluation, "id">,
   ) => void;
   deleteEvaluation: (courseId: string, evaluationId: string) => void;
+  updateCourseGradeBoundaries: (courseId: string, boundaries: GradeBoundary[] | undefined) => void;
   calculateCourseGrade: (courseId: string) => number | null;
   calculateOverallGPA: (sessionId?: string | null) => {
     gpa: number;
@@ -339,6 +342,19 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const updateCourseGradeBoundaries = (
+    courseId: string,
+    boundaries: GradeBoundary[] | undefined,
+  ) => {
+    setCourses(
+      courses.map((course) =>
+        course.id === courseId
+          ? { ...course, customGradeBoundaries: boundaries }
+          : course,
+      ),
+    );
+  };
+
   const calculateCourseGrade = (courseId: string): number | null => {
     const course = getCourse(courseId);
     if (!course || course.evaluations.length === 0) return null;
@@ -412,6 +428,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
         addEvaluation,
         updateEvaluation,
         deleteEvaluation,
+        updateCourseGradeBoundaries,
         calculateCourseGrade,
         calculateOverallGPA,
         isLoading,

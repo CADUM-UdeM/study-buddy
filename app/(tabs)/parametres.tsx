@@ -1,10 +1,11 @@
 import React from "react";
 import { ScrollView, Switch, Text, View } from "react-native";
 import { useSettings } from "../context/SettingsContext";
+import { GradeBoundariesEditor } from "../../components/GradeBoundariesEditor";
 import "../global.css";
 
 const Parametres = () => {
-  const { settings, updateSettings } = useSettings();
+  const { settings, updateSettings, updateGradeBoundaries, resetGradeBoundariesToDefault } = useSettings();
 
   const handleToggleSetting = (key: keyof typeof settings, value: boolean) => {
     updateSettings({ [key]: value });
@@ -82,6 +83,14 @@ const Parametres = () => {
           </View>
         ))}
       </View>
+
+      {/* --- Grade Boundaries Section --- */}
+      <GradeBoundariesEditor
+        boundaries={settings.gradeBoundaries}
+        onUpdate={updateGradeBoundaries}
+        onReset={resetGradeBoundariesToDefault}
+        title="Seuils de notation par défaut"
+      />
 
       {/* --- Theme Section --- */}
       <View className="mb-8">

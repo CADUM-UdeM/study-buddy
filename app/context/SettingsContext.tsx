@@ -28,8 +28,10 @@ export interface Settings {
 interface SettingsContextType {
   settings: Settings;
   updateSettings: (newSettings: Partial<Settings>) => void;
-  getLetterGrade: (percentage: number) => string;
-  getGPAFromPercentage: (percentage: number) => number;
+  updateGradeBoundaries: (boundaries: GradeBoundary[]) => void;
+  resetGradeBoundariesToDefault: () => void;
+  getLetterGrade: (percentage: number, customBoundaries?: GradeBoundary[]) => string;
+  getGPAFromPercentage: (percentage: number, customBoundaries?: GradeBoundary[]) => number;
   isLoading: boolean;
 }
 
@@ -156,46 +158,64 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const getLetterGrade = (percentage: number): string => {
+  const updateGradeBoundaries = (boundaries: GradeBoundary[]) => {
+    setSettings((prev) => ({
+      ...prev,
+      gradeBoundaries: boundaries,
+    }));
+  };
+
+  const resetGradeBoundariesToDefault = () => {
+    setSettings((prev) => ({
+      ...prev,
+      gradeBoundaries: getDefaultBoundariesForFormat(prev.gpaFormat),
+    }));
+  };
+
+  const getLetterGrade = (percentage: number, customBoundaries?: GradeBoundary[]): string => {
+    const boundaries = customBoundaries || settings.gradeBoundaries;
+    
     // Find exact match first
-    const exactMatch = settings.gradeBoundaries.find(
+    const exactMatch = boundaries.find(
       (b) => percentage >= b.min && percentage <= b.max
     );
     if (exactMatch) return exactMatch.letter;
     
     // If no exact match (due to gaps between boundaries), find the nearest boundary
     // Prefer boundaries where percentage is >= min (i.e., the lower boundary of a gap)
-    const lowerBoundary = settings.gradeBoundaries
+    const lowerBoundary = boundaries
       .filter((b) => percentage >= b.min)
       .sort((a, b) => b.min - a.min)[0];
     
     if (lowerBoundary) return lowerBoundary.letter;
     
     // If percentage is below all boundaries, return the lowest boundary's letter
-    const lowestBoundary = settings.gradeBoundaries.reduce((lowest, current) =>
+    const lowestBoundary = boundaries.reduce((lowest, current) =>
       current.min < lowest.min ? current : lowest
     );
     
     return lowestBoundary ? lowestBoundary.letter : "F";
   };
 
-  const getGPAFromPercentage = (percentage: number): number => {
+  const getGPAFromPercentage = (percentage: number, customBoundaries?: GradeBoundary[]): number => {
+    const boundaries = customBoundaries || settings.gradeBoundaries;
+    
     // Find exact match first
-    const exactMatch = settings.gradeBoundaries.find(
+    const exactMatch = boundaries.find(
       (b) => percentage >= b.min && percentage <= b.max
     );
     if (exactMatch) return exactMatch.gpa;
     
     // If no exact match (due to gaps between boundaries), find the nearest boundary
     // Prefer boundaries where percentage is >= min (i.e., the lower boundary of a gap)
-    const lowerBoundary = settings.gradeBoundaries
+    const lowerBoundary = boundaries
       .filter((b) => percentage >= b.min)
       .sort((a, b) => b.min - a.min)[0];
     
     if (lowerBoundary) return lowerBoundary.gpa;
     
     // If percentage is below all boundaries, return the lowest boundary's GPA
-    const lowestBoundary = settings.gradeBoundaries.reduce((lowest, current) =>
+    const lowestBoundary = boundaries.reduce((lowest, current) =>
       current.min < lowest.min ? current : lowest
     );
     
@@ -207,6 +227,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       value={{
         settings,
         updateSettings,
+        updateGradeBoundaries,
+        resetGradeBoundariesToDefault,
         getLetterGrade,
         getGPAFromPercentage,
         isLoading,

@@ -1,5 +1,6 @@
 import { Evaluation, useCourses } from "@/app/context/CoursesContext";
-import { useSettings } from "@/app/context/SettingsContext";
+import { GradeBoundary, useSettings } from "@/app/context/SettingsContext";
+import { GradeBoundariesEditor } from "./GradeBoundariesEditor";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -26,14 +27,17 @@ export default function DetailsCours() {
   const params = useLocalSearchParams();
   const courseId = params.courseId as string;
 
-  const { getCourse, addEvaluation, updateEvaluation, deleteEvaluation } =
+  const { getCourse, addEvaluation, updateEvaluation, deleteEvaluation, updateCourseGradeBoundaries } =
     useCourses();
-  const { getLetterGrade } = useSettings();
+  const { getLetterGrade, getGPAFromPercentage, settings } = useSettings();
   const course = getCourse(courseId);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingEvalId, setEditingEvalId] = useState<string | null>(null);
+  const [useCustomBoundaries, setUseCustomBoundaries] = useState(
+    !!course?.customGradeBoundaries
+  );
 
   // Form state
   const [evalName, setEvalName] = useState("");
@@ -356,6 +360,23 @@ export default function DetailsCours() {
     setEvalDate(null);
   };
 
+  const handleToggleCustomBoundaries = () => {
+    const newValue = !useCustomBoundaries;
+    setUseCustomBoundaries(newValue);
+    
+    if (!newValue) {
+      // Removing custom boundaries - revert to general settings
+      updateCourseGradeBoundaries(courseId, undefined);
+    } else {
+      // Enable custom boundaries - initialize with current general settings
+      updateCourseGradeBoundaries(courseId, settings.gradeBoundaries);
+    }
+  };
+
+  const handleUpdateCustomBoundaries = (boundaries: GradeBoundary[]) => {
+    updateCourseGradeBoundaries(courseId, boundaries);
+  };
+
   const completed = course.evaluations.filter(
     (e) => !e.isScheduled && e.note !== null,
   );
@@ -492,7 +513,12 @@ export default function DetailsCours() {
           {completed.length > 0 && (
             <View style={styles.letterGradeContainer}>
               <Text style={styles.letterGradeLabel}>Note de lettre:</Text>
-              <Text style={styles.letterGrade}>{getLetterGrade(currentGrade)}</Text>
+              <Text style={styles.letterGrade}>
+                {getLetterGrade(currentGrade, course.customGradeBoundaries)}
+              </Text>
+              <Text style={styles.gpaLabel}>
+                GPA: {getGPAFromPercentage(currentGrade, course.customGradeBoundaries).toFixed(2)}
+              </Text>
             </View>
           )}
 
@@ -523,6 +549,42 @@ export default function DetailsCours() {
           <Text style={{ color: "#555", textAlign: "center" }}>
             {getEncouragementMessage()}
           </Text>
+        </View>
+
+        {/* Custom Grade Boundaries Section */}
+        <View style={styles.customBoundariesSection}>
+          <View style={styles.customBoundariesHeader}>
+            <Text style={styles.customBoundariesTitle}>
+              Seuils de notation personnalisés
+            </Text>
+            <TouchableOpacity
+              onPress={handleToggleCustomBoundaries}
+              style={styles.toggleButton}
+            >
+              <View
+                style={[
+                  styles.toggleCircle,
+                  useCustomBoundaries && styles.toggleCircleActive,
+                ]}
+              />
+            </TouchableOpacity>
+          </View>
+          
+          {useCustomBoundaries && course.customGradeBoundaries && (
+            <View style={{ marginTop: 10 }}>
+              <GradeBoundariesEditor
+                boundaries={course.customGradeBoundaries}
+                onUpdate={handleUpdateCustomBoundaries}
+                title=""
+              />
+            </View>
+          )}
+          
+          {!useCustomBoundaries && (
+            <Text style={styles.customBoundariesHint}>
+              Utilisez les seuils de notation généraux définis dans les paramètres
+            </Text>
+          )}
         </View>
 
         {/* Completed Works Section */}
@@ -1164,6 +1226,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#7f3dff",
   },
+  gpaLabel: {
+    fontSize: 14,
+    color: "#666",
+    marginTop: 4,
+  },
   objectif: {
     marginTop: 10,
     fontSize: 18,
@@ -1475,5 +1542,51 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 16,
     fontWeight: "600",
+  },
+  customBoundariesSection: {
+    backgroundColor: "#f9f9f9",
+    borderRadius: 12,
+    padding: 15,
+    marginVertical: 15,
+  },
+  customBoundariesHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  customBoundariesTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#333",
+    flex: 1,
+  },
+  toggleButton: {
+    width: 50,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#ddd",
+    justifyContent: "center",
+    padding: 3,
+  },
+  toggleCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "white",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  toggleCircleActive: {
+    backgroundColor: "#5900a1ff",
+    alignSelf: "flex-end",
+  },
+  customBoundariesHint: {
+    fontSize: 13,
+    color: "#666",
+    fontStyle: "italic",
   },
 });

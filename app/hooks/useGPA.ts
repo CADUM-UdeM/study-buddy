@@ -11,8 +11,11 @@ export function useGPA() {
     const grade = calculateCourseGrade(courseId);
     if (grade === null) return null;
 
-    const gpa = getGPAFromPercentage(grade);
-    const letterGrade = getLetterGrade(grade);
+    const course = courses.find(c => c.id === courseId);
+    const customBoundaries = course?.customGradeBoundaries;
+
+    const gpa = getGPAFromPercentage(grade, customBoundaries);
+    const letterGrade = getLetterGrade(grade, customBoundaries);
 
     return {
       percentage: grade,
@@ -45,7 +48,8 @@ export function useGPA() {
 
     // Calculate weighted GPA
     const weightedGPASum = coursesWithGrades.reduce((sum, item) => {
-      const gpa = getGPAFromPercentage(item.grade!);
+      const customBoundaries = item.course.customGradeBoundaries;
+      const gpa = getGPAFromPercentage(item.grade!, customBoundaries);
       return sum + (gpa * item.course.credits);
     }, 0);
 
