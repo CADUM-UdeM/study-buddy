@@ -1,12 +1,17 @@
 import { Tabs } from "expo-router";
 import React from "react";
+import { Tabs } from "expo-router";
+import React from "react";
 
+import IonIcons from "@expo/vector-icons/Ionicons";
 import IonIcons from "@expo/vector-icons/Ionicons";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        tabBarActiveTintColor: "#AB8BFF",
+        tabBarInactiveTintColor: "#ffffff",
         tabBarActiveTintColor: "#AB8BFF",
         tabBarInactiveTintColor: "#ffffff",
         headerShown: false,

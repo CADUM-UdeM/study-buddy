@@ -1,6 +1,12 @@
 # Default ignored files
 /shelf/
 /workspace.xml
+/deviceManager.xml
+/misc.xml
+/markdown.xml
+/caches/deviceStreaming.xml# Default ignored files
+/shelf/
+/workspace.xml
 # Editor-based HTTP Client requests
 /httpRequests/
 # Datasource local storage ignored files
