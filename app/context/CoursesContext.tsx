@@ -1,10 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
+    createContext,
+    ReactNode,
+    useContext,
+    useEffect,
+    useState,
 } from "react";
 import { GradeBoundary } from "./SettingsContext";
 
@@ -32,13 +32,18 @@ export interface Course {
 
 interface CoursesContextType {
   courses: Course[];
-  addCourse: (name: string, objective: number, credits: number, sessionId?: string) => void;
+  addCourse: (
+    name: string,
+    objective: number,
+    credits: number,
+    sessionId?: string,
+  ) => string;
   updateCourse: (
     id: string,
     name: string,
     objective: number,
     credits: number,
-    sessionId?: string
+    sessionId?: string,
   ) => void;
   deleteCourse: (id: string) => void;
   getCourse: (id: string) => Course | undefined;
@@ -50,7 +55,10 @@ interface CoursesContextType {
     evaluation: Omit<Evaluation, "id">,
   ) => void;
   deleteEvaluation: (courseId: string, evaluationId: string) => void;
-  updateCourseGradeBoundaries: (courseId: string, boundaries: GradeBoundary[] | undefined) => void;
+  updateCourseGradeBoundaries: (
+    courseId: string,
+    boundaries: GradeBoundary[] | undefined,
+  ) => void;
   calculateCourseGrade: (courseId: string) => number | null;
   calculateOverallGPA: (sessionId?: string | null) => {
     gpa: number;
@@ -220,7 +228,12 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addCourse = (name: string, objective: number, credits: number, sessionId?: string) => {
+  const addCourse = (
+    name: string,
+    objective: number,
+    credits: number,
+    sessionId?: string,
+  ): string => {
     const newCourse: Course = {
       id: Date.now().toString(),
       name,
@@ -230,6 +243,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
       evaluations: [],
     };
     setCourses([...courses, newCourse]);
+    return newCourse.id;
   };
 
   const updateCourse = (
@@ -237,7 +251,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     name: string,
     objective: number,
     credits: number,
-    sessionId?: string
+    sessionId?: string,
   ) => {
     setCourses(
       courses.map((course) =>
@@ -377,15 +391,15 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     return totalWeight > 0 ? weightedSum / totalWeight : null;
   };
 
-
-  const calculateOverallGPA = (sessionId?: string | null): {
+  const calculateOverallGPA = (
+    sessionId?: string | null,
+  ): {
     gpa: number;
     totalCredits: number;
     averageGrade: number;
   } | null => {
-    const coursesToCalculate = sessionId !== undefined
-      ? getCoursesBySession(sessionId)
-      : courses;
+    const coursesToCalculate =
+      sessionId !== undefined ? getCoursesBySession(sessionId) : courses;
 
     const coursesWithGrades = coursesToCalculate
       .map((course) => ({
@@ -398,7 +412,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
 
     const totalCredits = coursesWithGrades.reduce(
       (sum, item) => sum + item.course.credits,
-      0
+      0,
     );
     const weightedGPASum = coursesWithGrades.reduce((sum, item) => {
       // We'll need to get GPA from percentage using settings context

@@ -1,16 +1,3 @@
-import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import DetailsCours from "@/components/detailscours";
 
-export default function Details() {
-  return (
-    <View style={{ flex: 1 }}>
-      <Text>Cours 1</Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  title: {
-    fontSize: 24,
-  },
-});
+export default DetailsCours;

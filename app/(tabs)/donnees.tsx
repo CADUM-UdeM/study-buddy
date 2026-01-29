@@ -2,18 +2,18 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
-  Alert,
-  Animated,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Animated,
+    KeyboardAvoidingView,
+    Modal,
+    Platform,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { Course, useCourses } from "../context/CoursesContext";
@@ -42,7 +42,7 @@ export default function Donnees() {
   const [courseObjective, setCourseObjective] = useState("");
   const [courseCredits, setCourseCredits] = useState("");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
-    null
+    null,
   );
   const [menuVisible, setMenuVisible] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
@@ -51,12 +51,10 @@ export default function Donnees() {
   const [sessionModalVisible, setSessionModalVisible] = useState(false);
   const [newSessionName, setNewSessionName] = useState("");
   const [sessionMenuVisible, setSessionMenuVisible] = useState<string | null>(
-    null
+    null,
   );
   const [sessionEditModalVisible, setSessionEditModalVisible] = useState(false);
-  const [editingSessionId, setEditingSessionId] = useState<string | null>(
-    null
-  );
+  const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
   const [editingSessionName, setEditingSessionName] = useState("");
 
   // Get courses for the active session
@@ -108,17 +106,21 @@ export default function Donnees() {
     const credits = validateCredits(courseCredits);
     if (credits === null) return;
 
-    addCourse(
+    const newCourseId = addCourse(
       courseName.trim(),
       objective,
       credits,
-      selectedSessionId || activeSession?.id
+      selectedSessionId || activeSession?.id,
     );
     setCourseName("");
     setCourseObjective("");
     setCourseCredits("");
     setSelectedSessionId(null);
     setModalVisible(false);
+    router.push({
+      pathname: "/(tabs)/detailscours",
+      params: { courseId: newCourseId },
+    });
   };
 
   const handleDeleteCourse = (id: string) => {
@@ -162,7 +164,7 @@ export default function Donnees() {
       courseName.trim(),
       objective,
       credits,
-      selectedSessionId || undefined
+      selectedSessionId || undefined,
     );
     setCourseName("");
     setCourseObjective("");
@@ -174,7 +176,7 @@ export default function Donnees() {
 
   const navigateToCourseDetails = (courseId: string) => {
     router.push({
-      pathname: "../detailscours",
+      pathname: "/(tabs)/detailscours",
       params: { courseId },
     });
   };
@@ -209,10 +211,7 @@ export default function Donnees() {
 
   const handleDeleteSession = (sessionId: string) => {
     if (sessions.length === 1) {
-      Alert.alert(
-        "Erreur",
-        "Vous ne pouvez pas supprimer la dernière session"
-      );
+      Alert.alert("Erreur", "Vous ne pouvez pas supprimer la dernière session");
       return;
     }
     Alert.alert(
@@ -225,7 +224,7 @@ export default function Donnees() {
           style: "destructive",
           onPress: () => deleteSession(sessionId),
         },
-      ]
+      ],
     );
     setSessionMenuVisible(null);
   };
@@ -397,7 +396,7 @@ export default function Donnees() {
                           setSelectedSessionId(
                             isSelected && selectedSessionId === session.id
                               ? null
-                              : session.id
+                              : session.id,
                           )
                         }
                       >
@@ -532,7 +531,7 @@ export default function Donnees() {
                           setSelectedSessionId(
                             isSelected && selectedSessionId === session.id
                               ? null
-                              : session.id
+                              : session.id,
                           )
                         }
                       >
@@ -596,7 +595,9 @@ export default function Donnees() {
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
-                const session = sessions.find((s) => s.id === sessionMenuVisible);
+                const session = sessions.find(
+                  (s) => s.id === sessionMenuVisible,
+                );
                 if (session) handleEditSession(session.id, session.name);
               }}
             >
@@ -818,10 +819,7 @@ function CourseCard({
         >
           <Animated.View
             style={{
-              transform: [
-                { scale: iconScale },
-                { translateX: iconTranslateX },
-              ],
+              transform: [{ scale: iconScale }, { translateX: iconTranslateX }],
             }}
           >
             <Ionicons name="pencil-outline" size={22} color="white" />
@@ -875,10 +873,7 @@ function CourseCard({
         >
           <Animated.View
             style={{
-              transform: [
-                { scale: iconScale },
-                { translateX: iconTranslateX },
-              ],
+              transform: [{ scale: iconScale }, { translateX: iconTranslateX }],
             }}
           >
             <Ionicons name="trash-outline" size={22} color="white" />
