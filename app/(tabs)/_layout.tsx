@@ -33,6 +33,15 @@ export default function TabLayout() {
         })}
       />
       <Tabs.Screen
+        name="index"
+        options={({ route }) => ({
+          tabBarIcon: ({ color, focused }) => (
+            <IonIcons size={28} name="home" color={color} />
+          ),
+        })}
+      />
+
+      <Tabs.Screen
         name="pomodoro"
         options={({ route }) => ({
           tabBarIcon: ({ color, focused }) => (
@@ -48,7 +57,6 @@ export default function TabLayout() {
           ),
         })}
       />
-      <Tabs.Screen name="index" options={{ href: null }} />
       <Tabs.Screen name="detailscours" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
       <Tabs.Screen name="profil_info" options={{ href: null }} />

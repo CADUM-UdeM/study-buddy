@@ -1,10 +1,11 @@
+import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { useGPA } from "../../app/hooks/useGPA";
-import { useSessions } from "../context/SessionsContext";
 import Graphics from "../../components/accueil/Graphics";
+import ContributionTracker from "../../components/ContributionTracker";
+import { useSessions } from "../context/SessionsContext";
 import "../global.css";
 
 export default function Accueil() {
@@ -12,7 +13,7 @@ export default function Accueil() {
   const { calculateOverallStats } = useGPA();
   const { activeSession } = useSessions();
   const [showGlobalGPA, setShowGlobalGPA] = useState(false);
-  
+
   // Calculate stats based on toggle
   const overallStats = calculateOverallStats(showGlobalGPA);
 
@@ -45,12 +46,18 @@ export default function Accueil() {
         <Text className="text-neutral-600">Moyenne actuelle :</Text>
         <Text className="text-2xl font-semibold text-violet-600">72%</Text>
       </View>
+      <ContributionTracker />
 
       {/* --- GPA Section --- */}
       <View className="rounded-2xl bg-green-100 p-4 mb-3">
         <View className="flex-row items-center justify-between mb-2">
           <Text className="text-neutral-600">
-            {showGlobalGPA ? "GPA Global" : activeSession ? `GPA ${activeSession.name}` : "GPA Global"} :
+            {showGlobalGPA
+              ? "GPA Global"
+              : activeSession
+                ? `GPA ${activeSession.name}`
+                : "GPA Global"}{" "}
+            :
           </Text>
           <Pressable
             onPress={() => setShowGlobalGPA(!showGlobalGPA)}
