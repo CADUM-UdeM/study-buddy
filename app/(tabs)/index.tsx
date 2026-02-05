@@ -3,7 +3,6 @@ import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useGPA } from "../../app/hooks/useGPA";
-import Graphics from "../../components/accueil/Graphics";
 import ContributionTracker from "../../components/ContributionTracker";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
@@ -23,29 +22,6 @@ export default function Accueil() {
         Bienvenue !
       </Text>
 
-      {/* --- Zone Graphique --- */}
-      <Graphics
-        title="Temps d’étude"
-        values={[25, 54, 73, 38, 95, 40, 66]}
-        labels={["L", "M", "M", "J", "V", "S", "D"]}
-        height={130}
-      />
-
-      {/* --- Stats rapides (placeholder) --- */}
-      <View className="rounded-2xl bg-violet-100 p-4 mb-3">
-        <Text className="text-neutral-600">Série actuelle :</Text>
-        <Text className="text-2xl font-semibold text-violet-600">3 jours</Text>
-      </View>
-
-      <View className="rounded-2xl bg-violet-100 p-4 mb-3">
-        <Text className="text-neutral-600">Temps d’étude cette semaine :</Text>
-        <Text className="text-2xl font-semibold text-violet-600">240 min</Text>
-      </View>
-
-      <View className="rounded-2xl bg-violet-100 p-4 mb-3">
-        <Text className="text-neutral-600">Moyenne actuelle :</Text>
-        <Text className="text-2xl font-semibold text-violet-600">72%</Text>
-      </View>
       <ContributionTracker />
 
       {/* --- GPA Section --- */}
