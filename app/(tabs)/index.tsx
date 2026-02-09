@@ -87,7 +87,7 @@ export default function Accueil() {
         </Pressable>
       </Link>
 
-      <View className="h-10" />
+      <View className="h-24" />
     </ScrollView>
   );
 }

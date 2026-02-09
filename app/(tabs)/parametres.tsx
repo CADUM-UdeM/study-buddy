@@ -114,7 +114,7 @@ const Parametres = () => {
         </Text>
       </View>
 
-      <View className="h-10" />
+      <View className="h-24" />
     </ScrollView>
   );
 };
