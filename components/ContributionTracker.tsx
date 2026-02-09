@@ -1,5 +1,6 @@
 import React from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { colors } from "../app/theme/colors";
 
 export default function ContributionTracker() {
   // Détermine la session actuelle et ses dates
@@ -96,13 +97,13 @@ export default function ContributionTracker() {
     return weeks;
   };
 
-  // Obtient la couleur selon le nombre de contributions
+  // Obtient la couleur selon le nombre de contributions (palette theme)
   const getColor = (count: number) => {
-    if (count === 0) return "#2D2A45";
-    if (count <= 3) return "#6B5B95";
-    if (count <= 6) return "#9B7EDE";
-    if (count <= 10) return "#AB8BFF";
-    return "#CCBBFF";
+    if (count === 0) return colors.darkAmethyst2;
+    if (count <= 3) return colors.indigoInk;
+    if (count <= 6) return colors.indigoVelvet;
+    if (count <= 10) return colors.lavenderPurple;
+    return colors.mauve;
   };
 
   const formatDate = (date: Date) => {
@@ -240,7 +241,7 @@ export default function ContributionTracker() {
             style={[
               styles.legendSquare,
               {
-                backgroundColor: "#2D2A45",
+                backgroundColor: colors.darkAmethyst2,
                 width: squareSize,
                 height: squareSize,
               },
@@ -250,7 +251,7 @@ export default function ContributionTracker() {
             style={[
               styles.legendSquare,
               {
-                backgroundColor: "#6B5B95",
+                backgroundColor: colors.indigoInk,
                 width: squareSize,
                 height: squareSize,
               },
@@ -260,7 +261,7 @@ export default function ContributionTracker() {
             style={[
               styles.legendSquare,
               {
-                backgroundColor: "#9B7EDE",
+                backgroundColor: colors.indigoVelvet,
                 width: squareSize,
                 height: squareSize,
               },
@@ -270,7 +271,7 @@ export default function ContributionTracker() {
             style={[
               styles.legendSquare,
               {
-                backgroundColor: "#AB8BFF",
+                backgroundColor: colors.lavenderPurple,
                 width: squareSize,
                 height: squareSize,
               },
@@ -280,7 +281,7 @@ export default function ContributionTracker() {
             style={[
               styles.legendSquare,
               {
-                backgroundColor: "#CCBBFF",
+                backgroundColor: colors.mauve,
                 width: squareSize,
                 height: squareSize,
               },
@@ -295,13 +296,13 @@ export default function ContributionTracker() {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#1A1729",
+    backgroundColor: colors.surface,
     borderRadius: 12,
     padding: 16,
     marginVertical: 10,
   },
   title: {
-    color: "#ffffff",
+    color: colors.white,
     fontSize: 15,
     fontWeight: "600",
     marginBottom: 16,
@@ -314,7 +315,7 @@ const styles = StyleSheet.create({
   },
   monthLabel: {
     position: "absolute",
-    color: "#9CA3AF",
+    color: colors.textOnDarkMuted,
     fontSize: 10,
   },
   graphContainer: {
@@ -326,7 +327,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   dayLabel: {
-    color: "#9CA3AF",
+    color: colors.textOnDarkMuted,
     fontSize: 9,
   },
   grid: {
@@ -346,7 +347,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   legendText: {
-    color: "#9CA3AF",
+    color: colors.textOnDarkMuted,
     fontSize: 10,
   },
   legendSquare: {

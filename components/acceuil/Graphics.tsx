@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, Pressable, LayoutChangeEvent } from "react-native";
+import { LayoutChangeEvent, Pressable, Text, View } from "react-native";
+import { colors } from "../../app/theme/colors";
 
 type Props = {
     title?: string;
@@ -66,7 +67,7 @@ export default function Graphics({
     }
 
     return (
-        <View className="w-full rounded-2xl border bg-dark-secondary p-4 mb-4">
+        <View className="w-full rounded-2xl border border-indigo-velvet bg-theme-surface-elevated p-4 mb-4">
             <Text className="text-base text-white font-semibold mb-3">{title}</Text>
 
             {/* Conteneur du graphe */}
@@ -96,7 +97,7 @@ export default function Graphics({
                                 <Pressable
                                     onPressIn={() => setActiveIndex(i)}
                                     onPressOut={() => setActiveIndex(null)}
-                                    className="rounded-t-md bg-violet-500"
+                                    className="rounded-t-md bg-royal-violet"
                                     style={{ width: barW, height: barH, zIndex: 1 }}
                                 />
                                 {/* Label pressable */}
@@ -132,7 +133,7 @@ export default function Graphics({
                                 paddingHorizontal: 8,
                                 paddingVertical: 3,
                                 borderRadius: 10,
-                                backgroundColor: "#111827",
+                                backgroundColor: colors.indigoInk,
                             }}
                         >
                             <Text className="text-[11px] text-white" numberOfLines={1}>

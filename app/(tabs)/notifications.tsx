@@ -2,6 +2,8 @@ import IonIcons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, Switch, Text, TouchableOpacity, useColorScheme, View } from "react-native";
+import AppBackground from "../../components/AppBackground";
+import { colors } from "../theme/colors";
 
 
 export default function Notifications() {
@@ -16,15 +18,15 @@ const colorScheme = useColorScheme();
 const isDarkMode = colorScheme == 'dark';
 
 return (
-        <View style ={styles.bodyStyle}> 
-        <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
+        <AppBackground style={styles.bodyStyle}> 
+        <Text style={{color: isDarkMode ? colors.white : colors.black}}> StudyBudy </Text>
             <Text></Text>
 
         <View style={{flexDirection:'row', padding: 10, marginRight:0, gap: 90}}>
         <TouchableOpacity style={[]} onPress={() => router.push("/profil")}>
-                    <IonIcons name="arrow-back-sharp" size={30} color={isDarkMode ? 'white' : 'black'}/>
+                    <IonIcons name="arrow-back-sharp" size={30} color={isDarkMode ? colors.white : colors.black}/>
                 </TouchableOpacity>
-            <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight:'bold'}}> Notification </Text>
+            <Text style={{color: isDarkMode ? colors.white : colors.black, fontSize: 20, fontWeight:'bold'}}> Notification </Text>
             <Text></Text>
         </View>
 
@@ -32,37 +34,37 @@ return (
 
         {/* 1ere section pour mise a jour*/}
         <View style={[styles.buttonNotif]}>
-        <View style={[styles.buttonNotifBackground, styles.shadow, {backgroundColor: isDarkMode ? '#565681' : 'white'}]}>
-        <Text style={[styles.textNotif, {color: isDarkMode ? 'white' : 'dark'}]}>Annonce nouvelle mise à jour</Text>
-        <Switch thumbColor={toggle_one ? '#006CFA' : 'grey'}  trackColor={{ false: '#D9D9D9', true: '#4294FF' }} value={toggle_one} onChange={()=>set_toggle_one(!toggle_one)}
+        <View style={[styles.buttonNotifBackground, styles.shadow, {backgroundColor: isDarkMode ? colors.modalSurface : colors.white}]}>
+        <Text style={[styles.textNotif, {color: isDarkMode ? colors.white : colors.textDark}]}>Annonce nouvelle mise à jour</Text>
+        <Switch thumbColor={toggle_one ? colors.primary : colors.surfaceElevated}  trackColor={{ false: colors.mauve + '40', true: colors.accent }} value={toggle_one} onChange={()=>set_toggle_one(!toggle_one)}
         />
         </View>
         </View>
 
         {/* 2eme section pour alerte durant session pomodoro*/}
         <View style={styles.buttonNotif}>
-        <View style={[styles.shadow, {gap:'10', width: '160%', backgroundColor: isDarkMode ? '#565681' : 'white', borderRadius:10 }]}>
-        <Text style={{marginLeft:10, color: isDarkMode ? 'white' : 'black', textDecorationLine: 'underline' }}>Alerte pendant la session pomodoro</Text>
+        <View style={[styles.shadow, {gap:'10', width: '160%', backgroundColor: isDarkMode ? colors.modalSurface : colors.white, borderRadius:10 }]}>
+        <Text style={{marginLeft:10, color: isDarkMode ? colors.white : colors.black, textDecorationLine: 'underline' }}>Alerte pendant la session pomodoro</Text>
         
         <View style={{flexDirection:'row', alignItems:'center',}}>
-        <Text style={[styles.textNotif, {color: isDarkMode ? 'white' : 'dark'}]}>10 minutes avant chaque pause</Text>
-        <Switch thumbColor={toggle_two ? '#006CFA' : 'grey'} trackColor={{ false: '#D9D9D9', true: '#4294FF' }} value={toggle_two} onChange={()=>set_toggle_two(!toggle_two)}/>
+        <Text style={[styles.textNotif, {color: isDarkMode ? colors.white : colors.textDark}]}>10 minutes avant chaque pause</Text>
+        <Switch thumbColor={toggle_two ? colors.primary : colors.surfaceElevated} trackColor={{ false: colors.mauve + '40', true: colors.accent }} value={toggle_two} onChange={()=>set_toggle_two(!toggle_two)}/>
         </View>
         <View style={{flexDirection:'row', alignItems:'center',}}>
-        <Text style={[styles.textNotif, {color: isDarkMode ? 'white' : 'dark'}]}>5 minutes avant chaque pause</Text>
-        <Switch thumbColor={toggle_three ? '#006CFA' : 'grey'}  trackColor={{ false: '#D9D9D9', true: '#4294FF' }} value={toggle_three} onChange={()=>set_toggle_three(!toggle_three)}/>
+        <Text style={[styles.textNotif, {color: isDarkMode ? colors.white : colors.textDark}]}>5 minutes avant chaque pause</Text>
+        <Switch thumbColor={toggle_three ? colors.primary : colors.surfaceElevated}  trackColor={{ false: colors.mauve + '40', true: colors.accent }} value={toggle_three} onChange={()=>set_toggle_three(!toggle_three)}/>
         </View>
         </View>
         </View>
 
         {/* 3eme section pour annonce quand nouveau badge debloque */}
         <View style={styles.buttonNotif}>
-        <View style={[styles.buttonNotifBackground, styles.shadow, {backgroundColor: isDarkMode ? '#565681' : 'white',}]}>
-        <Text style={[styles.textNotif, {color: isDarkMode ? 'white' : 'dark'}]}>Nouveau icon débloqué</Text>
-        <Switch thumbColor={toggle_four ? '#006CFA' : 'grey'} trackColor={{ false: '#D9D9D9', true: '#4294FF' }} value={toggle_four} onChange={()=>set_toggle_four(!toggle_four)}/>
+        <View style={[styles.buttonNotifBackground, styles.shadow, {backgroundColor: isDarkMode ? colors.modalSurface : colors.white,}]}>
+        <Text style={[styles.textNotif, {color: isDarkMode ? colors.white : colors.textDark}]}>Nouveau icon débloqué</Text>
+        <Switch thumbColor={toggle_four ? colors.primary : colors.surfaceElevated} trackColor={{ false: colors.mauve + '40', true: colors.accent }} value={toggle_four} onChange={()=>set_toggle_four(!toggle_four)}/>
         </View>
         </View>
-</View>
+</AppBackground>
 )
 }
 
@@ -94,7 +96,7 @@ const styles = StyleSheet.create({
     
     },
     shadow :{
-        shadowColor: 'black',
+        shadowColor: colors.black,
         shadowOpacity:0.1,
         shadowOffset: {
                 width: 0,

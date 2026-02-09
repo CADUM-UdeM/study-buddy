@@ -1,61 +1,103 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
+import { View } from "react-native";
+import { colors } from "../theme/colors";
+
+const TAB_ICON_SIZE = 26;
+
+function TabIcon({
+  name,
+  size = TAB_ICON_SIZE,
+  color,
+  focused,
+}: {
+  name: keyof typeof IonIcons.glyphMap;
+  size?: number;
+  color: string;
+  focused: boolean;
+}) {
+  return (
+    <View
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+        paddingVertical: 8,
+        paddingHorizontal: 16,
+        borderRadius: 24,
+        backgroundColor: focused ? colors.primary + "40" : "transparent",
+      }}
+    >
+      <IonIcons name={name} size={size} color={color} />
+      {focused && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            width: 24,
+            height: 3,
+            borderRadius: 2,
+            backgroundColor: colors.tabBarActive,
+          }}
+        />
+      )}
+    </View>
+  );
+}
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#AB8BFF",
-        tabBarInactiveTintColor: "#ffffff",
+        tabBarActiveTintColor: colors.tabBarActive,
+        tabBarInactiveTintColor: colors.tabBarInactive,
         headerShown: false,
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: "#221F3D",
-          shadowColor: "#000",
+          backgroundColor: colors.darkAmethyst2,
+          shadowColor: colors.black,
         },
         animation: "fade",
       }}
     >
       <Tabs.Screen
         name="parametres"
-        options={({ route }) => ({
+        options={{
           tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="settings" size={28} color={color} />
+            <TabIcon name="settings" size={28} color={color} focused={focused} />
           ),
-        })}
+        }}
       />
       <Tabs.Screen
         name="donnees"
-        options={({ route }) => ({
+        options={{
           tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="stats-chart" size={25} color={color} />
+            <TabIcon name="stats-chart" size={25} color={color} focused={focused} />
           ),
-        })}
+        }}
       />
       <Tabs.Screen
         name="index"
-        options={({ route }) => ({
+        options={{
           tabBarIcon: ({ color, focused }) => (
-            <IonIcons size={28} name="home" color={color} />
+            <TabIcon name="home" size={28} color={color} focused={focused} />
           ),
-        })}
+        }}
       />
-
       <Tabs.Screen
         name="pomodoro"
-        options={({ route }) => ({
+        options={{
           tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="alarm" size={28} color={color} />
+            <TabIcon name="alarm" size={28} color={color} focused={focused} />
           ),
-        })}
+        }}
       />
       <Tabs.Screen
         name="profil"
-        options={({ route }) => ({
+        options={{
           tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="person" size={28} color={color} />
+            <TabIcon name="person" size={28} color={color} focused={focused} />
           ),
-        })}
+        }}
       />
       <Tabs.Screen name="detailscours" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />

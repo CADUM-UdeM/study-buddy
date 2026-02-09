@@ -2,22 +2,24 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
-    Alert,
-    Animated,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
+import AppBackground from "../../components/AppBackground";
 import { Course, useCourses } from "../context/CoursesContext";
 import { useSessions } from "../context/SessionsContext";
+import { colors } from "../theme/colors";
 
 export default function Donnees() {
   const {
@@ -230,7 +232,7 @@ export default function Donnees() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+    <AppBackground>
       {/* Header - anchored to top */}
       <View>
         <Text style={styles.title}>Mes Cours</Text>
@@ -276,7 +278,7 @@ export default function Donnees() {
             style={styles.addSessionChip}
             onPress={() => setSessionModalVisible(true)}
           >
-            <Ionicons name="add" size={20} color="#5900a1ff" />
+            <Ionicons name="add" size={20} color={colors.primary} />
             <Text style={styles.addSessionText}>Nouvelle session</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -293,7 +295,7 @@ export default function Donnees() {
       >
         {displayedCourses.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="school-outline" size={48} color="#ccc" />
+            <Ionicons name="school-outline" size={48} color={colors.textMuted} />
             <Text style={styles.emptyStateText}>
               Aucun cours dans cette session
             </Text>
@@ -601,7 +603,7 @@ export default function Donnees() {
                 if (session) handleEditSession(session.id, session.name);
               }}
             >
-              <Ionicons name="create-outline" size={18} color="#333" />
+              <Ionicons name="create-outline" size={18} color={colors.textDark} />
               <Text style={styles.menuText}>Modifier</Text>
             </TouchableOpacity>
             <View style={styles.menuDivider} />
@@ -613,8 +615,8 @@ export default function Donnees() {
                 }
               }}
             >
-              <Ionicons name="trash-outline" size={18} color="#d32f2f" />
-              <Text style={[styles.menuText, { color: "#d32f2f" }]}>
+              <Ionicons name="trash-outline" size={18} color={colors.error} />
+              <Text style={[styles.menuText, { color: colors.error }]}>
                 Supprimer
               </Text>
             </TouchableOpacity>
@@ -730,7 +732,7 @@ export default function Donnees() {
           </Pressable>
         </Pressable>
       </Modal>
-    </View>
+    </AppBackground>
   );
 }
 
@@ -813,7 +815,7 @@ function CourseCard({
             borderRadius: 12,
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "rgb(64, 64, 64)",
+            backgroundColor: colors.surfaceElevated,
             opacity: reveal,
           }}
         >
@@ -867,7 +869,7 @@ function CourseCard({
             borderRadius: 12,
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "#f30000ff",
+            backgroundColor: colors.error,
             opacity: reveal,
           }}
         >
@@ -924,6 +926,7 @@ const styles = StyleSheet.create({
     marginTop: 70,
     marginBottom: 5,
     alignSelf: "center",
+    color: "white"
   },
   stepContainer: {
     gap: 8,
@@ -932,7 +935,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 3,
     width: "60%",
-    backgroundColor: "black",
+    backgroundColor: colors.background,
     marginTop: 5,
     marginBottom: 20,
     alignSelf: "center",
@@ -948,7 +951,7 @@ const styles = StyleSheet.create({
   },
 
   addCoursButton: {
-    backgroundColor: "#5900a1ff",
+    backgroundColor: colors.primary,
     paddingVertical: 20,
     paddingHorizontal: 10,
     width: "80%",
@@ -959,21 +962,21 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   addCoursText: {
-    color: "white",
+    color: colors.white,
     fontSize: 16,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: colors.modalOverlay,
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderRadius: 20,
     padding: 30,
     width: "85%",
-    shadowColor: "#000",
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -990,7 +993,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.borderMuted,
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
@@ -1008,27 +1011,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.surfaceLightest,
   },
   cancelButtonText: {
-    color: "#333",
+    color: colors.textDark,
     fontSize: 16,
     fontWeight: "600",
   },
   addButton: {
-    backgroundColor: "#5900a1ff",
+    backgroundColor: colors.primary,
   },
   addButtonText: {
-    color: "white",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
   dropdownMenu: {
     position: "absolute",
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderRadius: 10,
     paddingVertical: 5,
-    shadowColor: "#000",
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -1048,11 +1051,11 @@ const styles = StyleSheet.create({
   },
   menuText: {
     fontSize: 15,
-    color: "#333",
+    color: colors.textDark,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: colors.surfaceLighter,
     marginHorizontal: 10,
   },
   menuOverlay: {
@@ -1067,7 +1070,7 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: colors.surfaceLighter,
   },
   sessionScrollContent: {
     alignItems: "center",
@@ -1081,21 +1084,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.surfaceLightest,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.borderMuted,
   },
   sessionChipActive: {
-    backgroundColor: "#5900a1ff",
-    borderColor: "#5900a1ff",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   sessionChipText: {
     fontSize: 14,
-    color: "#333",
+    color: colors.textDark,
     fontWeight: "500",
   },
   sessionChipTextActive: {
-    color: "white",
+    color: colors.white,
   },
   addSessionChip: {
     flexDirection: "row",
@@ -1104,14 +1107,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: "#5900a1ff",
+    borderColor: colors.primary,
     borderStyle: "dashed",
   },
   addSessionText: {
     fontSize: 14,
-    color: "#5900a1ff",
+    color: colors.primary,
     fontWeight: "500",
   },
   sessionPicker: {
@@ -1127,26 +1130,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceLight,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.borderMuted,
   },
   sessionOptionActive: {
-    backgroundColor: "#5900a1ff",
-    borderColor: "#5900a1ff",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   sessionOptionText: {
     fontSize: 14,
-    color: "#333",
+    color: colors.textDark,
   },
   sessionOptionTextActive: {
-    color: "white",
+    color: colors.white,
   },
   label: {
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
-    color: "#333",
+    color: colors.textDark,
   },
   emptyState: {
     alignItems: "center",
@@ -1157,16 +1160,16 @@ const styles = StyleSheet.create({
   emptyStateText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#666",
+    color: colors.textMuted,
     marginTop: 16,
   },
   emptyStateSubtext: {
     fontSize: 14,
-    color: "#999",
+    color: colors.textMutedLight,
     marginTop: 8,
   },
   coursContainer: {
-    backgroundColor: "lightgray",
+    backgroundColor: colors.surfaceLighter,
     paddingVertical: 25,
     paddingHorizontal: 14,
     width: "100%",

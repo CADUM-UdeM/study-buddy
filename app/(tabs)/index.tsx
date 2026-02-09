@@ -3,9 +3,11 @@ import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useGPA } from "../../app/hooks/useGPA";
+import AppBackground from "../../components/AppBackground";
 import ContributionTracker from "../../components/ContributionTracker";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
+import { colors } from "../theme/colors";
 
 export default function Accueil() {
   const router = useRouter();
@@ -17,7 +19,8 @@ export default function Accueil() {
   const overallStats = calculateOverallStats(showGlobalGPA);
 
   return (
-    <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
+    <AppBackground>
+    <ScrollView className="flex-1 px-5 pt-16">
       <Text className="text-xl text-white font-bold mb-4 text-center">
         Bienvenue !
       </Text>
@@ -25,9 +28,9 @@ export default function Accueil() {
       <ContributionTracker />
 
       {/* --- GPA Section --- */}
-      <View className="rounded-2xl bg-green-100 p-4 mb-3">
+      <View className="rounded-2xl bg-indigo-ink/50 border border-indigo-velvet p-4 mb-3">
         <View className="flex-row items-center justify-between mb-2">
-          <Text className="text-neutral-600">
+          <Text className="text-mauve opacity-90">
             {showGlobalGPA
               ? "GPA Global"
               : activeSession
@@ -37,34 +40,34 @@ export default function Accueil() {
           </Text>
           <Pressable
             onPress={() => setShowGlobalGPA(!showGlobalGPA)}
-            className="flex-row items-center gap-2 px-3 py-1.5 rounded-lg bg-white/50"
+            className="flex-row items-center gap-2 px-3 py-1.5 rounded-lg bg-theme-surface-elevated"
           >
             <Ionicons
               name={showGlobalGPA ? "globe" : "calendar"}
               size={16}
-              color="#059669"
+              color={colors.success}
             />
-            <Text className="text-xs font-medium text-green-700">
+            <Text className="text-xs font-medium text-mauve">
               {showGlobalGPA ? "Global" : "Session"}
             </Text>
           </Pressable>
         </View>
         {overallStats ? (
           <>
-            <Text className="text-2xl font-semibold text-green-600">
+            <Text className="text-2xl font-semibold text-theme-text-on-dark">
               {overallStats.gpaDisplay}
             </Text>
-            <Text className="text-sm text-neutral-500 mt-1">
+            <Text className="text-sm text-mauve opacity-80 mt-1">
               {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
               crédits
             </Text>
           </>
         ) : (
           <View className="py-2">
-            <Text className="text-base text-neutral-500 italic">
+            <Text className="text-base text-mauve opacity-80 italic">
               Aucune note disponible pour le moment
             </Text>
-            <Text className="text-sm text-neutral-400 mt-1">
+            <Text className="text-sm text-mauve opacity-70 mt-1">
               Ajoutez des notes à vos cours pour voir votre GPA
             </Text>
           </View>
@@ -74,7 +77,7 @@ export default function Accueil() {
       {/* --- Actions --- */}
       <Pressable
         onPress={() => router.push("/(tabs)/pomodoro")}
-        className="mt-5 rounded-2xl bg-violet-600 py-4"
+        className="mt-5 rounded-2xl bg-royal-violet py-4"
       >
         <Text className="text-white text-center font-semibold">
           Démarrer un Pomodoro
@@ -82,12 +85,13 @@ export default function Accueil() {
       </Pressable>
 
       <Link href="/(tabs)/donnees" asChild>
-        <Pressable className="mt-3 rounded-2xl border border-violet-200 py-4">
-          <Text className="text-center font-medium">Voir mes données</Text>
+        <Pressable className="mt-3 rounded-2xl border border-mauve py-4">
+          <Text className="text-center font-medium text-theme-text-on-dark">Voir mes données</Text>
         </Pressable>
       </Link>
 
       <View className="h-10" />
     </ScrollView>
+    </AppBackground>
   );
 }

@@ -1,6 +1,6 @@
 import { Evaluation, useCourses } from "@/app/context/CoursesContext";
 import { GradeBoundary, useSettings } from "@/app/context/SettingsContext";
-import { GradeBoundariesEditor } from "./GradeBoundariesEditor";
+import { colors } from "@/app/theme/colors";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -21,6 +21,8 @@ import {
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Swipeable } from "react-native-gesture-handler";
+import AppBackground from "./AppBackground";
+import { GradeBoundariesEditor } from "./GradeBoundariesEditor";
 
 export default function DetailsCours() {
   const router = useRouter();
@@ -59,28 +61,26 @@ export default function DetailsCours() {
   // Error handling if course not found
   if (!course) {
     return (
-      <View
+      <AppBackground
         style={{
-          flex: 1,
-          backgroundColor: "white",
           justifyContent: "center",
           alignItems: "center",
         }}
       >
-        <Text style={{ fontSize: 18, marginBottom: 20 }}>
+        <Text style={{ fontSize: 18, marginBottom: 20, color: colors.textOnDark }}>
           Cours introuvable
         </Text>
         <TouchableOpacity
           style={{
             padding: 15,
-            backgroundColor: "#5900a1ff",
+            backgroundColor: colors.primary,
             borderRadius: 10,
           }}
           onPress={() => router.back()}
         >
-          <Text style={{ color: "white", fontSize: 16 }}>Retour</Text>
+          <Text style={{ color: colors.white, fontSize: 16 }}>Retour</Text>
         </TouchableOpacity>
-      </View>
+      </AppBackground>
     );
   }
 
@@ -399,7 +399,7 @@ export default function DetailsCours() {
     if (isScheduled) {
       return (
         <View style={styles.scheduledInfo}>
-          <Ionicons name="calendar-outline" size={20} color="#7f3dff" />
+          <Ionicons name="calendar-outline" size={20} color={colors.lavenderPurple} />
           <Text style={styles.scheduledText}>
             Évaluation planifiée - La note sera ajoutée plus tard
           </Text>
@@ -484,13 +484,13 @@ export default function DetailsCours() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+    <AppBackground>
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: colors.surface }]}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={26} />
+          <Ionicons name="arrow-back" size={26} color={colors.textOnDark} />
         </TouchableOpacity>
-        <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+        <Text style={[styles.title, { color: colors.textOnDark }]} numberOfLines={1} ellipsizeMode="tail">
           {course.name}
         </Text>
       </View>
@@ -502,8 +502,8 @@ export default function DetailsCours() {
             size={150}
             width={12}
             fill={currentGrade}
-            tintColor="#7f3dff"
-            backgroundColor="#e6d8ff"
+            tintColor={colors.lavenderPurple}
+            backgroundColor={colors.mauve + "30"}
             rotation={0}
             lineCap="round"
           >
@@ -527,7 +527,7 @@ export default function DetailsCours() {
             Pondération totale: {totalWeight.toFixed(2)}%
             {totalWeight !== 100 && (
               <Text
-                style={{ color: totalWeight > 100 ? "#d32f2f" : "#ff9800" }}
+                style={{ color: totalWeight > 100 ? colors.error : colors.warning }}
               >
                 {" "}
                 ({totalWeight > 100 ? "Dépasse" : "Reste"}{" "}
@@ -546,7 +546,7 @@ export default function DetailsCours() {
 
         {/* Encouragement message */}
         <View style={styles.encouragementBox}>
-          <Text style={{ color: "#555", textAlign: "center" }}>
+          <Text style={{ color: colors.textOnDark, textAlign: "center" }}>
             {getEncouragementMessage()}
           </Text>
         </View>
@@ -704,7 +704,7 @@ export default function DetailsCours() {
                     setShowDatePicker(true);
                   }}
                 >
-                  <Ionicons name="calendar-outline" size={18} color="#555" />
+                  <Ionicons name="calendar-outline" size={18} color={colors.textDark} />
                   <Text style={styles.dateFieldText}>
                     {evalDate
                       ? evalDate.toLocaleDateString("fr-CA", {
@@ -729,7 +729,7 @@ export default function DetailsCours() {
                       ]}
                     >
                       {isScheduled && (
-                        <Ionicons name="checkmark" size={16} color="white" />
+                        <Ionicons name="checkmark" size={16} color={colors.white} />
                       )}
                     </View>
                     <Text style={styles.checkboxLabel}>
@@ -815,7 +815,7 @@ export default function DetailsCours() {
             >
               <View
                 style={{
-                  backgroundColor: "white",
+                  backgroundColor: colors.white,
                   borderRadius: 20,
                   padding: 20,
                   width: "90%",
@@ -894,7 +894,7 @@ export default function DetailsCours() {
                     setShowDatePicker(true);
                   }}
                 >
-                  <Ionicons name="calendar-outline" size={18} color="#555" />
+                  <Ionicons name="calendar-outline" size={18} color={colors.textDark} />
                   <Text style={styles.dateFieldText}>
                     {evalDate ? formatDate(evalDate) : "Choisir une date"}
                   </Text>
@@ -913,7 +913,7 @@ export default function DetailsCours() {
                       ]}
                     >
                       {isScheduled && (
-                        <Ionicons name="checkmark" size={16} color="white" />
+                        <Ionicons name="checkmark" size={16} color={colors.white} />
                       )}
                     </View>
                     <Text style={styles.checkboxLabel}>
@@ -999,7 +999,7 @@ export default function DetailsCours() {
             >
               <View
                 style={{
-                  backgroundColor: "white",
+                  backgroundColor: colors.white,
                   borderRadius: 20,
                   padding: 20,
                   width: "90%",
@@ -1030,7 +1030,7 @@ export default function DetailsCours() {
       </Modal>
 
       {/* Context Menu */}
-    </View>
+    </AppBackground>
   );
 }
 
@@ -1119,7 +1119,7 @@ function EvaluationCard({
             borderRadius: 12,
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "#f30000ff",
+            backgroundColor: colors.error,
             opacity: reveal,
           }}
         >
@@ -1128,7 +1128,7 @@ function EvaluationCard({
               transform: [{ scale: iconScale }, { translateX: iconTranslateX }],
             }}
           >
-            <Ionicons name="trash-outline" size={22} color="white" />
+            <Ionicons name="trash-outline" size={22} color={colors.white} />
           </Animated.View>
         </Animated.View>
       </View>
@@ -1165,7 +1165,7 @@ function EvaluationCard({
             <Text style={styles.cardWeight}>
               Pondération {item.weight.toFixed(2)}%
               {item.isAutoWeight && (
-                <Text style={{ color: "#666", fontSize: 11 }}> (auto)</Text>
+                <Text style={{ color: colors.textOnDarkMuted, fontSize: 11 }}> (auto)</Text>
               )}
             </Text>
 
@@ -1178,12 +1178,12 @@ function EvaluationCard({
             style={[
               styles.noteBadge,
               isScheduled
-                ? { backgroundColor: "#e3d5ff" }
-                : { backgroundColor: item.note! >= 75 ? "#c8f7c5" : "#f7c5c5" },
+                ? { backgroundColor: colors.mauve + "40" }
+                : { backgroundColor: item.note! >= 75 ? colors.success + "40" : colors.error + "30" },
             ]}
           >
             <Text
-              style={[styles.noteText, isScheduled && { color: "#7f3dff" }]}
+              style={[styles.noteText, isScheduled && { color: colors.lavenderPurple }]}
             >
               {displayGrade}
             </Text>
@@ -1201,16 +1201,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 20,
     paddingHorizontal: 20,
+    paddingVertical: 12,
   },
   title: {
     fontSize: 24,
     fontWeight: "bold",
     flex: 1,
+    color: colors.textOnDark,
   },
   percentText: {
     fontSize: 32,
     fontWeight: "bold",
-    color: "#7f3dff",
+    color: colors.mauve,
   },
   letterGradeContainer: {
     marginTop: 12,
@@ -1218,66 +1220,73 @@ const styles = StyleSheet.create({
   },
   letterGradeLabel: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textOnDarkMuted,
     marginBottom: 4,
   },
   letterGrade: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#7f3dff",
+    color: colors.lavenderPurple,
   },
   gpaLabel: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textOnDarkMuted,
     marginTop: 4,
   },
   objectif: {
     marginTop: 10,
     fontSize: 18,
+    color: colors.textOnDark,
   },
   totalWeight: {
     marginTop: 5,
     fontSize: 14,
-    color: "#666",
+    color: colors.textOnDarkMuted,
   },
   autoWeightInfo: {
     marginTop: 3,
     fontSize: 12,
-    color: "#888",
+    color: colors.textOnDarkMuted,
     fontStyle: "italic",
   },
   encouragementBox: {
-    backgroundColor: "#e9e9e9",
+    backgroundColor: colors.surfaceElevated,
     padding: 15,
     borderRadius: 10,
     marginVertical: 20,
+    borderWidth: 1,
+    borderColor: colors.indigoVelvet,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
     marginTop: 15,
     marginBottom: 10,
+    color: colors.textOnDark,
   },
   card: {
-    backgroundColor: "#f3f3f3",
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 12,
     padding: 15,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
     gap: 12,
+    borderWidth: 1,
+    borderColor: colors.indigoVelvet,
   },
   scheduledCard: {
     borderWidth: 2,
-    borderColor: "#e3d5ff",
+    borderColor: colors.mauve + "80",
     borderStyle: "dashed",
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: "600",
     flex: 1,
+    color: colors.textOnDark,
   },
-  cardWeight: { fontSize: 13, color: "#555" },
+  cardWeight: { fontSize: 13, color: colors.textOnDarkMuted },
   noteBadge: {
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -1285,31 +1294,31 @@ const styles = StyleSheet.create({
     minWidth: 70,
     alignItems: "center",
   },
-  noteText: { fontWeight: "bold", fontSize: 14 },
+  noteText: { fontWeight: "bold", fontSize: 14, color: colors.textOnDark },
   addEvalButton: {
-    backgroundColor: "#5900a1ff",
+    backgroundColor: colors.primary,
     padding: 18,
     borderRadius: 14,
     marginVertical: 30,
     alignItems: "center",
   },
   addEvalText: {
-    color: "white",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: colors.modalOverlay,
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderRadius: 20,
     padding: 30,
     width: "85%",
-    shadowColor: "#000",
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -1326,7 +1335,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.borderMuted,
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
@@ -1342,21 +1351,21 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.borderMuted,
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceLight,
   },
   gradeModeButtonActive: {
-    backgroundColor: "#7f3dff",
-    borderColor: "#7f3dff",
+    backgroundColor: colors.lavenderPurple,
+    borderColor: colors.lavenderPurple,
   },
   gradeModeText: {
     fontSize: 14,
-    color: "#666",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   gradeModeTextActive: {
-    color: "white",
+    color: colors.white,
   },
   fractionInputContainer: {
     flexDirection: "row",
@@ -1371,7 +1380,7 @@ const styles = StyleSheet.create({
   fractionSlash: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#666",
+    color: colors.textMuted,
   },
   scheduledInfo: {
     flexDirection: "row",
@@ -1380,7 +1389,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   scheduledText: {
-    color: "#7f3dff",
+    color: colors.lavenderPurple,
     marginLeft: 6,
     fontSize: 14,
   },
@@ -1397,18 +1406,18 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: colors.borderMuted,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "white",
+    backgroundColor: colors.white,
   },
   checkboxChecked: {
-    backgroundColor: "#7f3dff",
-    borderColor: "#7f3dff",
+    backgroundColor: colors.lavenderPurple,
+    borderColor: colors.lavenderPurple,
   },
   checkboxLabel: {
     fontSize: 14,
-    color: "#444",
+    color: colors.textDark,
   },
   typeSelector: {
     flexDirection: "row",
@@ -1420,21 +1429,21 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.borderMuted,
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: colors.surfaceLight,
   },
   typeButtonActive: {
-    backgroundColor: "#5900a1ff",
-    borderColor: "#5900a1ff",
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
   },
   typeButtonText: {
     fontSize: 15,
-    color: "#666",
+    color: colors.textMuted,
     fontWeight: "600",
   },
   typeButtonTextActive: {
-    color: "white",
+    color: colors.white,
   },
   modalButtons: {
     flexDirection: "row",
@@ -1448,27 +1457,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: colors.surfaceLightest,
   },
   cancelButtonText: {
-    color: "#333",
+    color: colors.textDark,
     fontSize: 16,
     fontWeight: "600",
   },
   addButton: {
-    backgroundColor: "#5900a1ff",
+    backgroundColor: colors.primary,
   },
   addButtonText: {
-    color: "white",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
   dropdownMenu: {
     position: "absolute",
-    backgroundColor: "white",
+    backgroundColor: colors.white,
     borderRadius: 10,
     paddingVertical: 5,
-    shadowColor: "#000",
+    shadowColor: colors.black,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -1488,11 +1497,11 @@ const styles = StyleSheet.create({
   },
   menuText: {
     fontSize: 15,
-    color: "#333",
+    color: colors.textDark,
   },
   menuDivider: {
     height: 1,
-    backgroundColor: "#e0e0e0",
+    backgroundColor: colors.surfaceLighter,
     marginHorizontal: 10,
   },
   menuOverlay: {
@@ -1506,12 +1515,12 @@ const styles = StyleSheet.create({
   },
   cardDate: {
     fontSize: 12,
-    color: "#666",
+    color: colors.textOnDarkMuted,
     marginTop: 2,
   },
   dateField: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: colors.borderMuted,
     borderRadius: 10,
     padding: 15,
     marginBottom: 15,
@@ -1521,7 +1530,7 @@ const styles = StyleSheet.create({
   },
   dateFieldText: {
     fontSize: 16,
-    color: "#333",
+    color: colors.textDark,
   },
   sheetTitle: {
     fontSize: 18,
@@ -1531,7 +1540,7 @@ const styles = StyleSheet.create({
   },
 
   confirmDateButton: {
-    backgroundColor: "#5900a1ff",
+    backgroundColor: colors.primary,
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 20,
@@ -1539,15 +1548,17 @@ const styles = StyleSheet.create({
   },
 
   confirmDateText: {
-    color: "white",
+    color: colors.white,
     fontSize: 16,
     fontWeight: "600",
   },
   customBoundariesSection: {
-    backgroundColor: "#f9f9f9",
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 12,
     padding: 15,
     marginVertical: 15,
+    borderWidth: 1,
+    borderColor: colors.indigoVelvet,
   },
   customBoundariesHeader: {
     flexDirection: "row",
@@ -1558,14 +1569,14 @@ const styles = StyleSheet.create({
   customBoundariesTitle: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#333",
+    color: colors.textOnDark,
     flex: 1,
   },
   toggleButton: {
     width: 50,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#ddd",
+    backgroundColor: colors.indigoInk,
     justifyContent: "center",
     padding: 3,
   },
@@ -1573,20 +1584,20 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "white",
-    shadowColor: "#000",
+    backgroundColor: colors.mauve,
+    shadowColor: colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.2,
     shadowRadius: 2,
     elevation: 2,
   },
   toggleCircleActive: {
-    backgroundColor: "#5900a1ff",
+    backgroundColor: colors.primary,
     alignSelf: "flex-end",
   },
   customBoundariesHint: {
     fontSize: 13,
-    color: "#666",
+    color: colors.textOnDarkMuted,
     fontStyle: "italic",
   },
 });
