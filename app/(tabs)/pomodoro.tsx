@@ -1,5 +1,4 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
-import { usePreventRemove, useNavigation } from '@react-navigation/native';
 
 import React, { useEffect, useState, } from "react";
 import {
@@ -8,13 +7,12 @@ import {
     ScrollView,
     StyleSheet,
     Text,
+    TextInput,
     TouchableOpacity,
     useColorScheme,
     useWindowDimensions,
-    View,
-    TextInput, Alert,
+    View
 } from "react-native";
-import { stylesProfil } from "./profil";
 
 
 export default function Pomodoro() {
@@ -477,7 +475,7 @@ useEffect(() => {
         <View style={styles.infoBloc}>
         <IonIcons name="time-outline" size={25} color={'black'} style={styles.infoButton}/>
         <Text style={{fontWeight:'bold', fontSize:18, color:'white', marginLeft:-5}}> {pomodoroDuration} min </Text>
-        <IonIcons name="cafe-outline" size={25} color={'black'} sstyle={styles.infoButton}/>
+        <IonIcons name="cafe-outline" size={25} color={'black'} style={styles.infoButton}/>
         <Text style={{fontWeight:'bold', fontSize:18, color:'white', marginLeft:-5}}> {breakDuration} min </Text>
         <IonIcons name="refresh-outline" size={25} color={'black'} style={styles.infoButton}/>
         <Text style={{fontWeight:'bold', fontSize:18, color:'white', marginLeft:-5, paddingRight:5}}> {numCycle} </Text>
@@ -661,4 +659,36 @@ const styles = StyleSheet.create({
         marginTop:40,
         backgroundColor:'#D9D9D9',
     }
+});
+
+const stylesProfil = StyleSheet.create({
+    confPage: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    confContener: {
+        borderRadius: 20,
+        padding: 20,
+        width: '85%',
+    },
+    confText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+    },
+    shadow: {
+        shadowColor: 'black',
+        shadowOpacity: 0.1,
+        shadowOffset: { width: 0, height: 3 },
+        elevation: 3,
+    },
+    clickButton: {
+        alignItems: 'center',
+        padding: 12,
+        minWidth: 80,
+        borderRadius: 15,
+    },
+    drawHorLine: {
+        height: 2,
+    },
 });

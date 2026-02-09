@@ -49,17 +49,8 @@ export default function TabLayout() {
           ),
         })}
       />
-      <Tabs.Screen
-        name="profil"
-        options={({ route }) => ({
-          tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="person" size={28} color={color} />
-          ),
-        })}
-      />
       <Tabs.Screen name="detailscours" options={{ href: null }} />
       <Tabs.Screen name="notifications" options={{ href: null }} />
-      <Tabs.Screen name="profil_info" options={{ href: null }} />
     </Tabs>
   );
 }

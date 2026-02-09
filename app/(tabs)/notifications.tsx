@@ -21,7 +21,7 @@ return (
             <Text></Text>
 
         <View style={{flexDirection:'row', padding: 10, marginRight:0, gap: 90}}>
-        <TouchableOpacity style={[]} onPress={() => router.push("/profil")}>
+        <TouchableOpacity style={[]} onPress={() => router.back()}>
                     <IonIcons name="arrow-back-sharp" size={30} color={isDarkMode ? 'white' : 'black'}/>
                 </TouchableOpacity>
             <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight:'bold'}}> Notification </Text>
