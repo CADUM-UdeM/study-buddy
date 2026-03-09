@@ -1,56 +1,32 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
-import { Tabs } from "expo-router";
+import { Icon, Label, NativeTabs, VectorIcon } from "expo-router/unstable-native-tabs";
 
 export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: "#AB8BFF",
-        tabBarInactiveTintColor: "#ffffff",
-        headerShown: false,
-        tabBarShowLabel: false,
-        tabBarStyle: {
-          backgroundColor: "#221F3D",
-          shadowColor: "#000",
-        },
-        animation: "fade",
-      }}
+    <NativeTabs
+      backgroundColor="#221F3D"
+      iconColor={{ default: "#ffffff", selected: "#AB8BFF" }}
     >
-      <Tabs.Screen
-        name="parametres"
-        options={({ route }) => ({
-          tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="settings" size={28} color={color} />
-          ),
-        })}
-      />
-      <Tabs.Screen
-        name="donnees"
-        options={({ route }) => ({
-          tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="stats-chart" size={25} color={color} />
-          ),
-        })}
-      />
-      <Tabs.Screen
-        name="index"
-        options={({ route }) => ({
-          tabBarIcon: ({ color, focused }) => (
-            <IonIcons size={28} name="home" color={color} />
-          ),
-        })}
-      />
+      <NativeTabs.Trigger name="index">
+        <Icon src={<VectorIcon family={IonIcons} name="home" />} />
+        <Label>Accueil</Label>
+      </NativeTabs.Trigger>
 
-      <Tabs.Screen
-        name="pomodoro"
-        options={({ route }) => ({
-          tabBarIcon: ({ color, focused }) => (
-            <IonIcons name="alarm" size={28} color={color} />
-          ),
-        })}
-      />
-      <Tabs.Screen name="detailscours" options={{ href: null }} />
-      <Tabs.Screen name="notifications" options={{ href: null }} />
-    </Tabs>
+      <NativeTabs.Trigger name="donnees">
+        <Icon src={<VectorIcon family={IonIcons} name="stats-chart" />} />
+        <Label>Données</Label>
+      </NativeTabs.Trigger>
+
+      <NativeTabs.Trigger name="pomodoro">
+        <Icon src={<VectorIcon family={IonIcons} name="alarm" />} />
+        <Label>Pomodoro</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="parametres">
+        <Icon src={<VectorIcon family={IonIcons} name="settings" />} />
+        <Label>Paramètres</Label>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="detailscours" hidden />
+      <NativeTabs.Trigger name="notifications" hidden />
+    </NativeTabs>
   );
 }
