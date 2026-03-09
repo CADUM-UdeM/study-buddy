@@ -18,14 +18,11 @@ export default function Accueil() {
 
   return (
     <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
-      <Text className="text-xl text-white font-bold mb-4 text-center">
-        Bienvenue !
-      </Text>
 
       <ContributionTracker />
 
       {/* --- GPA Section --- */}
-      <View className="rounded-2xl bg-green-100 p-4 mb-3">
+      <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: "#1A1729"}}>
         <View className="flex-row items-center justify-between mb-2">
           <Text className="text-neutral-600">
             {showGlobalGPA
@@ -44,14 +41,14 @@ export default function Accueil() {
               size={16}
               color="#059669"
             />
-            <Text className="text-xs font-medium text-green-700">
+            <Text className="text-xs font-medium text-purple-100">
               {showGlobalGPA ? "Global" : "Session"}
             </Text>
           </Pressable>
         </View>
         {overallStats ? (
           <>
-            <Text className="text-2xl font-semibold text-green-600">
+            <Text className="text-2xl font-semibold text-purple-200">
               {overallStats.gpaDisplay}
             </Text>
             <Text className="text-sm text-neutral-500 mt-1">
@@ -76,14 +73,14 @@ export default function Accueil() {
         onPress={() => router.push("/(tabs)/pomodoro")}
         className="mt-5 rounded-2xl bg-violet-600 py-4"
       >
-        <Text className="text-white text-center font-semibold">
+        <Text className="text-purple-100 text-center font-semibold">
           Démarrer un Pomodoro
         </Text>
       </Pressable>
 
       <Link href="/(tabs)/donnees" asChild>
-        <Pressable className="mt-3 rounded-2xl border border-violet-200 py-4">
-          <Text className="text-center font-medium">Voir mes données</Text>
+        <Pressable className="mt-3 rounded-2xl border border-violet-100 py-4">
+          <Text className="text-center font-medium text-purple-100">Voir mes données</Text>
         </Pressable>
       </Link>
 

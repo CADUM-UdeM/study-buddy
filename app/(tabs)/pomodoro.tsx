@@ -1,29 +1,27 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
-
-import React, { useEffect, useState, } from "react";
+import React, { useEffect, useState } from "react";
 import {
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    useColorScheme,
-    useWindowDimensions,
-    View
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
 } from "react-native";
+import { AnimatedCircularProgress } from "react-native-circular-progress";
+import "../global.css";
 
 
 export default function Pomodoro() {
 
 
-const {width, height} = useWindowDimensions()
-const [isRunning, setIsRunning] = useState(false)
-const [isLocked, setIsLocked] = useState(false)
-const  button_start_text   = isRunning ? 'Pause' : 'Débuter'
-const colorScheme = useColorScheme();
-const isDarkMode = colorScheme == 'dark';
+const { width } = useWindowDimensions();
+const [isRunning, setIsRunning] = useState(false);
+const [hasTimerBeenStarted, setHasTimerBeenStarted] = useState(false);
+const button_start_text = isRunning ? "Pause" : "Débuter";
 const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
 
 const [defaultRepetition, setDefaultRepetition] = useState(2)
@@ -62,6 +60,8 @@ const [breakDuration, setBreakDuration] = useState(defaultBreakTime)
 const [pomodoroDuration, setPomodoroDuration] = useState(defaultStudyTime)
 
 const start_button = () => {
+      setPhaseTotalSeconds(timeLeft);
+      setHasTimerBeenStarted(true);
       setIsRunning(true);
 }
 const pause_button = () => {
@@ -70,12 +70,14 @@ const pause_button = () => {
 
 const stop_button = () => {
       setIsRunning(false);
-      setMin(addZero(initMin))
-      setHours(addZero(initHours))
-      setSec(addZero(initSec))
-      handleAddHistory(pomodoroDuration, breakDuration, String(numCycle), false, false)
-
-      setRemainingCycle(numCycle)
+      if (hasTimerBeenStarted) {
+        handleAddHistory(pomodoroDuration, breakDuration, String(numCycle), false, false);
+        setHasTimerBeenStarted(false);
+      }
+      setMin(addZero(initMin));
+      setHours(addZero(initHours));
+      setSec(addZero(initSec));
+      setRemainingCycle(numCycle);
 }
 
 const add_button = () => {
@@ -111,12 +113,18 @@ const min_button = () => {
     }
 }
 
-const [timeLeft, setTimeLeft] = useState(Number(hours)*60*60 + Number(min) *60+ Number(sec))
+const [timeLeft, setTimeLeft] = useState(Number(hours)*60*60 + Number(min) *60+ Number(sec));
+const [phaseTotalSeconds, setPhaseTotalSeconds] = useState(
+  Number(defaultStudyTime) * 60
+);
 
 {/* Pour tourner le minuteur --------------------*/}
 useEffect(() => {
         if(!isRunning) {
-            setTimeLeft(Number(hours)*60*60 + Number(min) *60+ Number(sec))}
+            const next = Number(hours)*60*60 + Number(min) *60+ Number(sec);
+            setTimeLeft(next);
+            setPhaseTotalSeconds(next);
+        }
     }, [hours, min, sec]);
 
 useEffect(() => {
@@ -130,20 +138,26 @@ useEffect(() => {
         if(!inBreakTime){
             setRemainingCycle(remainingCycle - 1)
         }
+        setHasTimerBeenStarted(false);
         if(inBreakTime){
-            setTimeLeft(Number(Number(pomodoroDuration)*60))
+            const next = Number(pomodoroDuration)*60;
+            setTimeLeft(next);
+            setPhaseTotalSeconds(next);
         }
         else {
-            setTimeLeft(Number(breakDuration)*60)
+            const next = Number(breakDuration)*60;
+            setTimeLeft(next);
+            setPhaseTotalSeconds(next);
         }
 
         setInBreakTime(!inBreakTime)
     }
 
     else {
-        setIsRunning(false)
-        if (remainingCycle ===0 && timeLeft === 0 ) {
-            setIsFinished(true)
+        setIsRunning(false);
+        if (remainingCycle === 0 && timeLeft === 0) {
+          setHasTimerBeenStarted(false);
+          setIsFinished(true);
         }
     }
 }, [timeLeft, isRunning])
@@ -258,308 +272,365 @@ useEffect(() => {
     }, [timeLeft]);
 
 
-    return (
-    <ScrollView>
-    <View style ={styles.bodyStyle}>
-        <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
-            <Text></Text>
+  const cardBg = { backgroundColor: "#1A1729" };
 
-        {/* -------------------- Section Minuteur pomodoro  -------------------- */}
-        <View style={[styles.timerSection, {borderColor: isDarkMode ? '#4D4D71' : '#B3B3B3',
-            backgroundColor:inBreakTime? (isDarkMode ? '#565681': '#D9D9D9') : (isDarkMode ? 'black': '#F4F4F4')}]}>
+  return (
+    <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
+      {/* --- Timer card (index-style) --- */}
+      <View
+        className="rounded-2xl p-6 mb-4"
+        style={[
+          cardBg,
+          {
+            borderWidth: 1,
+            borderColor: inBreakTime ? "#7b2cbf" : "#444462",
+          },
+        ]}
+      >
+        <Text className="text-center text-lg font-bold text-purple-200 mb-6">
+          {!inBreakTime ? "Focus" : "Pause"}
+        </Text>
 
-        <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:20, fontWeight:'bold', 
-          textAlign:'center', marginBottom:40, marginTop:20}}> {!inBreakTime ? 'Focus Mode' : 'En pause'} </Text>
-        
-        {/* -------------------- Partie Minuteur -------------------- */}
-        <View style={{flexDirection:'row', alignItems:'center',  justifyContent:'center', gap : "4%", }}>
-        
-        {/*  Diminue le temps */}
-        <TouchableOpacity style={[styles.time_button, ]} onPress={min_button} disabled={isRunning || timeLeft == 0 || isTimeLeftNoEnought }>
-        <IonIcons name="remove-outline" size={35} color={isDarkMode ? ((isRunning || timeLeft == 0 || isTimeLeftNoEnought) ? '#959090': '#F2F2F2'):
-            ((isRunning || timeLeft == 0|| isTimeLeftNoEnought) ? '#D8D6D6': '#757575')} style={styles.time_button}/>
-        </TouchableOpacity>
+        <View className="flex-row items-center justify-center gap-4">
+          <TouchableOpacity
+            onPress={min_button}
+            disabled={isRunning || timeLeft === 0 || isTimeLeftNoEnought}
+            style={styles.time_button}
+          >
+            <IonIcons
+              name="remove-outline"
+              size={32}
+              color={
+                isRunning || timeLeft === 0 || isTimeLeftNoEnought
+                  ? "#6B7280"
+                  : "#e0aaff"
+              }
+            />
+          </TouchableOpacity>
 
-        {/*  Minuteur */}
-        <View style={[styles.timer, {borderColor:"#FFC943"}]}>
-        <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:30, alignSelf:'center', fontWeight:'bold'}}> {hours}:{min}:{sec} </Text>
+          <AnimatedCircularProgress
+            size={176}
+            width={8}
+            fill={phaseTotalSeconds > 0 ? (timeLeft / phaseTotalSeconds) * 100 : 100}
+            tintColor="#AB8BFF"
+            backgroundColor="#444462"
+            rotation={0}
+            lineCap="round"
+          >
+            {() => (
+              <Text className="text-3xl font-bold text-purple-100">
+                {hours}:{min}:{sec}
+              </Text>
+            )}
+          </AnimatedCircularProgress>
+
+          <TouchableOpacity
+            onPress={add_button}
+            disabled={isRunning}
+            style={styles.time_button}
+          >
+            <IonIcons
+              name="add-outline"
+              size={32}
+              color={isRunning ? "#6B7280" : "#e0aaff"}
+            />
+          </TouchableOpacity>
         </View>
-        
-        {/*  Ajoute du temps */}
-        <TouchableOpacity style={[styles.time_button, ]} onPress={add_button} disabled={isRunning}>
-        <IonIcons name="add-outline" size={35} color={isDarkMode ? (isRunning ? '#959090': '#F2F2F2') :
-            (isRunning ? '#D8D6D6': '#757575')} style={styles.time_button}/>
-        </TouchableOpacity>
-        </View>
 
-        {/*  Option Minuteur */}
-        <View style={{flexDirection:'row', gap:45, marginTop:20 }}>
-        <TouchableOpacity onPress={()=> setClickParam(!clickParam)} disabled={isRunning} style={{marginLeft:20}}>
-        <IonIcons name="options-outline" size={18} color={'black'} style={[styles.setting_button,
-            {backgroundColor: !isRunning ? '#FFC943':'#FFECBD'}]}/>
-        </TouchableOpacity>
-        <View style={{backgroundColor:'#FFC943', padding: 5, borderRadius:10}}>
-            <Text style={{}}>
-                Cycle restant : {remainingCycle}
+        <View className="flex-row items-center justify-center gap-6 mt-5">
+          <TouchableOpacity
+            onPress={() => setClickParam(!clickParam)}
+            disabled={isRunning}
+            className="rounded-full p-2"
+            style={{ backgroundColor: !isRunning ? "#AB8BFF" : "#6B7280" }}
+          >
+            <IonIcons name="options-outline" size={20} color="#10002b" />
+          </TouchableOpacity>
+          <View
+            className="rounded-xl px-4 py-2"
+            style={{ backgroundColor: "#AB8BFF40" }}
+          >
+            <Text className="text-sm font-semibold text-purple-100">
+              Cycle : {remainingCycle}
             </Text>
+          </View>
         </View>
-
-        {/* Modals (/pop-up) pour page si clique sur bouton paramétrage */}
-        <Modal transparent visible={clickParam} animationType='none' >
-            <View style={[stylesProfil.confPage, {backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(1,1,1,0.6)'}]}>
-            
-            <View style={[stylesProfil.confContener, {height:'70%', backgroundColor: isDarkMode ? '#565681' : 'white'}]}>
-                <Text style={[stylesProfil.confText, {paddingTop:10, paddingBottom:20, color: isDarkMode ? 'white' : 'black'}]}>
-                    Réglez votre pomodoro </Text>
-
-                <View style={{padding:10, gap:20}}>
-                  <View style={[styles.paramContent, { flexDirection:'row'}]}>
-                  <Text>Temps d'étude</Text>
-
-                  <TouchableOpacity style={[styles.paramContent, styles.styleToSelectTime,
-                      {marginLeft:85, flexDirection:'row' }]} onPress={()=>setClickSelectStudy(true)}>
-
-                      <Text style={{color:'#757575', padding:0, margin:0, marginTop:-10}}>
-                      <TextInput keyboardType="numeric" maxLength={4} style={{color:'grey', height:40, padding:0,}}
-                                 value={`${defaultStudyTime}`} onChangeText={handleStudyText}/></Text>
-                      <Text style={{padding:0, margin:0,}}> min</Text>
-                  <IonIcons name='chevron-down' size={22} color="black"> </IonIcons>
-                  </TouchableOpacity>
-                  </View>
-
-                    {/* -------------------- Ouvre modal pour sélectionner le temps d'étude -------------------- */}
-                    <Modal transparent visible={clickSelectStudy} animationType='none' >
-                  <Pressable style={[stylesProfil.confPage, {flex:1}]} onPress={() =>
-                      setClickSelectStudy(false)} >
-
-                  <Pressable onPress={() =>{}}>
-                  <View style={[styles.styleSelectTime, stylesProfil.shadow, {}]}>
-                    <TouchableOpacity onPress={() =>{clickStudyTime('10')}} style={[styles.styleText,
-                        {backgroundColor: defaultStudyTime=='10' ? 'grey' : '#D9D9D9'}]} >
-                        <Text style={{color: defaultStudyTime=='10' ? 'white' : 'black'}}>10 min</Text>
-                    </TouchableOpacity >
-                    <TouchableOpacity onPress={() =>{clickStudyTime('20')}} style={[styles.styleText,
-                        {backgroundColor: defaultStudyTime=='20' ? 'grey' : '#D9D9D9'}]} >
-                        <Text style={{color: defaultStudyTime=='20' ? 'white' : 'black'}}>20 min</Text>
-                    </TouchableOpacity >
-                    <TouchableOpacity onPress={() =>{clickStudyTime('30')}} style={[styles.styleText,
-                        {backgroundColor: defaultStudyTime=='30' ? 'grey' : '#D9D9D9'}]} >
-                        <Text style={{color: defaultStudyTime=='30' ? 'white' : 'black'}}>30 min</Text>
-                    </TouchableOpacity > 
-                    <TouchableOpacity onPress={() =>{clickStudyTime('40')}} style={[styles.styleText,
-                        {backgroundColor: defaultStudyTime=='40' ? 'grey' : '#D9D9D9'}]} >
-                        <Text style={{color: defaultStudyTime=='40' ? 'white' : 'black'}}>40 min</Text>
-                    </TouchableOpacity >
-                    <TouchableOpacity onPress={() =>{clickStudyTime('50')}} style={[styles.styleText,
-                        {backgroundColor: defaultStudyTime=='50' ? 'grey' : '#D9D9D9'}]} >
-                        <Text style={{color: defaultStudyTime=='50' ? 'white' : 'black'}}>50 min</Text>
-                    </TouchableOpacity >  
-                    <TouchableOpacity onPress={() =>{clickStudyTime('60')}} style={[styles.styleText,
-                        {backgroundColor: defaultStudyTime=='60' ? 'grey' : '#D9D9D9'}]} >
-                        <Text style={{color: defaultStudyTime=='60' ? 'white' : 'black'}}>60 min</Text>
-                    </TouchableOpacity >    
-                  </View>
-                  </Pressable>
-                  </Pressable>
-
-                  </Modal>
-
-                  <View style={styles.paramContent}>
-                  <Text>Temps de pause</Text>
-                  <TouchableOpacity style={[styles.paramContent, styles.styleToSelectTime,
-                      {marginLeft:72, flexDirection:'row' }]}
-                  onPress={()=>setClickSelectBreak(true)}>
-                      <Text style={{color:'#757575', padding:0, margin:0, marginTop:-10}}>
-                          <TextInput keyboardType="numeric" maxLength={4} style={{color:'grey', height:40, padding:0,}}
-                                     value={`${defaultBreakTime}`} onChangeText={handleBreakText}/></Text>
-                      <Text style={{padding:0, margin:0,}}> min</Text>
-                  <IonIcons name='chevron-down' size={22} color="black"> </IonIcons>
-                  </TouchableOpacity>
-                  </View>
-                    {/* -------------------- Ouvre modal pour sélectionner le temps de pause -------------------- */}
-                    <Modal transparent visible={clickSelectBreak} animationType='none' >
-                        <Pressable style={[stylesProfil.confPage, {flex:1}]}
-                                          onPress={() => setClickSelectBreak(false)}>
-                            <Pressable onPress={() =>{}} style={{width: 0,}} >
-                                <View style={[styles.styleSelectBreak, stylesProfil.shadow, {}]}>
-                                    <TouchableOpacity onPress={() =>{clickBreakTime('5')}} style={[styles.styleText,
-                                        {backgroundColor: defaultBreakTime=='5' ? 'grey' : '#D9D9D9'}]} >
-                                        <Text style={{color: defaultBreakTime=='5' ? 'white' : 'black'}}>5 min</Text>
-                                    </TouchableOpacity >
-                                    <TouchableOpacity onPress={() =>{clickBreakTime('10')}} style={[styles.styleText,
-                                        {backgroundColor: defaultBreakTime=='10' ? 'grey' : '#D9D9D9'}]} >
-                                        <Text style={{color: defaultBreakTime=='10' ? 'white' : 'black'}}>10 min</Text>
-                                    </TouchableOpacity >
-                                    <TouchableOpacity onPress={() =>{clickBreakTime('15')}} style={[styles.styleText,
-                                        {backgroundColor: defaultBreakTime=='15' ? 'grey' : '#D9D9D9'}]} >
-                                        <Text style={{color: defaultBreakTime=='15' ? 'white' : 'black'}}>15 min</Text>
-                                    </TouchableOpacity >
-                                    <TouchableOpacity onPress={() =>{clickBreakTime('20')}} style={[styles.styleText,
-                                        {backgroundColor: defaultBreakTime=='20' ? 'grey' : '#D9D9D9'}]} >
-                                        <Text style={{color: defaultBreakTime=='20' ? 'white' : 'black'}}>20 min</Text>
-                                    </TouchableOpacity >
-                                    <TouchableOpacity onPress={() =>{clickBreakTime('25')}} style={[styles.styleText,
-                                        {backgroundColor: defaultBreakTime=='25' ? 'grey' : '#D9D9D9'}]} >
-                                        <Text style={{color: defaultBreakTime=='25' ? 'white' : 'black'}}>25 min</Text>
-                                    </TouchableOpacity >
-                                    <TouchableOpacity onPress={() =>{clickBreakTime('30')}} style={[styles.styleText,
-                                        {backgroundColor: defaultBreakTime=='30' ? 'grey' : '#D9D9D9'}]} >
-                                        <Text style={{color: defaultBreakTime=='30' ? 'white' : 'black'}}>30 min</Text>
-                                    </TouchableOpacity >
-                                </View>
-                            </Pressable>
-                        </Pressable>
-
-                    </Modal>
-
-
-
-                    <View style={[styles.paramContent, {flexDirection:'column',height:170}]}>
-
-                  {/* -------------------- Selection du nombre de répétitions -------------------- */}
-                  <Text style={{}}>Répétitions</Text>                  
-                  <View style={{alignItems:'center', gap:2}}>
-                    <Pressable onPress={() =>{clickRepeat(1)}} style={[styles.selectRepetition, 
-                      {backgroundColor: defaultRepetition==1 ? 'grey' : '#D9D9D9'}] } >
-                      <Text style={{color: defaultRepetition==1 ? 'white' : 'black'}}>1</Text>
-                      </Pressable >
-
-                    <Pressable onPress={() =>{clickRepeat(2)}} style={[styles.selectRepetition, 
-                      {backgroundColor: defaultRepetition==2 ? 'grey' : '#D9D9D9'}]} > 
-                      <Text style={{color: defaultRepetition==2 ? 'white' : 'black'}}>2</Text>
-                      </Pressable > 
-                    
-                    <Pressable onPress={() =>{clickRepeat(3)}} style={[styles.selectRepetition, 
-                      {backgroundColor: defaultRepetition==3 ? 'grey' : '#D9D9D9'}]}>
-                      <Text style={{color: defaultRepetition==3 ? 'white' : 'black'}}>3</Text>
-                      </Pressable >
-
-                    <Pressable onPress={() =>{clickRepeat(4)}} style={[styles.selectRepetition, 
-                      {backgroundColor: defaultRepetition==4 ? 'grey' : '#D9D9D9'}]}>
-                      <Text style={{color: defaultRepetition==4 ? 'white' : 'black'}}>4</Text>
-                      </Pressable >
-                                          
-                      <Pressable onPress={() =>{clickRepeat(5)}} style={[styles.selectRepetition, 
-                      {backgroundColor: defaultRepetition==5 ? 'grey' : '#D9D9D9'}]}>
-                      <Text style={{color: defaultRepetition==5 ? 'white' : 'black'}}>5</Text>
-                      </Pressable >
-                  </View>
-                  </View>
-                </View>
-                
-
-                <View style={{flexDirection:'row', alignContent:'center', alignSelf:'center', gap : "5%", marginTop:40 }}>
-                    <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#9CAFEF'}]}
-                    onPress={()=> {setClickParam(!clickParam); setNumCycle(defaultRepetition);
-                    setPomodoroDuration(defaultStudyTime); setBreakDuration(defaultBreakTime);
-                    updateTime(Number(defaultStudyTime) ); }}>
-
-                        <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> OK </Text>
-                        </TouchableOpacity>
-
-                    <TouchableOpacity style={[stylesProfil.clickButton,
-                      {backgroundColor: isDarkMode ? '#565681' : 'white', borderColor:'black'}]} 
-                      onPress={() => {setClickParam(!clickParam); setDefaultRepetition(numCycle);
-                      setDefaultStudyTime(pomodoroDuration); setDefaultBreakTime(breakDuration)}}>
-                        <Text style={[stylesProfil.confText, {color: isDarkMode ? 'white' : 'black'}]}> Annuler </Text>
-                        </TouchableOpacity>
-                </View>
-            </View>
-
-            </View>
-        </Modal> 
-
-
-        </View>
-
-        <View style={styles.infoBloc}>
-        <IonIcons name="time-outline" size={25} color={'black'} style={styles.infoButton}/>
-        <Text style={{fontWeight:'bold', fontSize:18, color:'white', marginLeft:-5}}> {pomodoroDuration} min </Text>
-        <IonIcons name="cafe-outline" size={25} color={'black'} style={styles.infoButton}/>
-        <Text style={{fontWeight:'bold', fontSize:18, color:'white', marginLeft:-5}}> {breakDuration} min </Text>
-        <IonIcons name="refresh-outline" size={25} color={'black'} style={styles.infoButton}/>
-        <Text style={{fontWeight:'bold', fontSize:18, color:'white', marginLeft:-5, paddingRight:5}}> {numCycle} </Text>
-        </View>
-        
-        {/* -------------------- Partie Boutons -------------------- */}
-        <View style={{flexDirection:'row', alignContent:'center',gap : "20%", marginTop:40 }}>
-        <TouchableOpacity style={[styles.actionButton, {backgroundColor: isRunning ? '#9CAFEF' : ((timeLeft ===0) ? 'grey' : '#9D75F2')}]}
-                          onPress={isRunning ? pause_button : start_button} disabled={timeLeft ===0}>
-        
-        <Text style={{color: 'white', fontSize:18}}> {button_start_text} </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.actionButton, {backgroundColor:"#F28C8C"}]} onPress={stop_button}>
-        <Text style={{color: 'white', fontSize:18,}}> Stop </Text>
-        </TouchableOpacity>
-        </View>
-        </View>
-      {/* -------------------- Fin Section Minuteur pomodoro  -------------------- */}
-      {/* -------------------- Section Historique pomodoro  -------------------- */}
-      
-      <View style={{marginTop:30, alignSelf: 'flex-start'}}>
-          <Text style={{color: isDarkMode ? 'white' : 'black', fontSize:20, fontWeight:'bold',
-              marginBottom:10, marginTop:20}}>Historique</Text>
-          <View style={[stylesProfil.drawHorLine, {width: width*0.6 , backgroundColor: isDarkMode ? 'white' : 'black'}]}></View>
       </View>
-        {/* Modals (/pop up) pour page si pomodoro est fini */}
-        <Modal transparent visible={isFinished} animationType='none' >
-            <View style={[stylesProfil.confPage, {backgroundColor: isDarkMode ? 'rgba(0,0,0,0.6)' : 'rgba(1,1,1,0.6)'}]}>
-                <View style={[stylesProfil.confContener, {backgroundColor: isDarkMode ? '#565681' : 'white'}]}>
-                    <Text style={[stylesProfil.confText, {marginTop:15, margin:5, color: isDarkMode ? 'white' : 'black'}]}>
-                        Bravo pour avoir fini la session de pomodoro !</Text>
-                    <IonIcons name="ribbon-outline" size={35} color={isDarkMode ? 'white': 'black'}
-                              style={{ marginTop: 10, marginBottom:10,alignSelf:'center'}}/>
 
-                        <View style={{flexDirection:'row', alignContent:'center', alignSelf:'center', gap : "15%", marginBottom:0 }}>
-                        <TouchableOpacity style={[stylesProfil.clickButton,{backgroundColor:'#9CAFEF'}]} onPress={() =>
-                            setIsFinished(false)} >
-                            <Text style={[stylesProfil.confText, {  color: isDarkMode ? 'white' : 'black'}]}> OK </Text>
-                        </TouchableOpacity>
-                    </View>
+      {/* --- Params modal --- */}
+      <Modal transparent visible={clickParam} animationType="fade">
+        <Pressable
+          style={[stylesProfil.confPage, { backgroundColor: "rgba(0,0,0,0.6)" }]}
+          onPress={() => setClickParam(false)}
+        >
+          <Pressable onPress={(e) => e.stopPropagation()}>
+            <View
+              style={[
+                stylesProfil.confContener,
+                { height: "70%", ...cardBg, borderColor: "#444462", borderWidth: 1 },
+              ]}
+            >
+              <Text
+                className="text-lg font-bold text-purple-100"
+                style={{ paddingTop: 10, paddingBottom: 20, textAlign: "center" }}
+              >
+                Réglez votre pomodoro
+              </Text>
+
+              <View style={{ padding: 10, gap: 20 }}>
+                <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2" style={cardBg}>
+                  <Text className="text-purple-100">Temps d'étude</Text>
+                  <TouchableOpacity
+                    className="flex-row items-center gap-1 rounded-lg px-3 py-2"
+                    style={{ backgroundColor: "#444462" }}
+                    onPress={() => setClickSelectStudy(true)}
+                  >
+                    <TextInput
+                      keyboardType="numeric"
+                      maxLength={4}
+                      className="text-purple-100 min-w-[40px]"
+                      style={{ padding: 0, height: 24 }}
+                      value={`${defaultStudyTime}`}
+                      onChangeText={handleStudyText}
+                    />
+                    <Text className="text-purple-200">min</Text>
+                    <IonIcons name="chevron-down" size={20} color="#e0aaff" />
+                  </TouchableOpacity>
                 </View>
 
+                <Modal transparent visible={clickSelectStudy} animationType="fade">
+                  <Pressable
+                    style={[stylesProfil.confPage, { flex: 1 }]}
+                    onPress={() => setClickSelectStudy(false)}
+                  >
+                    <Pressable onPress={(e) => e.stopPropagation()}>
+                      <View
+                        className="rounded-2xl p-3 gap-1 w-32"
+                        style={cardBg}
+                      >
+                        {["10", "20", "30", "40", "50", "60"].map((m) => (
+                          <TouchableOpacity
+                            key={m}
+                            onPress={() => clickStudyTime(m)}
+                            className="rounded-lg py-2 items-center"
+                            style={{
+                              backgroundColor: defaultStudyTime === m ? "#7b2cbf" : "#444462",
+                            }}
+                          >
+                            <Text
+                              className={
+                                defaultStudyTime === m ? "text-white font-semibold" : "text-purple-200"
+                              }
+                            >
+                              {m} min
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </Pressable>
+                  </Pressable>
+                </Modal>
+
+                <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2" style={cardBg}>
+                  <Text className="text-purple-100">Temps de pause</Text>
+                  <TouchableOpacity
+                    className="flex-row items-center gap-1 rounded-lg px-3 py-2"
+                    style={{ backgroundColor: "#444462" }}
+                    onPress={() => setClickSelectBreak(true)}
+                  >
+                    <TextInput
+                      keyboardType="numeric"
+                      maxLength={4}
+                      className="text-purple-100 min-w-[40px]"
+                      style={{ padding: 0, height: 24 }}
+                      value={`${defaultBreakTime}`}
+                      onChangeText={handleBreakText}
+                    />
+                    <Text className="text-purple-200">min</Text>
+                    <IonIcons name="chevron-down" size={20} color="#e0aaff" />
+                  </TouchableOpacity>
+                </View>
+                <Modal transparent visible={clickSelectBreak} animationType="fade">
+                  <Pressable
+                    style={[stylesProfil.confPage, { flex: 1 }]}
+                    onPress={() => setClickSelectBreak(false)}
+                  >
+                    <Pressable onPress={(e) => e.stopPropagation()}>
+                      <View className="rounded-2xl p-3 gap-1 w-32" style={cardBg}>
+                        {["5", "10", "15", "20", "25", "30"].map((m) => (
+                          <TouchableOpacity
+                            key={m}
+                            onPress={() => clickBreakTime(m)}
+                            className="rounded-lg py-2 items-center"
+                            style={{
+                              backgroundColor: defaultBreakTime === m ? "#7b2cbf" : "#444462",
+                            }}
+                          >
+                            <Text
+                              className={
+                                defaultBreakTime === m ? "text-white font-semibold" : "text-purple-200"
+                              }
+                            >
+                              {m} min
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </Pressable>
+                  </Pressable>
+                </Modal>
+
+                <View className="mb-4">
+                  <Text className="text-purple-100 mb-2">Répétitions</Text>
+                  <View className="flex-row gap-2">
+                    {[1, 2, 3, 4, 5].map((n) => (
+                      <Pressable
+                        key={n}
+                        onPress={() => clickRepeat(n)}
+                        className="flex-1 py-2 rounded-xl items-center"
+                        style={{
+                          backgroundColor: defaultRepetition === n ? "#7b2cbf" : "#444462",
+                        }}
+                      >
+                        <Text
+                          className={
+                            defaultRepetition === n ? "text-white font-semibold" : "text-purple-200"
+                          }
+                        >
+                          {n}
+                        </Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                </View>
+
+                <View className="flex-row justify-center gap-4 mt-6">
+                  <Pressable
+                    onPress={() => {
+                      setClickParam(false);
+                      setNumCycle(defaultRepetition);
+                      setPomodoroDuration(defaultStudyTime);
+                      setBreakDuration(defaultBreakTime);
+                      updateTime(Number(defaultStudyTime));
+                    }}
+                    className="rounded-2xl bg-violet-600 py-3 px-8"
+                  >
+                    <Text className="text-purple-100 font-semibold">OK</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => {
+                      setClickParam(false);
+                      setDefaultRepetition(numCycle);
+                      setDefaultStudyTime(pomodoroDuration);
+                      setDefaultBreakTime(breakDuration);
+                    }}
+                    className="rounded-2xl border border-violet-200 py-3 px-8"
+                  >
+                    <Text className="text-purple-100 font-semibold">Annuler</Text>
+                  </Pressable>
+                </View>
+              </View>
             </View>
+            </Pressable>
+          </Pressable>
         </Modal>
-        <ScrollView  horizontal={true} style={{marginLeft: -15, marginRight:-10}} showsHorizontalScrollIndicator={false} >
-            <ScrollView horizontal={false}>
-            {sessions.map((session) => (
 
-                    <View key={session.id} style={{borderWidth:2, borderColor:isDarkMode ? 'white': 'black',
-                    marginBottom:10, flexDirection:'row', padding:5, borderRadius:10, }}>
+      {/* --- Info row (index-style card) --- */}
+      <View
+        className="rounded-2xl flex-row items-center justify-center gap-4 py-4 mb-4"
+        style={cardBg}
+      >
+        <IonIcons name="time-outline" size={22} color="#e0aaff" />
+        <Text className="text-purple-100 font-semibold">{pomodoroDuration} min</Text>
+        <IonIcons name="cafe-outline" size={22} color="#e0aaff" />
+        <Text className="text-purple-100 font-semibold">{breakDuration} min</Text>
+        <IonIcons name="refresh-outline" size={22} color="#e0aaff" />
+        <Text className="text-purple-100 font-semibold">{numCycle}</Text>
+      </View>
 
-                    {session.isCompleted && <IonIcons name={'checkmark-outline'} size={35} color={isDarkMode ? 'black': 'white'}
-                              style={{ marginTop: 10, marginBottom:10,alignSelf:'center',
-                                  backgroundColor:'#4BAE4F', borderRadius:40, marginRight:15}}/>}
-                    {(!session.isCompleted) && <IonIcons name={'close-outline'} size={35} color={isDarkMode ? 'black': 'white'}
-                                                      style={{ marginTop: 10, marginBottom:10,alignSelf:'center',
-                                                          backgroundColor:'#FF4141', borderRadius:40, marginRight:10}}/>}
-                        <View >
-                            <Text style={{fontWeight:'bold'}} > {days[new Date().getDay()]} {new Date().getDay()} {new Date().toLocaleString('fr-FR', { month: 'long' })} {new Date().getFullYear()}</Text>
-                            <View style={{ flexDirection:'row', }}>
-                                <Text style={{color:'grey'}}>Durée:{session.durationSession} min Pause:{session.breakSession} min Répétitions:{session.repeatSession}</Text>
-                                <TouchableOpacity style={{alignSelf:'center', marginLeft:5, backgroundColor:isDarkMode ? '#4D4D71': '#D9D9D9',
-                                    borderRadius:20, padding:4, marginTop:-2, }} onPress={() => handleDeleteSession(session.id)}>
-                                    <IonIcons name={"trash-outline"} size={20} style={{color:isDarkMode ? 'white': 'black'}}></IonIcons>
-                                </TouchableOpacity>
+      {/* --- Actions (index-style buttons) --- */}
+      <View className="flex-row gap-3 mb-6">
+        <Pressable
+          onPress={isRunning ? pause_button : start_button}
+          disabled={timeLeft === 0}
+          className={`flex-1 rounded-2xl py-4 ${timeLeft === 0 ? "opacity-60" : ""}`}
+          style={{
+            backgroundColor: isRunning ? "#444462" : timeLeft === 0 ? "#6B7280" : "#7b2cbf",
+          }}
+        >
+          <Text className="text-purple-100 text-center font-semibold">{button_start_text}</Text>
+        </Pressable>
+        <Pressable
+          onPress={stop_button}
+          className="flex-1 rounded-2xl border border-red-300 py-4"
+          style={{ borderColor: "#f87171" }}
+        >
+          <Text className="text-red-200 text-center font-semibold">Stop</Text>
+        </Pressable>
+      </View>
 
-                            </View>
+      {/* --- Historique --- */}
+      <Text className="text-xl font-bold text-purple-100 mb-2 mt-2">Historique</Text>
+      <View style={{ height: 2, backgroundColor: "#444462", width: width * 0.5, marginBottom: 12 }} />
+      <Modal transparent visible={isFinished} animationType="fade">
+        <View style={[stylesProfil.confPage, { backgroundColor: "rgba(0,0,0,0.6)" }]}>
+          <View style={[stylesProfil.confContener, cardBg, { borderWidth: 1, borderColor: "#444462" }]}>
+            <Text className="text-purple-100 text-center font-bold text-lg mb-2">
+              Bravo pour avoir fini la session de pomodoro !
+            </Text>
+            <IonIcons name="ribbon-outline" size={40} color="#e0aaff" style={{ alignSelf: "center", marginVertical: 8 }} />
+            <Pressable
+              onPress={() => setIsFinished(false)}
+              className="rounded-2xl bg-violet-600 py-3 px-8 mt-2"
+            >
+              <Text className="text-purple-100 font-semibold">OK</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
 
-                        </View>
-
-                </View>
-            ))}
-            <View>
-
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="-mx-5"
+        contentContainerStyle={{ paddingRight: 20 }}
+      >
+        {sessions.map((session) => (
+          <View
+            key={session.id}
+            className="rounded-xl flex-row items-center py-2.5 px-3 mr-2"
+            style={{ ...cardBg, borderWidth: 1, borderColor: "#444462", minWidth: 140 }}
+          >
+            {session.isCompleted && (
+              <IonIcons
+                name="checkmark-circle"
+                size={18}
+                color="#4BAE4F"
+                style={{ marginRight: 8 }}
+              />
+            )}
+            <View className="flex-1 min-w-0">
+              <Text className="text-purple-100 text-xs font-medium" numberOfLines={1}>
+                {session.durationSession}min · {session.breakSession}min pause · ×{session.repeatSession}
+              </Text>
             </View>
-            </ScrollView>
-        </ScrollView>
-</View>
+            <TouchableOpacity
+              onPress={() => handleDeleteSession(session.id)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              className="rounded-full p-1.5 ml-1"
+              style={{ backgroundColor: "#444462" }}
+            >
+              <IonIcons name="trash-outline" size={14} color="#e0aaff" />
+            </TouchableOpacity>
+          </View>
+        ))}
+      </ScrollView>
 
-    </ScrollView>)}
+      <View className="h-10" />
+    </ScrollView>
+  );
+}
 
-
-{/* -------------------- Section Style -------------------- */}
 const styles = StyleSheet.create({
     styleText:{
       alignItems:'center',
