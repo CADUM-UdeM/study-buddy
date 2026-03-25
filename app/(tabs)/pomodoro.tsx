@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import {AnimatedCircularProgress} from "react-native-circular-progress";
 import "../global.css";
+import {sessionContext} from "@/app/context/SessionContext";
 
 
 export default function Pomodoro() {
@@ -31,8 +32,7 @@ export default function Pomodoro() {
     const [defaultBreakTime, setDefaultBreakTime] = useState('10')
     const [inBreakTime, setInBreakTime] = useState(false)
 
-    {/* Fonction pour formatage du minuteur */
-    }
+    {/* Fonction pour formatage du minuteur */ }
     const addZero = (num: number): string => {
         if (num < 10) {
             return `0${num}`
@@ -283,9 +283,8 @@ export default function Pomodoro() {
 
     /* Avant de modifier historique récupère les données enregistrées. */
     useEffect(() => {
-        AsyncStorage.getItem(key_session).then(stored =>
-            /* Si on a des données, retransforme le string en objet Javascript */
-            stored && setSessions(JSON.parse(stored))).catch(error => console.log(error));
+            /* Si on a des données, met à jour la variable contenant nos sessions */
+        sessionContext.getSessionsAsync().then(setSessions);
     }, []);
 
     /* Si session pomodoro fini le rajoute dans la liste de l'historique */

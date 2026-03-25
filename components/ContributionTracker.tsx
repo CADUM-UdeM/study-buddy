@@ -1,5 +1,7 @@
-import React from "react";
+import React, {useCallback, useState} from "react";
 import { Dimensions, StyleSheet, Text, View } from "react-native";
+import {sessionContext} from "@/app/context/SessionContext";
+import {useFocusEffect} from "@react-navigation/core";
 
 export default function ContributionTracker() {
   // Détermine la session actuelle et ses dates
@@ -12,17 +14,17 @@ export default function ContributionTracker() {
     let endMonth = 3;
 
     if (month >= 0 && month <= 3) {
-      // Janvier à Avril = Session Hiver
+      // Janvier à avril = Session Hiver
       sessionName = "Hiver";
       startMonth = 0; // Janvier
       endMonth = 3; // Avril
     } else if (month >= 4 && month <= 7) {
-      // Mai à Août = Session Été
+      // Mai à août = Session Été
       sessionName = "Été";
       startMonth = 4; // Mai
       endMonth = 7; // Août
     } else {
-      // Septembre à Décembre = Session Automne
+      // Septembre à décembre = Session Automne
       sessionName = "Automne";
       startMonth = 8; // Septembre
       endMonth = 11; // Décembre
@@ -110,10 +112,26 @@ export default function ContributionTracker() {
   };
 
   const weeks = generateWeeks();
-  const totalContributions = Object.values(contributions).reduce(
-    (sum, count) => sum + count,
-    0,
-  );
+
+  const [sessions, setSessions] = useState<{
+        id: string,
+        durationSession: string,
+        breakSession: string,
+        repeatSession: string,
+        isCompleted: boolean,
+        isDeleteOpen: boolean
+    }[]>([]);
+
+    const [totalContributions, setTotalContributions] = useState(0);
+
+    /* Avant de modifier historique récupère les données enregistrées. */
+    useFocusEffect(
+        useCallback(() => {
+        /* Si on a des données, met à jour la variable contenant nos sessions */
+        sessionContext.getSessionsAsync().then(setSessions);
+        setTotalContributions(sessions.length);
+    }, [sessions.length]));
+
 
   // Calcule la taille des carrés dynamiquement (GARDÉ LA MÊME LOGIQUE)
   const screenWidth = Dimensions.get("window").width;
@@ -164,7 +182,7 @@ export default function ContributionTracker() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>
-        {totalContributions} séances d'études cette session
+        {totalContributions} séances d&#39;études cette session
       </Text>
 
       <View style={styles.content}>
