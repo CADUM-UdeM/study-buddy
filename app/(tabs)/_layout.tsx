@@ -39,11 +39,15 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      detachInactiveScreens={false}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: "#AB8BFF",
         tabBarInactiveTintColor: "#ffffff",
         tabBarStyle: { backgroundColor: "#221F3D" },
+        animation: "fade",
+        sceneStyle: { backgroundColor: "#221F3D" },
+
       }}
     >
       <Tabs.Screen
