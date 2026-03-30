@@ -2,18 +2,18 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useRef, useState } from "react";
 import {
-    Alert,
-    Animated,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Animated,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { Course, useCourses } from "../context/CoursesContext";
@@ -61,9 +61,9 @@ export default function Donnees() {
   // Show courses from active session + courses without a session (for backwards compatibility)
   const displayedCourses = activeSession
     ? [
-        ...getCoursesBySession(activeSession.id),
-        ...getCoursesBySession(null), // Include courses without session assignment
-      ]
+      ...getCoursesBySession(activeSession.id),
+      ...getCoursesBySession(null), // Include courses without session assignment
+    ]
     : getCoursesBySession(null);
 
   const validateObjective = (value: string): number | null => {
@@ -230,11 +230,10 @@ export default function Donnees() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+    <View style={{ flex: 1, backgroundColor: "#221F3D" }}>
       {/* Header - anchored to top */}
       <View>
         <Text style={styles.title}>Mes Cours</Text>
-        <View style={styles.divider} />
       </View>
 
       {/* Session Selector */}
@@ -262,7 +261,7 @@ export default function Donnees() {
                 style={[
                   styles.sessionChipText,
                   activeSession?.id === session.id &&
-                    styles.sessionChipTextActive,
+                  styles.sessionChipTextActive,
                 ]}
               >
                 {session.name}
@@ -924,6 +923,7 @@ const styles = StyleSheet.create({
     marginTop: 70,
     marginBottom: 5,
     alignSelf: "center",
+    color: "white",
   },
   stepContainer: {
     gap: 8,
@@ -932,7 +932,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 3,
     width: "60%",
-    backgroundColor: "black",
+    backgroundColor: "white",
     marginTop: 5,
     marginBottom: 20,
     alignSelf: "center",

@@ -1,6 +1,5 @@
 import { Evaluation, useCourses } from "@/app/context/CoursesContext";
 import { GradeBoundary, useSettings } from "@/app/context/SettingsContext";
-import { GradeBoundariesEditor } from "./GradeBoundariesEditor";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -21,6 +20,7 @@ import {
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Swipeable } from "react-native-gesture-handler";
+import { GradeBoundariesEditor } from "./GradeBoundariesEditor";
 
 export default function DetailsCours() {
   const router = useRouter();
@@ -166,8 +166,7 @@ export default function DetailsCours() {
     if (currentManualTotal + num > 100) {
       Alert.alert(
         "Erreur",
-        `La pondération manuelle totale ne peut pas dépasser 100%. Actuellement: ${currentManualTotal}%. Disponible: ${
-          100 - currentManualTotal
+        `La pondération manuelle totale ne peut pas dépasser 100%. Actuellement: ${currentManualTotal}%. Disponible: ${100 - currentManualTotal
         }%`,
       );
       return null;
@@ -363,7 +362,7 @@ export default function DetailsCours() {
   const handleToggleCustomBoundaries = () => {
     const newValue = !useCustomBoundaries;
     setUseCustomBoundaries(newValue);
-    
+
     if (!newValue) {
       // Removing custom boundaries - revert to general settings
       updateCourseGradeBoundaries(courseId, undefined);
@@ -484,11 +483,11 @@ export default function DetailsCours() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "white" }}>
+    <View style={{ flex: 1, backgroundColor: "#221F3D" }}>
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={26} />
+          <Ionicons name="arrow-back" size={26} color="white" />
         </TouchableOpacity>
         <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
           {course.name}
@@ -569,7 +568,7 @@ export default function DetailsCours() {
               />
             </TouchableOpacity>
           </View>
-          
+
           {useCustomBoundaries && course.customGradeBoundaries && (
             <View style={{ marginTop: 10 }}>
               <GradeBoundariesEditor
@@ -579,7 +578,7 @@ export default function DetailsCours() {
               />
             </View>
           )}
-          
+
           {!useCustomBoundaries && (
             <Text style={styles.customBoundariesHint}>
               Utilisez les seuils de notation généraux définis dans les paramètres
@@ -708,10 +707,10 @@ export default function DetailsCours() {
                   <Text style={styles.dateFieldText}>
                     {evalDate
                       ? evalDate.toLocaleDateString("fr-CA", {
-                          year: "numeric",
-                          month: "long",
-                          day: "numeric",
-                        })
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })
                       : "Choisir une date"}
                   </Text>
                 </TouchableOpacity>
@@ -1051,10 +1050,10 @@ function EvaluationCard({
   };
   const displayDate = item.date
     ? parseLocalDate(item.date).toLocaleDateString("fr-CA", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    })
     : null;
 
   const confirmDelete = () => {
@@ -1206,6 +1205,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
     flex: 1,
+    color: "white",
   },
   percentText: {
     fontSize: 32,
@@ -1234,6 +1234,7 @@ const styles = StyleSheet.create({
   objectif: {
     marginTop: 10,
     fontSize: 18,
+    color: "white",
   },
   totalWeight: {
     marginTop: 5,
@@ -1257,6 +1258,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 15,
     marginBottom: 10,
+    color: "white",
   },
   card: {
     backgroundColor: "#f3f3f3",
