@@ -37,29 +37,7 @@ export default function ContributionTracker() {
     return { sessionName, startDate, endDate };
   };
 
-  // Génère des données de démo pour la session
-  const generateDemoData = () => {
-    const data: Record<string, number> = {};
-    const { startDate, endDate } = getCurrentSession();
 
-    let currentDate = new Date(startDate);
-
-    while (currentDate <= endDate) {
-      const dateStr = currentDate.toISOString().split("T")[0];
-
-      // Données aléatoires pour la démo
-      const random = Math.random();
-      if (random > 0.3) {
-        data[dateStr] = Math.floor(Math.random() * 15);
-      }
-
-      currentDate.setDate(currentDate.getDate() + 1);
-    }
-
-    return data;
-  };
-
-  const contributions = generateDemoData();
   const { sessionName, startDate, endDate } = getCurrentSession();
 
   // Génère les semaines de la session
@@ -113,14 +91,16 @@ export default function ContributionTracker() {
 
   const weeks = generateWeeks();
 
-  const [sessions, setSessions] = useState<{
+  interface Session {
         id: string,
         durationSession: string,
         breakSession: string,
         repeatSession: string,
         isCompleted: boolean,
-        isDeleteOpen: boolean
-    }[]>([]);
+        isDeleteOpen: boolean,
+        date: string,
+    }
+  const [sessions, setSessions] = useState<Session[]>([]);
 
     const [totalContributions, setTotalContributions] = useState(0);
 
@@ -132,6 +112,18 @@ export default function ContributionTracker() {
         setTotalContributions(sessions.length);
     }, [sessions.length]));
 
+    // Génère des données de démo pour la session
+  const generateDemoData = (sessions: Session[]) => {
+      const data: Record<string, number> = {};
+
+      sessions.forEach((session) => {
+          const dateStr =session.date;
+          data[dateStr] = (data[dateStr] ?? 0) + 1
+      })
+      return data;
+    };
+
+  const contributions = generateDemoData(sessions);
 
   // Calcule la taille des carrés dynamiquement (GARDÉ LA MÊME LOGIQUE)
   const screenWidth = Dimensions.get("window").width;

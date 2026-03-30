@@ -239,15 +239,16 @@ export default function Pomodoro() {
 
     {/* Pour l'historique --------------------*/
     }
-    const [sessions, setSessions] = useState<{
+    interface Session {
         id: string,
         durationSession: string,
         breakSession: string,
         repeatSession: string,
         isCompleted: boolean,
-        isDeleteOpen: boolean
-    }[]>([]);
-
+        isDeleteOpen: boolean,
+        date : string
+    }
+    const [sessions, setSessions] = useState<Session[]>([]);
     const handleDeleteSession = (id: string) => {
         setSessions(session => {
             const newSession = session.filter((actual) => actual.id !== id);
@@ -271,7 +272,8 @@ export default function Pomodoro() {
             /* Creation de la nouvelle session */
             setSessions(session => {
                 const newSession =
-                [...session, {id: Date.now().toString(), durationSession, breakSession, repeatSession, isCompleted, isDeleteOpen}];
+                [...session, {id: Date.now().toString(), durationSession, breakSession, repeatSession, isCompleted, isDeleteOpen,
+                    date : new Date().toISOString().split("T")[0]}];
 
                 /* Stockage en local */
                 AsyncStorage.setItem(key_session, JSON.stringify(newSession)).catch(error =>
