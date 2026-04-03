@@ -322,7 +322,7 @@ export default function Pomodoro() {
                     },
                 ]}
             >
-                <Text className="text-center text-lg font-bold text-purple-200 mb-6">
+                <Text className="text-center text-lg text-purple-200 mb-6" style={{fontFamily: 'PixelBold'}}>
                     {!inBreakTime ? "Focus" : "Pause"}
                 </Text>
 
@@ -353,7 +353,7 @@ export default function Pomodoro() {
                         lineCap="round"
                     >
                         {() => (
-                            <Text className="text-3xl font-bold text-purple-100">
+                            <Text className="text-3xl text-purple-100" style={{fontFamily: 'PixelRegular'}}>
                                 {hours}:{min}:{sec}
                             </Text>
                         )}
@@ -385,7 +385,7 @@ export default function Pomodoro() {
                         className="rounded-xl px-4 py-2"
                         style={{backgroundColor: "#AB8BFF40"}}
                     >
-                        <Text className="text-sm font-semibold text-purple-100">
+                        <Text className="text-sm font-semibold text-purple-100" >
                             Cycle : {remainingCycle}
                         </Text>
                     </View>
@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
         padding: 10,
         marginTop: 40,
         backgroundColor: '#D9D9D9',
-    }
+    },
 });
 
 const stylesProfil = StyleSheet.create({

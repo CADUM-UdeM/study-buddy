@@ -51,7 +51,7 @@ export default function Accueil() {
             <Text className="text-2xl font-semibold text-purple-200">
               {overallStats.gpaDisplay}
             </Text>
-            <Text className="text-sm text-neutral-500 mt-1">
+            <Text className="text-sm text-neutral-500 mt-1" style={{fontFamily: "PixelRegular"}}>
               {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
               crédits
             </Text>

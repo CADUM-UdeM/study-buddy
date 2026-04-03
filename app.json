@@ -26,6 +26,17 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/PixelifySans-Medium.ttf",
+            "./assets/fonts/PixelifySans-Regular.ttf",
+            "./assets/fonts/PixelifySans-SemiBold.ttf",
+            "./assets/fonts/PixelifySans-Bold.ttf"
+          ]
+        }
+      ],
       "expo-router",
       [
         "expo-splash-screen",
