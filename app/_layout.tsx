@@ -23,6 +23,8 @@ export default function RootLayout() {
         PixelMedium: require("../assets/fonts/PixelifySans-Medium.ttf"),
         PixelRegular: require("../assets/fonts/PixelifySans-Regular.ttf"),
         PixelSemiBold: require("../assets/fonts/PixelifySans-SemiBold.ttf"),
+        PixelJersey: require("../assets/fonts/Jersey10-Regular.ttf"),
+
     });
     if (!fonts) {
         return null;

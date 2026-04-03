@@ -7,6 +7,9 @@ module.exports = {
     ],
     presets: [require('nativewind/preset')],
     theme: {extend: {
+            fontFamily: {
+                pixel: ["PixelJersey"]
+            },
             colors: {
                 light: {
                     primary: '#D6C6FF',

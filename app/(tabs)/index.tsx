@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
-import { useGPA } from "../../app/hooks/useGPA";
+import { useGPA } from "@/app/hooks/useGPA";
 import ContributionTracker from "../../components/ContributionTracker";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
@@ -24,7 +24,7 @@ export default function Accueil() {
       {/* --- GPA Section --- */}
       <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: "#1A1729"}}>
         <View className="flex-row items-center justify-between mb-2">
-          <Text className="text-neutral-600">
+          <Text className="text-neutral-600 font-pixel text-lg">
             {showGlobalGPA
               ? "GPA Global"
               : activeSession
@@ -41,27 +41,27 @@ export default function Accueil() {
               size={16}
               color="#059669"
             />
-            <Text className="text-xs font-medium text-purple-100">
+            <Text className="text-base font-medium text-purple-100 font-pixel">
               {showGlobalGPA ? "Global" : "Session"}
             </Text>
           </Pressable>
         </View>
         {overallStats ? (
           <>
-            <Text className="text-2xl font-semibold text-purple-200">
+            <Text className="text-3xl font-semibold text-purple-200 font-pixel">
               {overallStats.gpaDisplay}
             </Text>
-            <Text className="text-sm text-neutral-500 mt-1" style={{fontFamily: "PixelRegular"}}>
+            <Text className="text-sm text-neutral-500 mt-1 font-pixel">
               {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
               crédits
             </Text>
           </>
         ) : (
           <View className="py-2">
-            <Text className="text-base text-neutral-500 italic">
+            <Text className="text-xl text-neutral-500 italic font-pixel">
               Aucune note disponible pour le moment
             </Text>
-            <Text className="text-sm text-neutral-400 mt-1">
+            <Text className="text-base text-neutral-400 mt-1 font-pixel ">
               Ajoutez des notes à vos cours pour voir votre GPA
             </Text>
           </View>
@@ -73,14 +73,14 @@ export default function Accueil() {
         onPress={() => router.push("/(tabs)/pomodoro")}
         className="mt-5 rounded-2xl bg-violet-600 py-4"
       >
-        <Text className="text-purple-100 text-center font-semibold">
+        <Text className="text-purple-100 text-center font-semibold font-pixel text-xl">
           Démarrer un Pomodoro
         </Text>
       </Pressable>
 
       <Link href="/(tabs)/donnees" asChild>
         <Pressable className="mt-3 rounded-2xl border border-violet-100 py-4">
-          <Text className="text-center font-medium text-purple-100">Voir mes données</Text>
+          <Text className="text-center font-medium text-purple-100 font-pixel text-xl">Voir mes données</Text>
         </Pressable>
       </Link>
 

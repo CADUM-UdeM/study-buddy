@@ -322,7 +322,7 @@ export default function Pomodoro() {
                     },
                 ]}
             >
-                <Text className="text-center text-lg text-purple-200 mb-6" style={{fontFamily: 'PixelBold'}}>
+                <Text className="text-center text-lg text-purple-200 mb-6 font-pixel text-[20px]">
                     {!inBreakTime ? "Focus" : "Pause"}
                 </Text>
 
@@ -353,7 +353,7 @@ export default function Pomodoro() {
                         lineCap="round"
                     >
                         {() => (
-                            <Text className="text-3xl text-purple-100" style={{fontFamily: 'PixelRegular'}}>
+                            <Text className="text-3xl text-purple-100 font-pixel ">
                                 {hours}:{min}:{sec}
                             </Text>
                         )}
@@ -385,7 +385,7 @@ export default function Pomodoro() {
                         className="rounded-xl px-4 py-2"
                         style={{backgroundColor: "#AB8BFF40"}}
                     >
-                        <Text className="text-sm font-semibold text-purple-100" >
+                        <Text className="text-4xl font-semibold text-purple-100 font-pixel">
                             Cycle : {remainingCycle}
                         </Text>
                     </View>
@@ -402,11 +402,11 @@ export default function Pomodoro() {
                         <View
                             style={[
                                 stylesProfil.confContainer,
-                                {height: "70%", ...cardBg, borderColor: "#444462", borderWidth: 1},
+                                {height: "77%", ...cardBg, borderColor: "#444462", borderWidth: 1},
                             ]}
                         >
                             <Text
-                                className="text-lg font-bold text-purple-100"
+                                className="text-2xl text-purple-100 font-pixel"
                                 style={{paddingTop: 10, paddingBottom: 20, textAlign: "center"}}
                             >
                                 Réglez votre pomodoro
@@ -415,7 +415,8 @@ export default function Pomodoro() {
                             <View style={{padding: 10, gap: 20}}>
                                 <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2"
                                       style={cardBg}>
-                                    <Text className="text-purple-100">Temps d&apos;étude</Text>
+                                    <Text className="text-purple-100 font-pixel text-xl"
+                                          >Temps d&apos;étude</Text>
                                     <TouchableOpacity
                                         className="flex-row items-center gap-1 rounded-lg px-3 py-2"
                                         style={{backgroundColor: "#444462"}}
@@ -424,12 +425,12 @@ export default function Pomodoro() {
                                         <TextInput
                                             keyboardType="numeric"
                                             maxLength={4}
-                                            className="text-purple-100 min-w-[40px]"
-                                            style={{padding: 0, height: 24}}
+                                            className="text-purple-100 min-w-[40px] font-pixel"
+                                            style={{padding: 0, height: 24, fontSize:20}}
                                             value={`${defaultStudyTime}`}
                                             onChangeText={handleStudyText}
                                         />
-                                        <Text className="text-purple-200">min</Text>
+                                        <Text className="text-purple-200 font-pixel text-xl" >min</Text>
                                         <IonIcons name="chevron-down" size={20} color="#e0aaff"/>
                                     </TouchableOpacity>
                                 </View>
@@ -455,7 +456,7 @@ export default function Pomodoro() {
                                                     >
                                                         <Text
                                                             className={
-                                                                defaultStudyTime === m ? "text-white font-semibold" : "text-purple-200"
+                                                                defaultStudyTime === m ? "text-white font-semibold font-pixel" : "text-purple-200 font-pixel"
                                                             }
                                                         >
                                                             {m} min
@@ -469,7 +470,7 @@ export default function Pomodoro() {
 
                                 <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2"
                                       style={cardBg}>
-                                    <Text className="text-purple-100">Temps de pause</Text>
+                                    <Text className="text-purple-100 font-pixel text-xl">Temps de pause </Text>
                                     <TouchableOpacity
                                         className="flex-row items-center gap-1 rounded-lg px-3 py-2"
                                         style={{backgroundColor: "#444462"}}
@@ -478,12 +479,12 @@ export default function Pomodoro() {
                                         <TextInput
                                             keyboardType="numeric"
                                             maxLength={4}
-                                            className="text-purple-100 min-w-[40px]"
-                                            style={{padding: 0, height: 24}}
+                                            className="text-purple-100 min-w-[40px] font-pixel"
+                                            style={{padding: 0, height: 24, fontSize:20}}
                                             value={`${defaultBreakTime}`}
                                             onChangeText={handleBreakText}
                                         />
-                                        <Text className="text-purple-200">min</Text>
+                                        <Text className="text-purple-200 text-xl font-pixel">min</Text>
                                         <IonIcons name="chevron-down" size={20} color="#e0aaff"/>
                                     </TouchableOpacity>
                                 </View>
@@ -505,7 +506,7 @@ export default function Pomodoro() {
                                                     >
                                                         <Text
                                                             className={
-                                                                defaultBreakTime === m ? "text-white font-semibold" : "text-purple-200"
+                                                                defaultBreakTime === m ? "text-white font-semibold font-pixel" : "text-purple-200 font-pixel"
                                                             }
                                                         >
                                                             {m} min
@@ -518,7 +519,7 @@ export default function Pomodoro() {
                                 </Modal>
 
                                 <View className="mb-4">
-                                    <Text className="text-purple-100 mb-2">Répétitions</Text>
+                                    <Text className="text-purple-100 mb-2 text-xl font-pixel">Répétitions</Text>
                                     <View className="flex-row gap-2">
                                         {[1, 2, 3, 4, 5].map((n) => (
                                             <Pressable
@@ -531,7 +532,7 @@ export default function Pomodoro() {
                                             >
                                                 <Text
                                                     className={
-                                                        defaultRepetition === n ? "text-white font-semibold" : "text-purple-200"
+                                                        defaultRepetition === n ? "text-white font-pixel" : "text-purple-200 font-pixel"
                                                     }
                                                 >
                                                     {n}
@@ -552,7 +553,7 @@ export default function Pomodoro() {
                                         }}
                                         className="rounded-2xl bg-violet-600 py-3 px-8"
                                     >
-                                        <Text className="text-purple-100 font-semibold">OK</Text>
+                                        <Text className="text-purple-100 text-xl font-pixel">OK</Text>
                                     </Pressable>
                                     <Pressable
                                         onPress={() => {
@@ -563,7 +564,7 @@ export default function Pomodoro() {
                                         }}
                                         className="rounded-2xl border border-violet-200 py-3 px-8"
                                     >
-                                        <Text className="text-purple-100 font-semibold">Annuler</Text>
+                                        <Text className="text-purple-100 text-xl font-pixel">Annuler</Text>
                                     </Pressable>
                                 </View>
                             </View>
@@ -578,11 +579,11 @@ export default function Pomodoro() {
                 style={cardBg}
             >
                 <IonIcons name="time-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 font-semibold">{pomodoroDuration} min</Text>
+                <Text className="text-purple-100 text-xl font-pixel">{pomodoroDuration} min</Text>
                 <IonIcons name="cafe-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 font-semibold">{breakDuration} min</Text>
+                <Text className="text-purple-100 text-xl font-pixel">{breakDuration} min</Text>
                 <IonIcons name="refresh-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 font-semibold">{numCycle}</Text>
+                <Text className="text-purple-100 text-xl font-pixel">{numCycle}</Text>
             </View>
 
             {/* --- Actions (index-style buttons) --- */}
@@ -595,33 +596,33 @@ export default function Pomodoro() {
                         backgroundColor: isRunning ? "#444462" : timeLeft === 0 ? "#6B7280" : "#7b2cbf",
                     }}
                 >
-                    <Text className="text-purple-100 text-center font-semibold">{button_start_text}</Text>
+                    <Text className="text-purple-100 text-center  text-xl font-pixel">{button_start_text}</Text>
                 </Pressable>
                 <Pressable
                     onPress={stop_button}
                     className="flex-1 rounded-2xl border border-red-300 py-4"
                     style={{borderColor: "#f87171"}}
                 >
-                    <Text className="text-red-200 text-center font-semibold">Stop</Text>
+                    <Text className="text-red-200 text-center text-xl font-pixel">Stop</Text>
                 </Pressable>
             </View>
 
             {/* --- Historique --- */}
-            <Text className="text-xl font-bold text-purple-100 mb-2 mt-2">Historique</Text>
+            <Text className="text-2xl text-purple-100 mb-2 mt-2 font-pixel">Historique</Text>
             <View style={{height: 2, backgroundColor: "#444462", width: width * 0.5, marginBottom: 12}}/>
             <Modal transparent visible={isFinished} animationType="fade">
                 <View style={[stylesProfil.confPage, {backgroundColor: "rgba(0,0,0,0.6)"}]}>
                     <View style={[stylesProfil.confContainer, cardBg, {borderWidth: 1, borderColor: "#444462"}]}>
-                        <Text className="text-purple-100 text-center font-bold text-lg mb-2">
+                        <Text className="text-purple-100 text-center mb-2 text-2xl font-pixel">
                             Bravo pour avoir fini la session de pomodoro !
                         </Text>
                         <IonIcons name="ribbon-outline" size={40} color="#e0aaff"
                                   style={{alignSelf: "center", marginVertical: 8}}/>
                         <Pressable
                             onPress={() => setIsFinished(false)}
-                            className="rounded-2xl bg-violet-600 py-3 px-8 mt-2"
+                            className="rounded-2xl bg-violet-600 py-3 px-8 mt-2 items-center"
                         >
-                            <Text className="text-purple-100 font-semibold">OK</Text>
+                            <Text className="text-purple-100 font-semibold font-pixel text-2xl">OK</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -648,7 +649,7 @@ export default function Pomodoro() {
                             />
                         )}
                         <View className="flex-1 min-w-0">
-                            <Text className="text-purple-100 text-xs font-medium" numberOfLines={1}>
+                            <Text className="text-purple-100 text-base font-medium font-pixel" numberOfLines={1}>
                                 {session.durationSession}min · {session.breakSession}min pause ·
                                 ×{session.repeatSession}
                             </Text>
