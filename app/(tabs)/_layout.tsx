@@ -12,6 +12,7 @@ export default function TabLayout() {
       <NativeTabs
         backgroundColor="#221F3D"
         iconColor={{ default: "#ffffff", selected: "#AB8BFF" }}
+        labelStyle={{ fontFamily: "PixelJersey", fontSize: 12 }}
       >
         <NativeTabs.Trigger name="index">
           <Icon src={<VectorIcon family={IonIcons} name="home" />} />
@@ -45,6 +46,7 @@ export default function TabLayout() {
         tabBarActiveTintColor: "#AB8BFF",
         tabBarInactiveTintColor: "#ffffff",
         tabBarStyle: { backgroundColor: "#221F3D" },
+        tabBarLabelStyle: { fontFamily: "PixelJersey", fontSize: 11 },
         animation: "fade",
         sceneStyle: { backgroundColor: "#221F3D" },
 

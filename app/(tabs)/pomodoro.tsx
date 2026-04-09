@@ -783,6 +783,7 @@ const stylesProfil = StyleSheet.create({
         width: '85%',
     },
     confText: {
+        fontFamily: 'PixelJersey',
         fontSize: 18,
         fontWeight: 'bold',
     },

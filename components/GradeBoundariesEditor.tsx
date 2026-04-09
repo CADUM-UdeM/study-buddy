@@ -248,13 +248,13 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
   return (
     <View className="mb-8">
       <View className="flex-row items-center justify-between mb-4">
-        <Text className="text-lg font-semibold text-white">{title}</Text>
+        <Text className="text-lg font-semibold text-white font-pixel">{title}</Text>
         {!isEditing && (
           <TouchableOpacity
             onPress={startEditing}
             className="bg-violet-600 px-4 py-2 rounded-lg"
           >
-            <Text className="text-white font-medium">Modifier</Text>
+            <Text className="text-white font-medium font-pixel">Modifier</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -262,7 +262,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
       {isEditing ? (
         <View>
           <View className="mb-3 bg-blue-900/30 rounded-lg p-3">
-            <Text className="text-blue-300 text-xs">
+            <Text className="text-blue-300 text-xs font-pixel">
               💡 Les seuils sont ajustés automatiquement. L'ordre des notes est préservé - chaque note doit avoir un minimum inférieur à la note précédente.
             </Text>
           </View>
@@ -277,21 +277,21 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                 key={index}
                 className="flex-row items-center mb-2 rounded-xl bg-zinc-800 px-4 py-3"
               >
-                <Text className="text-white font-bold w-12">{boundary.letter}</Text>
-                <Text className="text-zinc-400 flex-1 text-sm">
+                <Text className="text-white font-bold w-12 font-pixel">{boundary.letter}</Text>
+                <Text className="text-zinc-400 flex-1 text-sm font-pixel">
                   {boundary.min}%-{boundary.max}% → GPA: {boundary.gpa}
                 </Text>
                 <TouchableOpacity
                   onPress={() => openEditModal(index)}
                   className="bg-blue-600 px-3 py-1 rounded mr-2"
                 >
-                  <Text className="text-white text-xs">Éditer</Text>
+                  <Text className="text-white text-xs font-pixel">Éditer</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => deleteBoundary(index)}
                   className="bg-red-600 px-3 py-1 rounded"
                 >
-                  <Text className="text-white text-xs">×</Text>
+                  <Text className="text-white text-xs font-pixel">×</Text>
                 </TouchableOpacity>
               </View>
             ))}
@@ -302,14 +302,14 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
               onPress={addBoundary}
               className="flex-1 bg-green-600 px-4 py-2 rounded-lg"
             >
-              <Text className="text-white font-medium text-center">+ Ajouter</Text>
+              <Text className="text-white font-medium text-center font-pixel">+ Ajouter</Text>
             </TouchableOpacity>
             {onReset && (
               <TouchableOpacity
                 onPress={handleReset}
                 className="flex-1 bg-orange-600 px-4 py-2 rounded-lg"
               >
-                <Text className="text-white font-medium text-center">Réinitialiser</Text>
+                <Text className="text-white font-medium text-center font-pixel">Réinitialiser</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -319,13 +319,13 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
               onPress={cancelEditing}
               className="flex-1 bg-zinc-700 px-4 py-2 rounded-lg"
             >
-              <Text className="text-white font-medium text-center">Annuler</Text>
+              <Text className="text-white font-medium text-center font-pixel">Annuler</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={saveChanges}
               className="flex-1 bg-violet-600 px-4 py-2 rounded-lg"
             >
-              <Text className="text-white font-medium text-center">Enregistrer</Text>
+              <Text className="text-white font-medium text-center font-pixel">Enregistrer</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -336,11 +336,11 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
               key={index}
               className="flex-row items-center justify-between mb-2 rounded-xl bg-zinc-800 px-4 py-3"
             >
-              <Text className="text-white font-bold w-12">{boundary.letter}</Text>
-              <Text className="text-zinc-400 flex-1">
+              <Text className="text-white font-bold w-12 font-pixel">{boundary.letter}</Text>
+              <Text className="text-zinc-400 flex-1 font-pixel">
                 {boundary.min}%-{boundary.max}%
               </Text>
-              <Text className="text-violet-400 font-medium">GPA: {boundary.gpa}</Text>
+              <Text className="text-violet-400 font-medium font-pixel">GPA: {boundary.gpa}</Text>
             </View>
           ))}
         </View>
@@ -358,20 +358,20 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
           onPress={() => setEditingIndex(null)}
         >
           <Pressable className="bg-zinc-900 rounded-2xl p-6 w-80" onPress={(e) => e.stopPropagation()}>
-            <Text className="text-xl font-bold text-white mb-4">Modifier le seuil</Text>
+            <Text className="text-xl font-bold text-white mb-4 font-pixel">Modifier le seuil</Text>
 
-            <Text className="text-white mb-2">Lettre</Text>
+            <Text className="text-white mb-2 font-pixel">Lettre</Text>
             <TextInput
-              className="bg-zinc-800 text-white px-4 py-2 rounded-lg mb-4"
+              className="bg-zinc-800 text-white px-4 py-2 rounded-lg mb-4 font-pixel"
               value={editForm.letter}
               onChangeText={(text) => setEditForm({ ...editForm, letter: text })}
               placeholder="Ex: A+"
               placeholderTextColor="#71717a"
             />
 
-            <Text className="text-white mb-2">Minimum (%)</Text>
+            <Text className="text-white mb-2 font-pixel">Minimum (%)</Text>
             <TextInput
-              className="bg-zinc-800 text-white px-4 py-2 rounded-lg mb-4"
+              className="bg-zinc-800 text-white px-4 py-2 rounded-lg mb-4 font-pixel"
               value={editForm.min}
               onChangeText={(text) => setEditForm({ ...editForm, min: text })}
               keyboardType="numeric"
@@ -380,15 +380,15 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
               editable={editingIndex !== editingBoundaries.length - 1}
             />
 
-            <Text className="text-zinc-400 text-xs mb-4 italic">
+            <Text className="text-zinc-400 text-xs mb-4 italic font-pixel">
               {editingIndex === editingBoundaries.length - 1 
                 ? "Le seuil le plus bas commence automatiquement à 0%"
                 : "Le maximum sera automatiquement ajusté en fonction des autres seuils"}
             </Text>
 
-            <Text className="text-white mb-2">Valeur GPA</Text>
+            <Text className="text-white mb-2 font-pixel">Valeur GPA</Text>
             <TextInput
-              className="bg-zinc-800 text-white px-4 py-2 rounded-lg mb-6"
+              className="bg-zinc-800 text-white px-4 py-2 rounded-lg mb-6 font-pixel"
               value={editForm.gpa}
               onChangeText={(text) => setEditForm({ ...editForm, gpa: text })}
               keyboardType="numeric"
@@ -401,13 +401,13 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                 onPress={() => setEditingIndex(null)}
                 className="flex-1 bg-zinc-700 px-4 py-2 rounded-lg"
               >
-                <Text className="text-white font-medium text-center">Annuler</Text>
+                <Text className="text-white font-medium text-center font-pixel">Annuler</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={saveEdit}
                 className="flex-1 bg-violet-600 px-4 py-2 rounded-lg"
               >
-                <Text className="text-white font-medium text-center">Enregistrer</Text>
+                <Text className="text-white font-medium text-center font-pixel">Enregistrer</Text>
               </TouchableOpacity>
             </View>
           </Pressable>

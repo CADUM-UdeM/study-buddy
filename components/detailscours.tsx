@@ -67,7 +67,7 @@ export default function DetailsCours() {
           alignItems: "center",
         }}
       >
-        <Text style={{ fontSize: 18, marginBottom: 20 }}>
+        <Text style={{ fontFamily: "PixelJersey", fontSize: 18, marginBottom: 20 }}>
           Cours introuvable
         </Text>
         <TouchableOpacity
@@ -78,7 +78,7 @@ export default function DetailsCours() {
           }}
           onPress={() => router.back()}
         >
-          <Text style={{ color: "white", fontSize: 16 }}>Retour</Text>
+          <Text style={{ fontFamily: "PixelJersey", color: "white", fontSize: 16 }}>Retour</Text>
         </TouchableOpacity>
       </View>
     );
@@ -545,7 +545,7 @@ export default function DetailsCours() {
 
         {/* Encouragement message */}
         <View style={styles.encouragementBox}>
-          <Text style={{ color: "#555", textAlign: "center" }}>
+          <Text style={{ fontFamily: "PixelJersey", color: "#555", textAlign: "center" }}>
             {getEncouragementMessage()}
           </Text>
         </View>
@@ -1164,7 +1164,7 @@ function EvaluationCard({
             <Text style={styles.cardWeight}>
               Pondération {item.weight.toFixed(2)}%
               {item.isAutoWeight && (
-                <Text style={{ color: "#666", fontSize: 11 }}> (auto)</Text>
+                <Text style={{ fontFamily: "PixelJersey", color: "#666", fontSize: 11 }}> (auto)</Text>
               )}
             </Text>
 
@@ -1193,6 +1193,8 @@ function EvaluationCard({
   );
 }
 
+const pixelFont = { fontFamily: "PixelJersey" as const };
+
 const styles = StyleSheet.create({
   header: {
     marginTop: 60,
@@ -1202,12 +1204,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   title: {
+    ...pixelFont,
     fontSize: 24,
     fontWeight: "bold",
     flex: 1,
     color: "white",
   },
   percentText: {
+    ...pixelFont,
     fontSize: 32,
     fontWeight: "bold",
     color: "#7f3dff",
@@ -1217,31 +1221,37 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   letterGradeLabel: {
+    ...pixelFont,
     fontSize: 14,
     color: "#666",
     marginBottom: 4,
   },
   letterGrade: {
+    ...pixelFont,
     fontSize: 28,
     fontWeight: "bold",
     color: "#7f3dff",
   },
   gpaLabel: {
+    ...pixelFont,
     fontSize: 14,
     color: "#666",
     marginTop: 4,
   },
   objectif: {
+    ...pixelFont,
     marginTop: 10,
     fontSize: 18,
     color: "white",
   },
   totalWeight: {
+    ...pixelFont,
     marginTop: 5,
     fontSize: 14,
     color: "#666",
   },
   autoWeightInfo: {
+    ...pixelFont,
     marginTop: 3,
     fontSize: 12,
     color: "#888",
@@ -1254,6 +1264,7 @@ const styles = StyleSheet.create({
     marginVertical: 20,
   },
   sectionTitle: {
+    ...pixelFont,
     fontSize: 20,
     fontWeight: "bold",
     marginTop: 15,
@@ -1275,11 +1286,12 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
   },
   cardTitle: {
+    ...pixelFont,
     fontSize: 16,
     fontWeight: "600",
     flex: 1,
   },
-  cardWeight: { fontSize: 13, color: "#555" },
+  cardWeight: { ...pixelFont, fontSize: 13, color: "#555" },
   noteBadge: {
     paddingVertical: 6,
     paddingHorizontal: 12,
@@ -1287,7 +1299,7 @@ const styles = StyleSheet.create({
     minWidth: 70,
     alignItems: "center",
   },
-  noteText: { fontWeight: "bold", fontSize: 14 },
+  noteText: { ...pixelFont, fontWeight: "bold", fontSize: 14 },
   addEvalButton: {
     backgroundColor: "#5900a1ff",
     padding: 18,
@@ -1296,6 +1308,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   addEvalText: {
+    ...pixelFont,
     color: "white",
     fontSize: 16,
     fontWeight: "600",
@@ -1321,12 +1334,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalTitle: {
+    ...pixelFont,
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
   },
   input: {
+    ...pixelFont,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 10,
@@ -1353,6 +1368,7 @@ const styles = StyleSheet.create({
     borderColor: "#7f3dff",
   },
   gradeModeText: {
+    ...pixelFont,
     fontSize: 14,
     color: "#666",
     fontWeight: "600",
@@ -1371,6 +1387,7 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   fractionSlash: {
+    ...pixelFont,
     fontSize: 24,
     fontWeight: "bold",
     color: "#666",
@@ -1382,6 +1399,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   scheduledText: {
+    ...pixelFont,
     color: "#7f3dff",
     marginLeft: 6,
     fontSize: 14,
@@ -1409,6 +1427,7 @@ const styles = StyleSheet.create({
     borderColor: "#7f3dff",
   },
   checkboxLabel: {
+    ...pixelFont,
     fontSize: 14,
     color: "#444",
   },
@@ -1431,6 +1450,7 @@ const styles = StyleSheet.create({
     borderColor: "#5900a1ff",
   },
   typeButtonText: {
+    ...pixelFont,
     fontSize: 15,
     color: "#666",
     fontWeight: "600",
@@ -1453,6 +1473,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   cancelButtonText: {
+    ...pixelFont,
     color: "#333",
     fontSize: 16,
     fontWeight: "600",
@@ -1461,6 +1482,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5900a1ff",
   },
   addButtonText: {
+    ...pixelFont,
     color: "white",
     fontSize: 16,
     fontWeight: "600",
@@ -1489,6 +1511,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   menuText: {
+    ...pixelFont,
     fontSize: 15,
     color: "#333",
   },
@@ -1507,6 +1530,7 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   cardDate: {
+    ...pixelFont,
     fontSize: 12,
     color: "#666",
     marginTop: 2,
@@ -1522,10 +1546,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   dateFieldText: {
+    ...pixelFont,
     fontSize: 16,
     color: "#333",
   },
   sheetTitle: {
+    ...pixelFont,
     fontSize: 18,
     fontWeight: "600",
     textAlign: "center",
@@ -1541,6 +1567,7 @@ const styles = StyleSheet.create({
   },
 
   confirmDateText: {
+    ...pixelFont,
     color: "white",
     fontSize: 16,
     fontWeight: "600",
@@ -1558,6 +1585,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   customBoundariesTitle: {
+    ...pixelFont,
     fontSize: 16,
     fontWeight: "600",
     color: "#333",
@@ -1587,6 +1615,7 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
   },
   customBoundariesHint: {
+    ...pixelFont,
     fontSize: 13,
     color: "#666",
     fontStyle: "italic",

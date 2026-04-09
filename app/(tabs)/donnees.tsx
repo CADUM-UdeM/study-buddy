@@ -916,8 +916,11 @@ function CourseCard({
   );
 }
 
+const pixelFont = { fontFamily: "PixelJersey" as const };
+
 const styles = StyleSheet.create({
   title: {
+    ...pixelFont,
     fontSize: 24,
     fontWeight: "bold",
     marginTop: 70,
@@ -959,6 +962,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
   },
   addCoursText: {
+    ...pixelFont,
     color: "white",
     fontSize: 16,
   },
@@ -983,12 +987,14 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   modalTitle: {
+    ...pixelFont,
     fontSize: 22,
     fontWeight: "bold",
     marginBottom: 20,
     textAlign: "center",
   },
   input: {
+    ...pixelFont,
     borderWidth: 1,
     borderColor: "#ddd",
     borderRadius: 10,
@@ -1011,6 +1017,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
   },
   cancelButtonText: {
+    ...pixelFont,
     color: "#333",
     fontSize: 16,
     fontWeight: "600",
@@ -1019,6 +1026,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#5900a1ff",
   },
   addButtonText: {
+    ...pixelFont,
     color: "white",
     fontSize: 16,
     fontWeight: "600",
@@ -1047,6 +1055,7 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   menuText: {
+    ...pixelFont,
     fontSize: 15,
     color: "#333",
   },
@@ -1090,6 +1099,7 @@ const styles = StyleSheet.create({
     borderColor: "#5900a1ff",
   },
   sessionChipText: {
+    ...pixelFont,
     fontSize: 14,
     color: "#333",
     fontWeight: "500",
@@ -1110,6 +1120,7 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
   },
   addSessionText: {
+    ...pixelFont,
     fontSize: 14,
     color: "#5900a1ff",
     fontWeight: "500",
@@ -1136,6 +1147,7 @@ const styles = StyleSheet.create({
     borderColor: "#5900a1ff",
   },
   sessionOptionText: {
+    ...pixelFont,
     fontSize: 14,
     color: "#333",
   },
@@ -1143,6 +1155,7 @@ const styles = StyleSheet.create({
     color: "white",
   },
   label: {
+    ...pixelFont,
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
@@ -1155,12 +1168,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   emptyStateText: {
+    ...pixelFont,
     fontSize: 18,
     fontWeight: "600",
     color: "#666",
     marginTop: 16,
   },
   emptyStateSubtext: {
+    ...pixelFont,
     fontSize: 14,
     color: "#999",
     marginTop: 8,
@@ -1178,6 +1193,7 @@ const styles = StyleSheet.create({
   },
 
   coursText: {
+    ...pixelFont,
     fontSize: 16,
     flex: 1,
     marginRight: 12,

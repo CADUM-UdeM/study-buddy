@@ -67,7 +67,7 @@ export default function Graphics({
 
     return (
         <View className="w-full rounded-2xl border bg-dark-secondary p-4 mb-4">
-            <Text className="text-base text-white font-semibold mb-3">{title}</Text>
+            <Text className="text-base text-white font-semibold mb-3 font-pixel">{title}</Text>
 
             {/* Conteneur du graphe */}
             <View
@@ -105,7 +105,7 @@ export default function Graphics({
                                         onPressIn={() => setActiveIndex(i)}
                                         onPressOut={() => setActiveIndex(null)}
                                     >
-                                        <Text className="text-[12px] text-white mt-1">{labels[i]}</Text>
+                                        <Text className="text-[12px] text-white mt-1 font-pixel">{labels[i]}</Text>
                                     </Pressable>
                                 ) : null}
                             </View>
@@ -135,7 +135,7 @@ export default function Graphics({
                                 backgroundColor: "#111827",
                             }}
                         >
-                            <Text className="text-[11px] text-white" numberOfLines={1}>
+                            <Text className="text-[11px] text-white font-pixel" numberOfLines={1}>
                                 {tooltipInfo.text}
                             </Text>
                         </View>

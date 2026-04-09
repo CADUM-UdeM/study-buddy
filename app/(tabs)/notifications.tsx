@@ -17,14 +17,14 @@ const isDarkMode = colorScheme == 'dark';
 
 return (
         <View style ={styles.bodyStyle}> 
-        <Text style={{color: isDarkMode ? 'white' : 'black'}}> StudyBudy </Text>
+        <Text style={{color: isDarkMode ? 'white' : 'black', fontFamily: 'PixelJersey'}}> StudyBudy </Text>
             <Text></Text>
 
         <View style={{flexDirection:'row', padding: 10, marginRight:0, gap: 90}}>
         <TouchableOpacity style={[]} onPress={() => router.back()}>
                     <IonIcons name="arrow-back-sharp" size={30} color={isDarkMode ? 'white' : 'black'}/>
                 </TouchableOpacity>
-            <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight:'bold'}}> Notification </Text>
+            <Text style={{color: isDarkMode ? 'white' : 'black', fontSize: 20, fontWeight:'bold', fontFamily: 'PixelJersey'}}> Notification </Text>
             <Text></Text>
         </View>
 
@@ -42,7 +42,7 @@ return (
         {/* 2eme section pour alerte durant session pomodoro*/}
         <View style={styles.buttonNotif}>
         <View style={[styles.shadow, {gap:'10', width: '160%', backgroundColor: isDarkMode ? '#565681' : 'white', borderRadius:10 }]}>
-        <Text style={{marginLeft:10, color: isDarkMode ? 'white' : 'black', textDecorationLine: 'underline' }}>Alerte pendant la session pomodoro</Text>
+        <Text style={{marginLeft:10, color: isDarkMode ? 'white' : 'black', textDecorationLine: 'underline', fontFamily: 'PixelJersey' }}>Alerte pendant la session pomodoro</Text>
         
         <View style={{flexDirection:'row', alignItems:'center',}}>
         <Text style={[styles.textNotif, {color: isDarkMode ? 'white' : 'dark'}]}>10 minutes avant chaque pause</Text>
@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
     textNotif:{
         flex:1,
         marginLeft:8,
-        fontSize:15
+        fontSize:15,
+        fontFamily: 'PixelJersey',
     }
 });

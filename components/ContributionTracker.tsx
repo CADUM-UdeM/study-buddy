@@ -311,6 +311,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   title: {
+    fontFamily: "PixelJersey",
     color: "#ffffff",
     fontSize: 15,
     fontWeight: "600",
@@ -323,6 +324,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   monthLabel: {
+    fontFamily: "PixelJersey",
     position: "absolute",
     color: "#9CA3AF",
     fontSize: 10,
@@ -336,6 +338,7 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   dayLabel: {
+    fontFamily: "PixelJersey",
     color: "#9CA3AF",
     fontSize: 9,
   },
@@ -356,6 +359,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   legendText: {
+    fontFamily: "PixelJersey",
     color: "#9CA3AF",
     fontSize: 10,
   },

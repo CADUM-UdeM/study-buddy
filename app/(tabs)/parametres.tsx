@@ -17,13 +17,13 @@ const Parametres = () => {
 
   return (
     <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
-      <Text className="text-xl text-white font-bold mb-6 text-center">
+      <Text className="text-xl text-white font-bold mb-6 text-center font-pixel">
         Paramètres
       </Text>
 
       {/* --- GPA Format Section --- */}
       <View className="mb-8">
-        <Text className="text-lg font-semibold text-white mb-4">
+        <Text className="text-lg font-semibold text-white mb-4 font-pixel">
           Format GPA
         </Text>
 
@@ -33,7 +33,7 @@ const Parametres = () => {
             className="flex-row items-center mb-3 rounded-xl bg-zinc-800 px-4 py-3"
           >
             <Text
-              className={`flex-1 font-medium ${
+              className={`flex-1 font-medium font-pixel ${
                 settings.gpaFormat === format ? "text-violet-400" : "text-white"
               }`}
             >
@@ -55,7 +55,7 @@ const Parametres = () => {
 
       {/* --- Display Options Section --- */}
       <View className="mb-8">
-        <Text className="text-lg font-semibold text-white mb-4">
+        <Text className="text-lg font-semibold text-white mb-4 font-pixel">
           Affichage de la page d'accueil
         </Text>
 
@@ -73,7 +73,7 @@ const Parametres = () => {
             key={key}
             className="flex-row items-center justify-between mb-3 rounded-xl bg-zinc-800 px-4 py-3"
           >
-            <Text className="text-white font-medium flex-1">{label}</Text>
+            <Text className="text-white font-medium flex-1 font-pixel">{label}</Text>
             <Switch
               value={settings[key]}
               onValueChange={(value) => handleToggleSetting(key, value)}
@@ -94,10 +94,10 @@ const Parametres = () => {
 
       {/* --- Theme Section --- */}
       <View className="mb-8">
-        <Text className="text-lg font-semibold text-white mb-4">Apparence</Text>
+        <Text className="text-lg font-semibold text-white mb-4 font-pixel">Apparence</Text>
 
         <View className="flex-row items-center justify-between rounded-xl bg-zinc-800 px-4 py-3">
-          <Text className="text-white font-medium">Mode sombre</Text>
+          <Text className="text-white font-medium font-pixel">Mode sombre</Text>
           <Switch
             value={settings.isDarkMode}
             onValueChange={(value) => handleToggleSetting("isDarkMode", value)}
@@ -109,7 +109,7 @@ const Parametres = () => {
 
       {/* --- Info Section --- */}
       <View className="rounded-xl bg-zinc-800 px-4 py-4 mb-8">
-        <Text className="text-zinc-400 text-sm text-center">
+        <Text className="text-zinc-400 text-sm text-center font-pixel">
           Vos préférences sont sauvegardées automatiquement.
         </Text>
       </View>
