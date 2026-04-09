@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useGPA } from "@/app/hooks/useGPA";
 import ContributionTracker from "../../components/ContributionTracker";
+import { WalkingBirdPeek } from "../../components/home/SpritePeeks";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
 
@@ -19,7 +20,10 @@ export default function Accueil() {
   return (
     <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
 
-      <ContributionTracker />
+      <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
+        <ContributionTracker />
+        <WalkingBirdPeek displayHeight={82} overlap={44} right={2} />
+      </View>
 
       {/* --- GPA Section --- */}
       <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: "#1A1729"}}>

@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, ScrollView, Switch, Text, View } from "react-native";
+import { ChibiBirdPeek } from "../../components/home/SpritePeeks";
 import { GradeBoundariesEditor } from "../../components/GradeBoundariesEditor";
 import { useSettings } from "../context/SettingsContext";
 import "../global.css";
@@ -34,38 +35,41 @@ const Parametres = () => {
       </Text>
 
       {/* --- GPA Format Section --- */}
-      <View className="rounded-2xl p-4 mb-3 gap-3" style={cardShellStyle}>
-        <Text className="text-lg font-pixel text-neutral-600">
-          Format GPA
-        </Text>
+      <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
+        <View className="rounded-2xl p-4 gap-3" style={cardShellStyle}>
+          <Text className="text-lg font-pixel text-neutral-600">
+            Format GPA
+          </Text>
 
-        {["4.3", "4.0", "percentage"].map((format) => {
-          const selected = settings.gpaFormat === format;
-          return (
-            <Pressable
-              key={format}
-              onPress={() =>
-                handleGPAFormatChange(format as "4.0" | "4.3" | "percentage")
-              }
-              className="flex-row items-center rounded-xl px-4 py-3"
-              style={{ backgroundColor: ROW_BG }}
-            >
-              <Text
-                className={`flex-1 font-pixel text-base ${selected ? "text-dark-accent font-semibold" : "text-purple-200"
-                  }`}
+          {["4.3", "4.0", "percentage"].map((format) => {
+            const selected = settings.gpaFormat === format;
+            return (
+              <Pressable
+                key={format}
+                onPress={() =>
+                  handleGPAFormatChange(format as "4.0" | "4.3" | "percentage")
+                }
+                className="flex-row items-center rounded-xl px-4 py-3"
+                style={{ backgroundColor: ROW_BG }}
               >
-                {format === "percentage" ? "Pourcentage (%)" : `Format ${format}`}
-              </Text>
-              <View
-                className="w-5 h-5 rounded-full border-2"
-                style={{
-                  borderColor: selected ? ACCENT : CARD_BORDER,
-                  backgroundColor: selected ? ACCENT : "transparent",
-                }}
-              />
-            </Pressable>
-          );
-        })}
+                <Text
+                  className={`flex-1 font-pixel text-base ${selected ? "text-dark-accent font-semibold" : "text-purple-200"
+                    }`}
+                >
+                  {format === "percentage" ? "Pourcentage (%)" : `Format ${format}`}
+                </Text>
+                <View
+                  className="w-5 h-5 rounded-full border-2"
+                  style={{
+                    borderColor: selected ? ACCENT : CARD_BORDER,
+                    backgroundColor: selected ? ACCENT : "transparent",
+                  }}
+                />
+              </Pressable>
+            );
+          })}
+        </View>
+        <ChibiBirdPeek displayHeight={74} overlap={38} right={4} />
       </View>
 
       {/* --- Display Options Section --- */}
@@ -98,12 +102,12 @@ const Parametres = () => {
               trackColor={{ false: SWITCH_TRACK_OFF, true: ACCENT }}
               thumbColor={settings[key] ? "#e0aaff" : "#6B7280"}
             />
-          </View >
+          </View>
         ))}
-      </View >
+      </View>
 
       {/* --- Grade Boundaries Section --- */}
-      < GradeBoundariesEditor
+      <GradeBoundariesEditor
         boundaries={settings.gradeBoundaries}
         onUpdate={updateGradeBoundaries}
         onReset={resetGradeBoundariesToDefault}
