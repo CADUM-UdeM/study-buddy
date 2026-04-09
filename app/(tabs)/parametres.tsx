@@ -1,8 +1,14 @@
 import React from "react";
-import { ScrollView, Switch, Text, View } from "react-native";
+import { Pressable, ScrollView, Switch, Text, View } from "react-native";
 import { useSettings } from "../context/SettingsContext";
 import { GradeBoundariesEditor } from "../../components/GradeBoundariesEditor";
 import "../global.css";
+
+const CARD_BG = "#1A1729";
+const CARD_BORDER = "#444462";
+const ROW_BG = "#444462";
+const ACCENT = "#AB8BFF";
+const SWITCH_TRACK_OFF = "#2D2A45";
 
 const Parametres = () => {
   const { settings, updateSettings, updateGradeBoundaries, resetGradeBoundariesToDefault } = useSettings();
@@ -15,48 +21,58 @@ const Parametres = () => {
     updateSettings({ gpaFormat: format });
   };
 
+  const cardShellStyle = {
+    backgroundColor: CARD_BG,
+    borderWidth: 1,
+    borderColor: CARD_BORDER,
+  };
+
   return (
     <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
-      <Text className="text-xl text-white font-bold mb-6 text-center">
+      <Text className="text-2xl text-purple-100 font-pixel mb-4">
         Paramètres
       </Text>
 
       {/* --- GPA Format Section --- */}
-      <View className="mb-8">
-        <Text className="text-lg font-semibold text-white mb-4">
+      <View className="rounded-2xl p-4 mb-3 gap-3" style={cardShellStyle}>
+        <Text className="text-lg font-pixel text-neutral-600">
           Format GPA
         </Text>
 
-        {["4.3", "4.0", "percentage"].map((format) => (
-          <View
-            key={format}
-            className="flex-row items-center mb-3 rounded-xl bg-zinc-800 px-4 py-3"
-          >
-            <Text
-              className={`flex-1 font-medium ${
-                settings.gpaFormat === format ? "text-violet-400" : "text-white"
-              }`}
-            >
-              {format === "percentage" ? "Pourcentage (%)" : `Format ${format}`}
-            </Text>
-            <View
-              className={`w-5 h-5 rounded-full border-2 ${
-                settings.gpaFormat === format
-                  ? "bg-violet-600 border-violet-600"
-                  : "border-zinc-600"
-              }`}
-              onTouchEnd={() =>
+        {["4.3", "4.0", "percentage"].map((format) => {
+          const selected = settings.gpaFormat === format;
+          return (
+            <Pressable
+              key={format}
+              onPress={() =>
                 handleGPAFormatChange(format as "4.0" | "4.3" | "percentage")
               }
-            />
-          </View>
-        ))}
+              className="flex-row items-center rounded-xl px-4 py-3"
+              style={{ backgroundColor: ROW_BG }}
+            >
+              <Text
+                className={`flex-1 font-pixel text-base ${
+                  selected ? "text-dark-accent font-semibold" : "text-purple-200"
+                }`}
+              >
+                {format === "percentage" ? "Pourcentage (%)" : `Format ${format}`}
+              </Text>
+              <View
+                className="w-5 h-5 rounded-full border-2"
+                style={{
+                  borderColor: selected ? ACCENT : CARD_BORDER,
+                  backgroundColor: selected ? ACCENT : "transparent",
+                }}
+              />
+            </Pressable>
+          );
+        })}
       </View>
 
       {/* --- Display Options Section --- */}
-      <View className="mb-8">
-        <Text className="text-lg font-semibold text-white mb-4">
-          Affichage de la page d'accueil
+      <View className="rounded-2xl p-4 mb-3 gap-3" style={cardShellStyle}>
+        <Text className="text-lg font-pixel text-neutral-600">
+          Affichage de la page d&apos;accueil
         </Text>
 
         {[
@@ -71,14 +87,17 @@ const Parametres = () => {
         ].map(({ key, label }) => (
           <View
             key={key}
-            className="flex-row items-center justify-between mb-3 rounded-xl bg-zinc-800 px-4 py-3"
+            className="flex-row items-center justify-between rounded-xl px-3 py-2"
+            style={{ backgroundColor: ROW_BG }}
           >
-            <Text className="text-white font-medium flex-1">{label}</Text>
+            <Text className="text-purple-100 font-pixel text-base flex-1 pr-2">
+              {label}
+            </Text>
             <Switch
               value={settings[key]}
               onValueChange={(value) => handleToggleSetting(key, value)}
-              trackColor={{ false: "#3f3f46", true: "#a78bfa" }}
-              thumbColor={settings[key] ? "#7c3aed" : "#71717a"}
+              trackColor={{ false: SWITCH_TRACK_OFF, true: ACCENT }}
+              thumbColor={settings[key] ? "#e0aaff" : "#6B7280"}
             />
           </View>
         ))}
@@ -93,23 +112,29 @@ const Parametres = () => {
       />
 
       {/* --- Theme Section --- */}
-      <View className="mb-8">
-        <Text className="text-lg font-semibold text-white mb-4">Apparence</Text>
+      <View className="rounded-2xl p-4 mb-3 gap-3" style={cardShellStyle}>
+        <Text className="text-lg font-pixel text-neutral-600">Apparence</Text>
 
-        <View className="flex-row items-center justify-between rounded-xl bg-zinc-800 px-4 py-3">
-          <Text className="text-white font-medium">Mode sombre</Text>
+        <View
+          className="flex-row items-center justify-between rounded-xl px-3 py-2"
+          style={{ backgroundColor: ROW_BG }}
+        >
+          <Text className="text-purple-100 font-pixel text-base">Mode sombre</Text>
           <Switch
             value={settings.isDarkMode}
             onValueChange={(value) => handleToggleSetting("isDarkMode", value)}
-            trackColor={{ false: "#3f3f46", true: "#a78bfa" }}
-            thumbColor={settings.isDarkMode ? "#7c3aed" : "#71717a"}
+            trackColor={{ false: SWITCH_TRACK_OFF, true: ACCENT }}
+            thumbColor={settings.isDarkMode ? "#e0aaff" : "#6B7280"}
           />
         </View>
       </View>
 
       {/* --- Info Section --- */}
-      <View className="rounded-xl bg-zinc-800 px-4 py-4 mb-8">
-        <Text className="text-zinc-400 text-sm text-center">
+      <View
+        className="rounded-2xl px-4 py-4 mb-8"
+        style={cardShellStyle}
+      >
+        <Text className="text-neutral-500 text-sm text-center font-pixel">
           Vos préférences sont sauvegardées automatiquement.
         </Text>
       </View>
