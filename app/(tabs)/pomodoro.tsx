@@ -385,7 +385,7 @@ export default function Pomodoro() {
                         className="rounded-xl px-4 py-2"
                         style={{backgroundColor: "#AB8BFF40"}}
                     >
-                        <Text className="text-4xl font-semibold text-purple-100 font-pixel">
+                        <Text className="text-lg font-semibold text-purple-100 font-pixel">
                             Cycle : {remainingCycle}
                         </Text>
                     </View>
@@ -412,15 +412,16 @@ export default function Pomodoro() {
                                 Réglez votre pomodoro
                             </Text>
 
-                            <View style={{padding: 10, gap: 20}}>
+                            <View style={{padding: 10, gap: 20, zIndex:3}}>
                                 <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2"
                                       style={cardBg}>
                                     <Text className="text-purple-100 font-pixel text-xl"
                                           >Temps d&apos;étude</Text>
+                                     <View>
                                     <TouchableOpacity
                                         className="flex-row items-center gap-1 rounded-lg px-3 py-2"
                                         style={{backgroundColor: "#444462"}}
-                                        onPress={() => setClickSelectStudy(true)}
+                                        onPress={() => setClickSelectStudy(!clickSelectStudy)}
                                     >
                                         <TextInput
                                             keyboardType="numeric"
@@ -433,18 +434,26 @@ export default function Pomodoro() {
                                         <Text className="text-purple-200 font-pixel text-xl" >min</Text>
                                         <IonIcons name="chevron-down" size={20} color="#e0aaff"/>
                                     </TouchableOpacity>
-                                </View>
 
-                                <Modal transparent visible={clickSelectStudy} animationType="fade">
-                                    <Pressable
-                                        style={[stylesProfil.confPage, {flex: 1}]}
-                                        onPress={() => setClickSelectStudy(false)}
-                                    >
-                                        <Pressable onPress={(e) => e.stopPropagation()}>
-                                            <View
-                                                className="rounded-2xl p-3 gap-1 w-32"
-                                                style={cardBg}
-                                            >
+                                    {clickSelectStudy && (<>
+                                          <Pressable
+                                             onPress={() => setClickSelectStudy(false)}
+                                             style={{
+                                             position: 'absolute',
+                                             /* Prend tout l'écran*/
+                                             top: -1000, bottom: -1000, left: -1000, right: -1000,
+                                             zIndex: 1,
+                                             }}/>
+                                          <View
+                                              style={[cardBg,{
+                                                  position: 'absolute',
+                                                  top: 40,
+                                                  right: -2,
+                                                  width: 120,
+                                                  borderRadius: 12,
+                                                  padding: 5,
+                                                  zIndex: 2,
+                                              }]}>
                                                 {["10", "20", "30", "40", "50", "60"].map((m) => (
                                                     <TouchableOpacity
                                                         key={m}
@@ -452,6 +461,7 @@ export default function Pomodoro() {
                                                         className="rounded-lg py-2 items-center"
                                                         style={{
                                                             backgroundColor: defaultStudyTime === m ? "#7b2cbf" : "#444462",
+                                                            marginBottom:4,
                                                         }}
                                                     >
                                                         <Text
@@ -464,17 +474,19 @@ export default function Pomodoro() {
                                                     </TouchableOpacity>
                                                 ))}
                                             </View>
-                                        </Pressable>
-                                    </Pressable>
-                                </Modal>
-
+                                        </>
+                                    )}
+                                    </View>
+                                </View>
                                 <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2"
                                       style={cardBg}>
                                     <Text className="text-purple-100 font-pixel text-xl">Temps de pause </Text>
+                                    <View>
+
                                     <TouchableOpacity
                                         className="flex-row items-center gap-1 rounded-lg px-3 py-2"
                                         style={{backgroundColor: "#444462"}}
-                                        onPress={() => setClickSelectBreak(true)}
+                                        onPress={() => setClickSelectBreak(!clickSelectBreak)}
                                     >
                                         <TextInput
                                             keyboardType="numeric"
@@ -487,14 +499,26 @@ export default function Pomodoro() {
                                         <Text className="text-purple-200 text-xl font-pixel">min</Text>
                                         <IonIcons name="chevron-down" size={20} color="#e0aaff"/>
                                     </TouchableOpacity>
-                                </View>
-                                <Modal transparent visible={clickSelectBreak} animationType="fade">
+
+                                    {clickSelectBreak && (<>
                                     <Pressable
-                                        style={[stylesProfil.confPage, {flex: 1}]}
                                         onPress={() => setClickSelectBreak(false)}
-                                    >
-                                        <Pressable onPress={(e) => e.stopPropagation()}>
-                                            <View className="rounded-2xl p-3 gap-1 w-32" style={cardBg}>
+                                        style={{
+                                            position: 'absolute',
+                                            /* Prend tout l'écran*/
+                                            top: -1000, bottom: -1000, left: -1000, right: -1000,
+                                            zIndex: 1,
+                                        }}/>
+                                    <View
+                                        style={[cardBg,{
+                                            position: 'absolute',
+                                            top: 40,
+                                            right: -2,
+                                            width: 120,
+                                            borderRadius: 12,
+                                            padding: 5,
+                                            zIndex: 2,
+                                        }]}>
                                                 {["5", "10", "15", "20", "25", "30"].map((m) => (
                                                     <TouchableOpacity
                                                         key={m}
@@ -502,6 +526,7 @@ export default function Pomodoro() {
                                                         className="rounded-lg py-2 items-center"
                                                         style={{
                                                             backgroundColor: defaultBreakTime === m ? "#7b2cbf" : "#444462",
+                                                            marginBottom:4,
                                                         }}
                                                     >
                                                         <Text
@@ -514,9 +539,10 @@ export default function Pomodoro() {
                                                     </TouchableOpacity>
                                                 ))}
                                             </View>
-                                        </Pressable>
-                                    </Pressable>
-                                </Modal>
+                                        </>
+                                    )}
+                                </View>
+                            </View>
 
                                 <View className="mb-4">
                                     <Text className="text-purple-100 mb-2 text-xl font-pixel">Répétitions</Text>
