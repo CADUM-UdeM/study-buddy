@@ -356,6 +356,7 @@ export default function Donnees() {
                 <TextInput
                   style={styles.input}
                   placeholder="Nom du cours"
+                  placeholderTextColor={"#6B7282"}
                   value={courseName}
                   onChangeText={setCourseName}
                   autoFocus
@@ -364,6 +365,7 @@ export default function Donnees() {
                 <TextInput
                   style={styles.input}
                   placeholder="Objectif (%)"
+                  placeholderTextColor={"#6B7282"}
                   value={courseObjective}
                   onChangeText={setCourseObjective}
                   keyboardType="numeric"
@@ -372,6 +374,7 @@ export default function Donnees() {
                 <TextInput
                   style={styles.input}
                   placeholder="Crédits"
+                  placeholderTextColor={"#6B7282"}
                   value={courseCredits}
                   onChangeText={setCourseCredits}
                   keyboardType="numeric"
@@ -488,6 +491,7 @@ export default function Donnees() {
                 <TextInput
                   style={styles.input}
                   placeholder="Nom du cours"
+                  placeholderTextColor={"#6B7282"}
                   value={courseName}
                   onChangeText={setCourseName}
                   autoFocus
@@ -496,6 +500,7 @@ export default function Donnees() {
                 <TextInput
                   style={styles.input}
                   placeholder="Objectif (%)"
+                  placeholderTextColor={"#6B7282"}
                   value={courseObjective}
                   onChangeText={setCourseObjective}
                   keyboardType="numeric"
@@ -505,6 +510,7 @@ export default function Donnees() {
                   style={styles.input}
                   placeholder="Crédits"
                   value={courseCredits}
+                  placeholderTextColor={"#6B7282"}
                   onChangeText={setCourseCredits}
                   keyboardType="numeric"
                 />
@@ -647,6 +653,7 @@ export default function Donnees() {
             <TextInput
               style={styles.input}
               placeholder="Nom de la session"
+              placeholderTextColor={"#6B7282"}
               value={newSessionName}
               onChangeText={setNewSessionName}
               autoFocus
@@ -702,6 +709,7 @@ export default function Donnees() {
             <TextInput
               style={styles.input}
               placeholder="Nom de la session"
+              placeholderTextColor={"#6B7282"}
               value={editingSessionName}
               onChangeText={setEditingSessionName}
               autoFocus
@@ -922,11 +930,10 @@ const styles = StyleSheet.create({
   title: {
     ...pixelFont,
     fontSize: 24,
-    fontWeight: "bold",
     marginTop: 70,
     marginBottom: 5,
     alignSelf: "center",
-    color: "white",
+    color: "#f3e8ff",
   },
   stepContainer: {
     gap: 8,
@@ -973,10 +980,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: "#221f3d",
     borderRadius: 20,
     padding: 30,
-    width: "85%",
+    width: "86%",
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -988,19 +995,21 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     ...pixelFont,
-    fontSize: 22,
-    fontWeight: "bold",
+    fontSize: 26,
     marginBottom: 20,
+    color:"#f3e8ff",
     textAlign: "center",
   },
   input: {
     ...pixelFont,
     borderWidth: 1,
-    borderColor: "#ddd",
+    backgroundColor: "#444462",
+    borderColor: "#444462",
     borderRadius: 10,
     padding: 15,
     fontSize: 16,
     marginBottom: 20,
+    color:"#f3e8ff",
   },
   modalButtons: {
     flexDirection: "row",
@@ -1014,11 +1023,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   cancelButton: {
-    backgroundColor: "#f0f0f0",
+      borderWidth: 1,
+      borderColor:'#ddd6fe',
   },
   cancelButtonText: {
     ...pixelFont,
-    color: "#333",
+    color: "#f5f3ff",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -1159,7 +1169,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 10,
-    color: "#333",
+    color: "#515153",
   },
   emptyState: {
     alignItems: "center",
