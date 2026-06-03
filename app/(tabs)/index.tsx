@@ -3,16 +3,22 @@ import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useGPA } from "@/app/hooks/useGPA";
+import { useSettings } from "../context/SettingsContext";
 import ContributionTracker from "../../components/ContributionTracker";
 import { WalkingBirdPeek } from "../../components/home/SpritePeeks";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
+import LastStreakTracker from "@/components/LastStreakTracker";
+import WeekStreakTracker from "@/components/WeekStreakTracker";
 
 export default function Accueil() {
   const router = useRouter();
   const { calculateOverallStats } = useGPA();
   const { activeSession } = useSessions();
   const [showGlobalGPA, setShowGlobalGPA] = useState(false);
+
+  /* Récupère les paramètres pour savoir quelles données afficher */
+  const {settings} = useSettings();
 
   // Calculate stats based on toggle
   const overallStats = calculateOverallStats(showGlobalGPA);
@@ -25,6 +31,16 @@ export default function Accueil() {
         <WalkingBirdPeek displayHeight={82} overlap={44} right={2} />
       </View>
 
+        {/* Série actuelle */}
+        {settings.showStreak && (
+            <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
+                <LastStreakTracker />
+            </View>)}
+        {/* Temps de la série de la semaine */}
+        {settings.showStudyTime && (
+            <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
+                <WeekStreakTracker />
+            </View>)}
       {/* --- GPA Section --- */}
       <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: "#1A1729"}}>
         <View className="flex-row items-center justify-between mb-2">
@@ -55,10 +71,12 @@ export default function Accueil() {
             <Text className="text-3xl font-semibold text-purple-200 font-pixel">
               {overallStats.gpaDisplay}
             </Text>
-            <Text className="text-sm text-neutral-500 mt-1 font-pixel">
-              {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
-              crédits
-            </Text>
+              {settings.showCourseCount && (
+                  <Text className="text-sm text-neutral-500 mt-1 font-pixel">
+                      {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
+                      crédits
+                  </Text>
+              )}
           </>
         ) : (
           <View className="py-2">
