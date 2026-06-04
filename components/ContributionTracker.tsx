@@ -1,97 +1,104 @@
 import React, {useCallback, useState} from "react";
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import {Dimensions, StyleSheet, Text, View} from "react-native";
 import {sessionContext} from "@/app/context/SessionContext";
 import {useFocusEffect} from "@react-navigation/core";
+import {useSettings} from "@/app/context/SettingsContext";
+import {darkTheme, lightTheme} from "@/components/colors";
 
 export default function ContributionTracker() {
-  // Détermine la session actuelle et ses dates
-  const getCurrentSession = () => {
-    const now = new Date();
-    const month = now.getMonth(); // 0-11
+    // Détermine la session actuelle et ses dates
+    const getCurrentSession = () => {
+        const now = new Date();
+        const month = now.getMonth(); // 0-11
 
-    let sessionName = "";
-    let startMonth = 0;
-    let endMonth = 3;
+        let sessionName = "";
+        let startMonth = 0;
+        let endMonth = 3;
 
-    if (month >= 0 && month <= 3) {
-      // Janvier à avril = Session Hiver
-      sessionName = "Hiver";
-      startMonth = 0; // Janvier
-      endMonth = 3; // Avril
-    } else if (month >= 4 && month <= 7) {
-      // Mai à août = Session Été
-      sessionName = "Été";
-      startMonth = 4; // Mai
-      endMonth = 7; // Août
-    } else {
-      // Septembre à décembre = Session Automne
-      sessionName = "Automne";
-      startMonth = 8; // Septembre
-      endMonth = 11; // Décembre
-    }
-
-    const year = now.getFullYear();
-    const startDate = new Date(year, startMonth, 1);
-    const endDate = new Date(year, endMonth + 1, 0); // Dernier jour du mois
-
-    return { sessionName, startDate, endDate };
-  };
-
-
-  const { sessionName, startDate, endDate } = getCurrentSession();
-
-  // Génère les semaines de la session
-  const generateWeeks = () => {
-    const weeks: (Date | null)[][] = [];
-
-    // Commence au début de la session
-    const firstDay = new Date(startDate);
-
-    // Ajuste pour commencer un lundi
-    const dayOfWeek = firstDay.getDay();
-    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-    firstDay.setDate(firstDay.getDate() - daysToMonday);
-
-    let currentDate = new Date(firstDay);
-
-    // Continue jusqu'à la fin de la session
-    while (currentDate <= endDate) {
-      const week: (Date | null)[] = [];
-
-      for (let day = 0; day < 7; day++) {
-        if (currentDate < startDate || currentDate > endDate) {
-          week.push(null);
+        if (month >= 0 && month <= 3) {
+            // Janvier à avril = Session Hiver
+            sessionName = "Hiver";
+            startMonth = 0; // Janvier
+            endMonth = 3; // Avril
+        } else if (month >= 4 && month <= 7) {
+            // Mai à août = Session Été
+            sessionName = "Été";
+            startMonth = 4; // Mai
+            endMonth = 7; // Août
         } else {
-          week.push(new Date(currentDate));
+            // Septembre à décembre = Session Automne
+            sessionName = "Automne";
+            startMonth = 8; // Septembre
+            endMonth = 11; // Décembre
         }
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
 
-      weeks.push(week);
+        const year = now.getFullYear();
+        const startDate = new Date(year, startMonth, 1);
+        const endDate = new Date(year, endMonth + 1, 0); // Dernier jour du mois
 
-      // Sécurité pour éviter une boucle infinie
-      if (weeks.length > 20) break;
-    }
+        return {sessionName, startDate, endDate};
+    };
 
-    return weeks;
-  };
 
-  // Obtient la couleur selon le nombre de contributions
-  const getColor = (count: number) => {
-    if (count === 0) return "#2D2A45";
-    if (count <= 3) return "#6B5B95";
-    if (count <= 6) return "#9B7EDE";
-    if (count <= 10) return "#AB8BFF";
-    return "#CCBBFF";
-  };
+    const {sessionName, startDate, endDate} = getCurrentSession();
 
-  const formatDate = (date: Date) => {
-    return date.toISOString().split("T")[0];
-  };
+    // Génère les semaines de la session
+    const generateWeeks = () => {
+        const weeks: (Date | null)[][] = [];
 
-  const weeks = generateWeeks();
+        // Commence au début de la session
+        const firstDay = new Date(startDate);
 
-  interface Session {
+        // Ajuste pour commencer un lundi
+        const dayOfWeek = firstDay.getDay();
+        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+        firstDay.setDate(firstDay.getDate() - daysToMonday);
+
+        let currentDate = new Date(firstDay);
+
+        // Continue jusqu'à la fin de la session
+        while (currentDate <= endDate) {
+            const week: (Date | null)[] = [];
+
+            for (let day = 0; day < 7; day++) {
+                if (currentDate < startDate || currentDate > endDate) {
+                    week.push(null);
+                } else {
+                    week.push(new Date(currentDate));
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            weeks.push(week);
+
+            // Sécurité pour éviter une boucle infinie
+            if (weeks.length > 20) break;
+        }
+
+        return weeks;
+    };
+
+    // Obtient la couleur selon le nombre de contributions
+    const getColor = (count: number) => {
+        if (count === 0) return theme.calendarZero;
+        if (count <= 3) return "#6B5B95";
+        if (count <= 6) return "#9B7EDE";
+        if (count <= 10) return "#AB8BFF";
+        return "#CCBBFF";
+    };
+
+    const formatDate = (date: Date) => {
+        return date.toISOString().split("T")[0];
+    };
+
+    const weeks = generateWeeks();
+    const {settings} = useSettings();
+
+
+    /* Appliquer la couleur du theme */
+    const theme = settings.isDarkMode ? darkTheme : lightTheme;
+
+    interface Session {
         id: string,
         durationSession: string,
         breakSession: string,
@@ -100,270 +107,270 @@ export default function ContributionTracker() {
         isDeleteOpen: boolean,
         date: string,
     }
-  const [sessions, setSessions] = useState<Session[]>([]);
+
+    const [sessions, setSessions] = useState<Session[]>([]);
 
     const [totalContributions, setTotalContributions] = useState(0);
 
     /* Avant de modifier historique récupère les données enregistrées. */
     useFocusEffect(
         useCallback(() => {
-        /* Si on a des données, met à jour la variable contenant nos sessions */
-        sessionContext.getSessionsAsync().then(setSessions);
-        setTotalContributions(sessions.length);
-    }, [sessions.length]));
+            /* Si on a des données, met à jour la variable contenant nos sessions */
+            sessionContext.getSessionsAsync().then(setSessions);
+            setTotalContributions(sessions.length);
+        }, [sessions.length]));
 
     // Génère des données de démo pour la session
-  const generateDemoData = (sessions: Session[]) => {
-      const data: Record<string, number> = {};
+    const generateDemoData = (sessions: Session[]) => {
+        const data: Record<string, number> = {};
 
-      sessions.forEach((session) => {
-          const dateStr =session.date;
-          data[dateStr] = (data[dateStr] ?? 0) + 1
-      })
-      return data;
+        sessions.forEach((session) => {
+            const dateStr = session.date;
+            data[dateStr] = (data[dateStr] ?? 0) + 1
+        })
+        return data;
     };
 
-  const contributions = generateDemoData(sessions);
+    const contributions = generateDemoData(sessions);
 
-  // Calcule la taille des carrés dynamiquement (GARDÉ LA MÊME LOGIQUE)
-  const screenWidth = Dimensions.get("window").width;
-  const containerPadding = 32;
-  const dayLabelsWidth = 35;
-  const availableWidth = screenWidth - containerPadding - dayLabelsWidth - 18;
-  const numberOfWeeks = weeks.length; // Maintenant basé sur la session
-  const gap = 3;
-  const squareSize = Math.floor(
-    (availableWidth - gap * (numberOfWeeks - 1)) / numberOfWeeks,
-  );
+    // Calcule la taille des carrés dynamiquement (GARDÉ LA MÊME LOGIQUE)
+    const screenWidth = Dimensions.get("window").width;
+    const containerPadding = 32;
+    const dayLabelsWidth = 35;
+    const availableWidth = screenWidth - containerPadding - dayLabelsWidth - 18;
+    const numberOfWeeks = weeks.length; // Maintenant basé sur la session
+    const gap = 3;
+    const squareSize = Math.floor(
+        (availableWidth - gap * (numberOfWeeks - 1)) / numberOfWeeks,
+    );
 
-  // Obtient les labels de mois
-  const getMonthLabels = () => {
-    const months = [
-      "Jan",
-      "Fév",
-      "Mar",
-      "Avr",
-      "Mai",
-      "Jun",
-      "Jul",
-      "Aoû",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Déc",
-    ];
-    const labels: { month: string; position: number }[] = [];
+    // Obtient les labels de mois
+    const getMonthLabels = () => {
+        const months = [
+            "Jan",
+            "Fév",
+            "Mar",
+            "Avr",
+            "Mai",
+            "Jun",
+            "Jul",
+            "Aoû",
+            "Sep",
+            "Oct",
+            "Nov",
+            "Déc",
+        ];
+        const labels: { month: string; position: number }[] = [];
 
-    let lastMonth = -1;
-    weeks.forEach((week, weekIndex) => {
-      const firstDay = week.find((day) => day !== null);
-      if (firstDay) {
-        const month = firstDay.getMonth();
-        if (month !== lastMonth) {
-          labels.push({ month: months[month], position: weekIndex });
-          lastMonth = month;
-        }
-      }
-    });
+        let lastMonth = -1;
+        weeks.forEach((week, weekIndex) => {
+            const firstDay = week.find((day) => day !== null);
+            if (firstDay) {
+                const month = firstDay.getMonth();
+                if (month !== lastMonth) {
+                    labels.push({month: months[month], position: weekIndex});
+                    lastMonth = month;
+                }
+            }
+        });
 
-    return labels;
-  };
+        return labels;
+    };
 
-  const monthLabels = getMonthLabels();
+    const monthLabels = getMonthLabels();
 
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>
-        {totalContributions} séances d&#39;études cette session
-      </Text>
-
-      <View style={styles.content}>
-        {/* Labels des mois */}
-        <View style={styles.monthsRow}>
-          {monthLabels.map((label, index) => (
-            <Text
-              key={index}
-              style={[
-                styles.monthLabel,
-                { left: dayLabelsWidth + label.position * (squareSize + gap) },
-              ]}
-            >
-              {label.month}
+    return (
+        <View style={[styles.container, {backgroundColor:theme.contentWrapperBgColor, borderRadius:20}]}>
+            <Text style={[styles.title, {color:theme.defaultTextColor}]}>
+                {totalContributions} séances d&#39;études cette session
             </Text>
-          ))}
-        </View>
 
-        <View style={styles.graphContainer}>
-          {/* Labels des jours */}
-          <View style={styles.dayLabels}>
-            <Text style={styles.dayLabel}>Lun</Text>
-            <View style={{ height: squareSize }} />
-            <Text style={styles.dayLabel}>Mer</Text>
-            <View style={{ height: squareSize }} />
-            <Text style={styles.dayLabel}>Ven</Text>
-          </View>
+            <View style={styles.content}>
+                {/* Labels des mois */}
+                <View style={[styles.monthsRow]}>
+                    {monthLabels.map((label, index) => (
+                        <Text
+                            key={index}
+                            style={[
+                                styles.monthLabel,
+                                {left: dayLabelsWidth + label.position * (squareSize + gap)},
+                            ]}
+                        >
+                            {label.month}
+                        </Text>
+                    ))}
+                </View>
 
-          {/* Grille */}
-          <View style={styles.grid}>
-            {weeks.map((week, weekIndex) => (
-              <View key={weekIndex} style={[styles.column, { gap }]}>
-                {week.map((day, dayIndex) => {
-                  if (!day) {
-                    return (
-                      <View
-                        key={dayIndex}
-                        style={[
-                          styles.emptySquare,
-                          { width: squareSize, height: squareSize },
-                        ]}
-                      />
-                    );
-                  }
+                <View style={styles.graphContainer}>
+                    {/* Labels des jours */}
+                    <View style={styles.dayLabels}>
+                        <Text style={styles.dayLabel}>Lun</Text>
+                        <View style={{height: squareSize}}/>
+                        <Text style={styles.dayLabel}>Mer</Text>
+                        <View style={{height: squareSize}}/>
+                        <Text style={styles.dayLabel}>Ven</Text>
+                    </View>
 
-                  const dateStr = formatDate(day);
-                  const count = contributions[dateStr] || 0;
-                  const color = getColor(count);
+                    {/* Grille */}
+                    <View style={styles.grid}>
+                        {weeks.map((week, weekIndex) => (
+                            <View key={weekIndex} style={[styles.column, {gap}]}>
+                                {week.map((day, dayIndex) => {
+                                    if (!day) {
+                                        return (
+                                            <View
+                                                key={dayIndex}
+                                                style={[
+                                                    styles.emptySquare,
+                                                    {width: squareSize, height: squareSize},
+                                                ]}
+                                            />
+                                        );
+                                    }
 
-                  return (
+                                    const dateStr = formatDate(day);
+                                    const count = contributions[dateStr] || 0;
+                                    const color = getColor(count);
+
+                                    return (
+                                        <View
+                                            key={dayIndex}
+                                            style={[
+                                                styles.square,
+                                                {
+                                                    backgroundColor: color,
+                                                    width: squareSize,
+                                                    height: squareSize,
+                                                },
+                                            ]}
+                                        />
+                                    );
+                                })}
+                            </View>
+                        ))}
+                    </View>
+                </View>
+
+                {/* Légende */}
+                <View style={styles.legend}>
+                    <Text style={styles.legendText}>Moins</Text>
                     <View
-                      key={dayIndex}
-                      style={[
-                        styles.square,
-                        {
-                          backgroundColor: color,
-                          width: squareSize,
-                          height: squareSize,
-                        },
-                      ]}
+                        style={[
+                            styles.legendSquare,
+                            {
+                                backgroundColor: theme.calendarZero,
+                                width: squareSize,
+                                height: squareSize,
+                            },
+                        ]}
                     />
-                  );
-                })}
-              </View>
-            ))}
-          </View>
+                    <View
+                        style={[
+                            styles.legendSquare,
+                            {
+                                backgroundColor: "#6B5B95",
+                                width: squareSize,
+                                height: squareSize,
+                            },
+                        ]}
+                    />
+                    <View
+                        style={[
+                            styles.legendSquare,
+                            {
+                                backgroundColor: "#9B7EDE",
+                                width: squareSize,
+                                height: squareSize,
+                            },
+                        ]}
+                    />
+                    <View
+                        style={[
+                            styles.legendSquare,
+                            {
+                                backgroundColor: "#AB8BFF",
+                                width: squareSize,
+                                height: squareSize,
+                            },
+                        ]}
+                    />
+                    <View
+                        style={[
+                            styles.legendSquare,
+                            {
+                                backgroundColor: "#CCBBFF",
+                                width: squareSize,
+                                height: squareSize,
+                            },
+                        ]}
+                    />
+                    <Text style={styles.legendText}>Plus</Text>
+                </View>
+            </View>
         </View>
-
-        {/* Légende */}
-        <View style={styles.legend}>
-          <Text style={styles.legendText}>Moins</Text>
-          <View
-            style={[
-              styles.legendSquare,
-              {
-                backgroundColor: "#2D2A45",
-                width: squareSize,
-                height: squareSize,
-              },
-            ]}
-          />
-          <View
-            style={[
-              styles.legendSquare,
-              {
-                backgroundColor: "#6B5B95",
-                width: squareSize,
-                height: squareSize,
-              },
-            ]}
-          />
-          <View
-            style={[
-              styles.legendSquare,
-              {
-                backgroundColor: "#9B7EDE",
-                width: squareSize,
-                height: squareSize,
-              },
-            ]}
-          />
-          <View
-            style={[
-              styles.legendSquare,
-              {
-                backgroundColor: "#AB8BFF",
-                width: squareSize,
-                height: squareSize,
-              },
-            ]}
-          />
-          <View
-            style={[
-              styles.legendSquare,
-              {
-                backgroundColor: "#CCBBFF",
-                width: squareSize,
-                height: squareSize,
-              },
-            ]}
-          />
-          <Text style={styles.legendText}>Plus</Text>
-        </View>
-      </View>
-    </View>
-  );
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#1A1729",
-    borderRadius: 12,
-    padding: 16,
-    marginVertical: 10,
-  },
-  title: {
-    fontFamily: "PixelJersey",
-    color: "#ffffff",
-    fontSize: 15,
-    fontWeight: "600",
-    marginBottom: 16,
-  },
-  content: {},
-  monthsRow: {
-    height: 18,
-    position: "relative",
-    marginBottom: 4,
-  },
-  monthLabel: {
-    fontFamily: "PixelJersey",
-    position: "absolute",
-    color: "#9CA3AF",
-    fontSize: 10,
-  },
-  graphContainer: {
-    flexDirection: "row",
-  },
-  dayLabels: {
-    justifyContent: "space-between",
-    marginRight: 6,
-    paddingTop: 2,
-  },
-  dayLabel: {
-    fontFamily: "PixelJersey",
-    color: "#9CA3AF",
-    fontSize: 9,
-  },
-  grid: {
-    flexDirection: "row",
-    gap: 3,
-  },
-  column: {},
-  square: {
-    borderRadius: 2,
-  },
-  emptySquare: {},
-  legend: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 12,
-    gap: 3,
-    justifyContent: "flex-end",
-  },
-  legendText: {
-    fontFamily: "PixelJersey",
-    color: "#9CA3AF",
-    fontSize: 10,
-  },
-  legendSquare: {
-    borderRadius: 2,
-  },
+    container: {
+        borderRadius: 12,
+        padding: 16,
+        marginVertical: 10,
+    },
+    title: {
+        fontFamily: "PixelJersey",
+        color: "#ffffff",
+        fontSize: 15,
+        fontWeight: "600",
+        marginBottom: 16,
+    },
+    content: {},
+    monthsRow: {
+        height: 18,
+        position: "relative",
+        marginBottom: 4,
+    },
+    monthLabel: {
+        fontFamily: "PixelJersey",
+        position: "absolute",
+        color: "#9CA3AF",
+        fontSize: 10,
+    },
+    graphContainer: {
+        flexDirection: "row",
+    },
+    dayLabels: {
+        justifyContent: "space-between",
+        marginRight: 6,
+        paddingTop: 2,
+    },
+    dayLabel: {
+        fontFamily: "PixelJersey",
+        color: "#9CA3AF",
+        fontSize: 9,
+    },
+    grid: {
+        flexDirection: "row",
+        gap: 3,
+    },
+    column: {},
+    square: {
+        borderRadius: 2,
+    },
+    emptySquare: {},
+    legend: {
+        flexDirection: "row",
+        alignItems: "center",
+        marginTop: 12,
+        gap: 3,
+        justifyContent: "flex-end",
+    },
+    legendText: {
+        fontFamily: "PixelJersey",
+        color: "#9CA3AF",
+        fontSize: 10,
+    },
+    legendSquare: {
+        borderRadius: 2,
+    },
 });

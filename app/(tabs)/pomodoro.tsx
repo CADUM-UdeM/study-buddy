@@ -16,6 +16,8 @@ import {
 import {AnimatedCircularProgress} from "react-native-circular-progress";
 import "../global.css";
 import {sessionContext} from "@/app/context/SessionContext";
+import {darkTheme, lightTheme} from "@/components/colors";
+import {useSettings} from "@/app/context/SettingsContext";
 
 
 export default function Pomodoro() {
@@ -307,10 +309,14 @@ export default function Pomodoro() {
     }, [timeLeft]);
 
 
-    const cardBg = {backgroundColor: "#1A1729"};
+
+    const {settings} = useSettings();
+    /* Appliquer la couleur du theme */
+    const theme = settings.isDarkMode ? darkTheme : lightTheme;
+    const cardBg = {backgroundColor: theme.contentWrapperBgColor};
 
     return (
-        <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
+        <ScrollView className="flex-1  px-5 pt-16" style={{backgroundColor:theme.background}}>
             {/* --- Timer card (index-style) --- */}
             <View
                 className="rounded-2xl p-6 mb-4"
@@ -318,11 +324,11 @@ export default function Pomodoro() {
                     cardBg,
                     {
                         borderWidth: 1,
-                        borderColor: inBreakTime ? "#7b2cbf" : "#444462",
+                        borderColor: inBreakTime ? "#7b2cbf" : theme.borderColor,
                     },
                 ]}
             >
-                <Text className="text-center text-lg text-purple-200 mb-6 font-pixel text-[20px]">
+                <Text className="text-center text-lg  mb-6 font-pixel text-[20px]" style={{color:theme.defaultTextColor}}>
                     {!inBreakTime ? "Focus" : "Pause"}
                 </Text>
 
@@ -353,7 +359,7 @@ export default function Pomodoro() {
                         lineCap="round"
                     >
                         {() => (
-                            <Text className="text-3xl text-purple-100 font-pixel ">
+                            <Text className="text-3xl font-pixel " style={{color:theme.defaultTextColor}}>
                                 {hours}:{min}:{sec}
                             </Text>
                         )}
@@ -385,7 +391,7 @@ export default function Pomodoro() {
                         className="rounded-xl px-4 py-2"
                         style={{backgroundColor: "#AB8BFF40"}}
                     >
-                        <Text className="text-lg font-semibold text-purple-100 font-pixel">
+                        <Text className="text-lg font-semibold font-pixel" style={{color:theme.defaultTextColor}}>
                             Cycle : {remainingCycle}
                         </Text>
                     </View>
@@ -402,12 +408,12 @@ export default function Pomodoro() {
                         <View
                             style={[
                                 stylesProfil.confContainer,
-                                {height: "77%", ...cardBg, borderColor: "#444462", borderWidth: 1},
+                                {height: "77%", ...cardBg, borderColor: theme.borderColor, borderWidth: 1},
                             ]}
                         >
                             <Text
-                                className="text-2xl text-purple-100 font-pixel"
-                                style={{paddingTop: 10, paddingBottom: 20, textAlign: "center"}}
+                                className="text-2xl  font-pixel"
+                                style={{paddingTop: 10, paddingBottom: 20, textAlign: "center", color:theme.defaultTextColor}}
                             >
                                 Réglez votre pomodoro
                             </Text>
@@ -627,19 +633,19 @@ export default function Pomodoro() {
                 <Pressable
                     onPress={stop_button}
                     className="flex-1 rounded-2xl border border-red-300 py-4"
-                    style={{borderColor: "#f87171"}}
+                    style={{borderColor: theme.borderColor}}
                 >
                     <Text className="text-red-200 text-center text-xl font-pixel">Stop</Text>
                 </Pressable>
             </View>
 
             {/* --- Historique --- */}
-            <Text className="text-2xl text-purple-100 mb-2 mt-2 font-pixel">Historique</Text>
+            <Text className="text-2xl  mb-2 mt-2 font-pixel" style={{color:theme.defaultTextColor}}>Historique</Text>
             <View style={{height: 2, backgroundColor: "#444462", width: width * 0.5, marginBottom: 12}}/>
             <Modal transparent visible={isFinished} animationType="fade">
                 <View style={[stylesProfil.confPage, {backgroundColor: "rgba(0,0,0,0.6)"}]}>
-                    <View style={[stylesProfil.confContainer, cardBg, {borderWidth: 1, borderColor: "#444462"}]}>
-                        <Text className="text-purple-100 text-center mb-2 text-2xl font-pixel">
+                    <View style={[stylesProfil.confContainer, cardBg, {borderWidth: 1, borderColor: theme.borderColor}]}>
+                        <Text className=" text-center mb-2 text-2xl font-pixel" style={{color:theme.defaultTextColor}}>
                             Bravo pour avoir fini la session de pomodoro !
                         </Text>
                         <IonIcons name="ribbon-outline" size={40} color="#e0aaff"
@@ -648,7 +654,7 @@ export default function Pomodoro() {
                             onPress={() => setIsFinished(false)}
                             className="rounded-2xl bg-violet-600 py-3 px-8 mt-2 items-center"
                         >
-                            <Text className="text-purple-100 font-semibold font-pixel text-2xl">OK</Text>
+                            <Text className=" font-semibold font-pixel text-2xl" style={{color:theme.defaultTextColor}}>OK</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -664,7 +670,7 @@ export default function Pomodoro() {
                     <View
                         key={session.id}
                         className="rounded-xl flex-row items-center py-2.5 px-3 mr-2"
-                        style={{...cardBg, borderWidth: 1, borderColor: "#444462", minWidth: 140}}
+                        style={{...cardBg, borderWidth: 1, borderColor: theme.borderColor, minWidth: 140}}
                     >
                         {session.isCompleted && (
                             <IonIcons
@@ -675,7 +681,7 @@ export default function Pomodoro() {
                             />
                         )}
                         <View className="flex-1 min-w-0">
-                            <Text className="text-purple-100 text-base font-medium font-pixel" numberOfLines={1}>
+                            <Text className=" text-base font-medium font-pixel" numberOfLines={1} style={{color:theme.defaultTextColor}}>
                                 {session.durationSession}min · {session.breakSession}min pause ·
                                 ×{session.repeatSession}
                             </Text>

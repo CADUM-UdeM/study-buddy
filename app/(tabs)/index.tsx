@@ -10,6 +10,7 @@ import { useSessions } from "../context/SessionsContext";
 import "../global.css";
 import LastStreakTracker from "@/components/LastStreakTracker";
 import WeekStreakTracker from "@/components/WeekStreakTracker";
+import {darkTheme, lightTheme} from "@/components/colors";
 
 export default function Accueil() {
   const router = useRouter();
@@ -23,8 +24,11 @@ export default function Accueil() {
   // Calculate stats based on toggle
   const overallStats = calculateOverallStats(showGlobalGPA);
 
+  /* Appliquer la couleur du theme */
+  const theme = settings.isDarkMode ? darkTheme : lightTheme;
+
   return (
-    <ScrollView className="flex-1 bg-dark-primary px-5 pt-16">
+    <ScrollView className="flex-1 px-5 pt-16" style={{backgroundColor:theme.background}}>
 
       <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
         <ContributionTracker />
@@ -42,7 +46,7 @@ export default function Accueil() {
                 <WeekStreakTracker />
             </View>)}
       {/* --- GPA Section --- */}
-      <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: "#1A1729"}}>
+      <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: theme.mainWrapperBgColor}}>
         <View className="flex-row items-center justify-between mb-2">
           <Text className="text-neutral-600 font-pixel text-lg">
             {showGlobalGPA
@@ -93,9 +97,10 @@ export default function Accueil() {
       {/* --- Actions --- */}
       <Pressable
         onPress={() => router.push("/(tabs)/pomodoro")}
-        className="mt-5 rounded-2xl bg-violet-600 py-4"
+        className="mt-5 rounded-2xl  py-4"
+        style={{backgroundColor:theme.buttonColor}}
       >
-        <Text className="text-purple-100 text-center font-semibold font-pixel text-xl">
+        <Text className=" text-center font-semibold font-pixel text-xl" style={{color:theme.defaultTextColor}}>
           Démarrer un Pomodoro
         </Text>
       </Pressable>

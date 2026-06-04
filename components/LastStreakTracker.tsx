@@ -3,6 +3,9 @@ import {StyleSheet, Text, View} from "react-native";
 import {sessionContext} from "@/app/context/SessionContext";
 import {useFocusEffect} from "@react-navigation/core";
 import IonIcons from "@expo/vector-icons/Ionicons";
+import styleTracker, {getStyles} from './styleTracker'
+import {useSettings} from "@/app/context/SettingsContext";
+import {darkTheme, lightTheme} from "@/components/colors";
 
 export default function LastStreakTracker() {
     interface Session {
@@ -14,9 +17,13 @@ export default function LastStreakTracker() {
         isDeleteOpen: boolean,
         date: string,
     }
-
     const [sessions, setSessions] = useState<Session[]>([]);
     const [totalContributions, setTotalContributions] = useState(0);
+
+    /* Variables pour css */
+    const {settings} = useSettings();
+    const theme = settings.isDarkMode ? darkTheme : lightTheme;
+    const styles = getStyles();
 
     /* Avant de modifier historique récupère les données enregistrées. */
     useFocusEffect(
@@ -47,13 +54,14 @@ export default function LastStreakTracker() {
 
 
     return (
-        <View style={[styles.container,]}>
+        <View style={[styles.container, {backgroundColor: theme.mainWrapperBgColor, borderColor: theme.borderColor,
+        }]}>
             <View className="flex-row items-center justify-between mb-2">
 
                 {dateLastPomodoro && (
                     <View style={{flexDirection: 'row'}}>
-                        <IonIcons name="time-outline"  color={"#525252"} size={20} style={{bottom:1, right:5}}/>
-                        <Text className="text-neutral-600 font-pixel text-md" style={{left:5}}>
+                        <IonIcons name="time-outline"  color={theme.defaultTextColor} size={20} style={{bottom:1, right:5}}/>
+                        <Text className=" font-pixel text-md" style={{left:5, color:theme.defaultTextColor}}>
                             Dernier pomodoro le {dateLastPomodoro} de {durationLastPomodoro} minutes.
                         </Text>
                     </View>)
@@ -62,15 +70,3 @@ export default function LastStreakTracker() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: {
-        backgroundColor: "#1A1729",
-        borderRadius: 12,
-        padding: 16,
-        paddingBottom:2,
-        paddingTop:8,
-        marginVertical: 0,
-    },
-
-});
