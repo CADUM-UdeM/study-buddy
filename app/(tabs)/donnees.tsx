@@ -16,8 +16,12 @@ import {
   View,
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
+import { darkTheme, lightTheme } from "@/components/colors";
 import { Course, useCourses } from "../context/CoursesContext";
 import { useSessions } from "../context/SessionsContext";
+import { useSettings } from "../context/SettingsContext";
+
+type AppTheme = typeof lightTheme;
 
 export default function Donnees() {
   const {
@@ -36,6 +40,20 @@ export default function Donnees() {
     deleteSession,
     setActiveSession,
   } = useSessions();
+  const { settings } = useSettings();
+  const theme = settings.isDarkMode ? darkTheme : lightTheme;
+  const placeholderColor = settings.isDarkMode ? "#B9A8D8" : "#9372BA";
+  const mutedTextColor = settings.isDarkMode ? "#D6C8EA" : "#9372BA";
+  const buttonTextColor = settings.isDarkMode ? "white" : theme.defaultTextColor;
+  const surfaceStyle = {
+    backgroundColor: theme.mainWrapperBgColor,
+    borderColor: theme.borderColor,
+  };
+  const inputStyle = {
+    backgroundColor: theme.contentWrapperBgColor,
+    borderColor: theme.borderColor,
+    color: theme.defaultTextColor,
+  };
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
@@ -230,14 +248,16 @@ export default function Donnees() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#221F3D" }}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       {/* Header - anchored to top */}
       <View>
-        <Text style={styles.title}>Mes Cours</Text>
+        <Text style={[styles.title, { color: theme.defaultTextColor }]}>
+          Mes Cours
+        </Text>
       </View>
 
       {/* Session Selector */}
-      <View style={styles.sessionSelector}>
+      <View style={[styles.sessionSelector, { borderBottomColor: theme.borderColor }]}>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -248,7 +268,14 @@ export default function Donnees() {
               key={session.id}
               style={[
                 styles.sessionChip,
-                activeSession?.id === session.id && styles.sessionChipActive,
+                {
+                  backgroundColor: theme.contentWrapperBgColor,
+                  borderColor: theme.borderColor,
+                },
+                activeSession?.id === session.id && {
+                  backgroundColor: theme.buttonColor,
+                  borderColor: theme.buttonColor,
+                },
               ]}
               onPress={() => setActiveSession(session.id)}
               onLongPress={(e) => {
@@ -260,23 +287,37 @@ export default function Donnees() {
               <Text
                 style={[
                   styles.sessionChipText,
-                  activeSession?.id === session.id &&
-                  styles.sessionChipTextActive,
+                  { color: theme.defaultTextColor },
+                  activeSession?.id === session.id && {
+                    color: buttonTextColor,
+                  },
                 ]}
               >
                 {session.name}
               </Text>
               {activeSession?.id === session.id && (
-                <Ionicons name="checkmark-circle" size={16} color="white" />
+                <Ionicons
+                  name="checkmark-circle"
+                  size={16}
+                  color={buttonTextColor}
+                />
               )}
             </TouchableOpacity>
           ))}
           <TouchableOpacity
-            style={styles.addSessionChip}
+            style={[
+              styles.addSessionChip,
+              {
+                backgroundColor: theme.mainWrapperBgColor,
+                borderColor: theme.activeColorIcon,
+              },
+            ]}
             onPress={() => setSessionModalVisible(true)}
           >
-            <Ionicons name="add" size={20} color="#5900a1ff" />
-            <Text style={styles.addSessionText}>Nouvelle session</Text>
+            <Ionicons name="add" size={20} color={theme.activeColorIcon} />
+            <Text style={[styles.addSessionText, { color: theme.activeColorIcon }]}>
+              Nouvelle session
+            </Text>
           </TouchableOpacity>
         </ScrollView>
       </View>
@@ -292,11 +333,11 @@ export default function Donnees() {
       >
         {displayedCourses.length === 0 ? (
           <View style={styles.emptyState}>
-            <Ionicons name="school-outline" size={48} color="#ccc" />
-            <Text style={styles.emptyStateText}>
+            <Ionicons name="school-outline" size={48} color={mutedTextColor} />
+            <Text style={[styles.emptyStateText, { color: theme.defaultTextColor }]}>
               Aucun cours dans cette session
             </Text>
-            <Text style={styles.emptyStateSubtext}>
+            <Text style={[styles.emptyStateSubtext, { color: mutedTextColor }]}>
               Ajoutez un cours pour commencer
             </Text>
           </View>
@@ -306,6 +347,7 @@ export default function Donnees() {
               <CourseCard
                 key={course.id}
                 course={course}
+                theme={theme}
                 onPress={() => navigateToCourseDetails(course.id)}
                 onEdit={() => handleEditCourse(course)}
                 onDelete={() => handleDeleteCourse(course.id)}
@@ -315,10 +357,17 @@ export default function Donnees() {
         )}
 
         <TouchableOpacity
-          style={styles.addCoursButton}
+          style={[styles.addCoursButton, { backgroundColor: theme.buttonColor }]}
           onPress={() => setModalVisible(true)}
         >
-          <Text style={styles.addCoursText}>+ Ajouter un cours</Text>
+          <Text
+            style={[
+              styles.addCoursText,
+              { color: buttonTextColor },
+            ]}
+          >
+            + Ajouter un cours
+          </Text>
         </TouchableOpacity>
       </ScrollView>
 
@@ -343,7 +392,7 @@ export default function Donnees() {
             }}
           >
             <Pressable
-              style={styles.modalContent}
+              style={[styles.modalContent, surfaceStyle]}
               onPress={(e) => e.stopPropagation()}
             >
               <ScrollView
@@ -351,36 +400,40 @@ export default function Donnees() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Text style={styles.modalTitle}>Ajouter un cours</Text>
+                <Text style={[styles.modalTitle, { color: theme.defaultTextColor }]}>
+                  Ajouter un cours
+                </Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, inputStyle]}
                   placeholder="Nom du cours"
-                  placeholderTextColor={"#6B7282"}
+                  placeholderTextColor={placeholderColor}
                   value={courseName}
                   onChangeText={setCourseName}
                   autoFocus
                 />
 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, inputStyle]}
                   placeholder="Objectif (%)"
-                  placeholderTextColor={"#6B7282"}
+                  placeholderTextColor={placeholderColor}
                   value={courseObjective}
                   onChangeText={setCourseObjective}
                   keyboardType="numeric"
                 />
 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, inputStyle]}
                   placeholder="Crédits"
-                  placeholderTextColor={"#6B7282"}
+                  placeholderTextColor={placeholderColor}
                   value={courseCredits}
                   onChangeText={setCourseCredits}
                   keyboardType="numeric"
                 />
 
-                <Text style={styles.label}>Session</Text>
+                <Text style={[styles.label, { color: theme.defaultTextColor }]}>
+                  Session
+                </Text>
                 <View style={styles.sessionPicker}>
                   {sessions.map((session) => {
                     const isSelected =
@@ -392,7 +445,14 @@ export default function Donnees() {
                         key={session.id}
                         style={[
                           styles.sessionOption,
-                          isSelected && styles.sessionOptionActive,
+                          {
+                            backgroundColor: theme.contentWrapperBgColor,
+                            borderColor: theme.borderColor,
+                          },
+                          isSelected && {
+                            backgroundColor: theme.buttonColor,
+                            borderColor: theme.buttonColor,
+                          },
                         ]}
                         onPress={() =>
                           setSelectedSessionId(
@@ -405,13 +465,20 @@ export default function Donnees() {
                         <Text
                           style={[
                             styles.sessionOptionText,
-                            isSelected && styles.sessionOptionTextActive,
+                            { color: theme.defaultTextColor },
+                            isSelected && {
+                              color: buttonTextColor,
+                            },
                           ]}
                         >
                           {session.name}
                         </Text>
                         {isSelected && (
-                          <Ionicons name="checkmark" size={18} color="white" />
+                          <Ionicons
+                            name="checkmark"
+                            size={18}
+                            color={buttonTextColor}
+                          />
                         )}
                       </TouchableOpacity>
                     );
@@ -420,7 +487,11 @@ export default function Donnees() {
 
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.cancelButton]}
+                    style={[
+                      styles.modalButton,
+                      styles.cancelButton,
+                      { borderColor: theme.borderColor },
+                    ]}
                     onPress={() => {
                       setModalVisible(false);
                       setCourseName("");
@@ -429,14 +500,27 @@ export default function Donnees() {
                       setSelectedSessionId(null);
                     }}
                   >
-                    <Text style={styles.cancelButtonText}>Annuler</Text>
+                    <Text style={[styles.cancelButtonText, { color: theme.defaultTextColor }]}>
+                      Annuler
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.addButton]}
+                    style={[
+                      styles.modalButton,
+                      styles.addButton,
+                      { backgroundColor: theme.buttonColor },
+                    ]}
                     onPress={handleAddCourse}
                   >
-                    <Text style={styles.addButtonText}>Ajouter</Text>
+                    <Text
+                      style={[
+                        styles.addButtonText,
+                        { color: buttonTextColor },
+                      ]}
+                    >
+                      Ajouter
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -478,7 +562,7 @@ export default function Donnees() {
             }}
           >
             <Pressable
-              style={styles.modalContent}
+              style={[styles.modalContent, surfaceStyle]}
               onPress={(e) => e.stopPropagation()}
             >
               <ScrollView
@@ -486,36 +570,40 @@ export default function Donnees() {
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
               >
-                <Text style={styles.modalTitle}>Modifier le cours</Text>
+                <Text style={[styles.modalTitle, { color: theme.defaultTextColor }]}>
+                  Modifier le cours
+                </Text>
 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, inputStyle]}
                   placeholder="Nom du cours"
-                  placeholderTextColor={"#6B7282"}
+                  placeholderTextColor={placeholderColor}
                   value={courseName}
                   onChangeText={setCourseName}
                   autoFocus
                 />
 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, inputStyle]}
                   placeholder="Objectif (%)"
-                  placeholderTextColor={"#6B7282"}
+                  placeholderTextColor={placeholderColor}
                   value={courseObjective}
                   onChangeText={setCourseObjective}
                   keyboardType="numeric"
                 />
 
                 <TextInput
-                  style={styles.input}
+                  style={[styles.input, inputStyle]}
                   placeholder="Crédits"
                   value={courseCredits}
-                  placeholderTextColor={"#6B7282"}
+                  placeholderTextColor={placeholderColor}
                   onChangeText={setCourseCredits}
                   keyboardType="numeric"
                 />
 
-                <Text style={styles.label}>Session</Text>
+                <Text style={[styles.label, { color: theme.defaultTextColor }]}>
+                  Session
+                </Text>
                 <View style={styles.sessionPicker}>
                   {sessions.map((session) => {
                     const isSelected =
@@ -530,7 +618,14 @@ export default function Donnees() {
                         key={session.id}
                         style={[
                           styles.sessionOption,
-                          isSelected && styles.sessionOptionActive,
+                          {
+                            backgroundColor: theme.contentWrapperBgColor,
+                            borderColor: theme.borderColor,
+                          },
+                          isSelected && {
+                            backgroundColor: theme.buttonColor,
+                            borderColor: theme.buttonColor,
+                          },
                         ]}
                         onPress={() =>
                           setSelectedSessionId(
@@ -543,13 +638,20 @@ export default function Donnees() {
                         <Text
                           style={[
                             styles.sessionOptionText,
-                            isSelected && styles.sessionOptionTextActive,
+                            { color: theme.defaultTextColor },
+                            isSelected && {
+                              color: buttonTextColor,
+                            },
                           ]}
                         >
                           {session.name}
                         </Text>
                         {isSelected && (
-                          <Ionicons name="checkmark" size={18} color="white" />
+                          <Ionicons
+                            name="checkmark"
+                            size={18}
+                            color={buttonTextColor}
+                          />
                         )}
                       </TouchableOpacity>
                     );
@@ -558,7 +660,11 @@ export default function Donnees() {
 
                 <View style={styles.modalButtons}>
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.cancelButton]}
+                    style={[
+                      styles.modalButton,
+                      styles.cancelButton,
+                      { borderColor: theme.borderColor },
+                    ]}
                     onPress={() => {
                       setEditModalVisible(false);
                       setCourseName("");
@@ -568,14 +674,27 @@ export default function Donnees() {
                       setEditingCourse(null);
                     }}
                   >
-                    <Text style={styles.cancelButtonText}>Annuler</Text>
+                    <Text style={[styles.cancelButtonText, { color: theme.defaultTextColor }]}>
+                      Annuler
+                    </Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
-                    style={[styles.modalButton, styles.addButton]}
+                    style={[
+                      styles.modalButton,
+                      styles.addButton,
+                      { backgroundColor: theme.buttonColor },
+                    ]}
                     onPress={handleUpdateCourse}
                   >
-                    <Text style={styles.addButtonText}>Modifier</Text>
+                    <Text
+                      style={[
+                        styles.addButtonText,
+                        { color: buttonTextColor },
+                      ]}
+                    >
+                      Modifier
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </ScrollView>
@@ -594,6 +713,7 @@ export default function Donnees() {
           <View
             style={[
               styles.dropdownMenu,
+              surfaceStyle,
               { top: menuPosition.top, left: menuPosition.left },
             ]}
           >
@@ -606,10 +726,16 @@ export default function Donnees() {
                 if (session) handleEditSession(session.id, session.name);
               }}
             >
-              <Ionicons name="create-outline" size={18} color="#333" />
-              <Text style={styles.menuText}>Modifier</Text>
+              <Ionicons
+                name="create-outline"
+                size={18}
+                color={theme.defaultTextColor}
+              />
+              <Text style={[styles.menuText, { color: theme.defaultTextColor }]}>
+                Modifier
+              </Text>
             </TouchableOpacity>
-            <View style={styles.menuDivider} />
+            <View style={[styles.menuDivider, { backgroundColor: theme.borderColor }]} />
             <TouchableOpacity
               style={styles.menuItem}
               onPress={() => {
@@ -645,15 +771,17 @@ export default function Donnees() {
           }}
         >
           <Pressable
-            style={styles.modalContent}
+            style={[styles.modalContent, surfaceStyle]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={styles.modalTitle}>Ajouter une session</Text>
+            <Text style={[styles.modalTitle, { color: theme.defaultTextColor }]}>
+              Ajouter une session
+            </Text>
 
             <TextInput
-              style={styles.input}
+              style={[styles.input, inputStyle]}
               placeholder="Nom de la session"
-              placeholderTextColor={"#6B7282"}
+              placeholderTextColor={placeholderColor}
               value={newSessionName}
               onChangeText={setNewSessionName}
               autoFocus
@@ -661,20 +789,37 @@ export default function Donnees() {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[
+                  styles.modalButton,
+                  styles.cancelButton,
+                  { borderColor: theme.borderColor },
+                ]}
                 onPress={() => {
                   setSessionModalVisible(false);
                   setNewSessionName("");
                 }}
               >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
+                <Text style={[styles.cancelButtonText, { color: theme.defaultTextColor }]}>
+                  Annuler
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
+                style={[
+                  styles.modalButton,
+                  styles.addButton,
+                  { backgroundColor: theme.buttonColor },
+                ]}
                 onPress={handleAddSession}
               >
-                <Text style={styles.addButtonText}>Ajouter</Text>
+                <Text
+                  style={[
+                    styles.addButtonText,
+                    { color: buttonTextColor },
+                  ]}
+                >
+                  Ajouter
+                </Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -701,15 +846,17 @@ export default function Donnees() {
           }}
         >
           <Pressable
-            style={styles.modalContent}
+            style={[styles.modalContent, surfaceStyle]}
             onPress={(e) => e.stopPropagation()}
           >
-            <Text style={styles.modalTitle}>Modifier la session</Text>
+            <Text style={[styles.modalTitle, { color: theme.defaultTextColor }]}>
+              Modifier la session
+            </Text>
 
             <TextInput
-              style={styles.input}
+              style={[styles.input, inputStyle]}
               placeholder="Nom de la session"
-              placeholderTextColor={"#6B7282"}
+              placeholderTextColor={placeholderColor}
               value={editingSessionName}
               onChangeText={setEditingSessionName}
               autoFocus
@@ -717,21 +864,38 @@ export default function Donnees() {
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[
+                  styles.modalButton,
+                  styles.cancelButton,
+                  { borderColor: theme.borderColor },
+                ]}
                 onPress={() => {
                   setSessionEditModalVisible(false);
                   setEditingSessionName("");
                   setEditingSessionId(null);
                 }}
               >
-                <Text style={styles.cancelButtonText}>Annuler</Text>
+                <Text style={[styles.cancelButtonText, { color: theme.defaultTextColor }]}>
+                  Annuler
+                </Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalButton, styles.addButton]}
+                style={[
+                  styles.modalButton,
+                  styles.addButton,
+                  { backgroundColor: theme.buttonColor },
+                ]}
                 onPress={handleUpdateSession}
               >
-                <Text style={styles.addButtonText}>Modifier</Text>
+                <Text
+                  style={[
+                    styles.addButtonText,
+                    { color: buttonTextColor },
+                  ]}
+                >
+                  Modifier
+                </Text>
               </TouchableOpacity>
             </View>
           </Pressable>
@@ -743,11 +907,13 @@ export default function Donnees() {
 
 function CourseCard({
   course,
+  theme,
   onPress,
   onEdit,
   onDelete,
 }: {
   course: Course;
+  theme: AppTheme;
   onPress: () => void;
   onEdit: () => void;
   onDelete: () => void;
@@ -820,7 +986,7 @@ function CourseCard({
             borderRadius: 12,
             justifyContent: "center",
             alignItems: "center",
-            backgroundColor: "rgb(64, 64, 64)",
+            backgroundColor: theme.contentWrapperBgColor,
             opacity: reveal,
           }}
         >
@@ -829,7 +995,11 @@ function CourseCard({
               transform: [{ scale: iconScale }, { translateX: iconTranslateX }],
             }}
           >
-            <Ionicons name="pencil-outline" size={22} color="white" />
+            <Ionicons
+              name="pencil-outline"
+              size={22}
+              color={theme.defaultTextColor}
+            />
           </Animated.View>
         </Animated.View>
       </View>
@@ -907,16 +1077,28 @@ function CourseCard({
         }}
       >
         <Pressable onPress={onPress} onLongPress={onEdit}>
-          <View style={styles.coursContainer}>
+          <View
+            style={[
+              styles.coursContainer,
+              {
+                backgroundColor: theme.mainWrapperBgColor,
+                borderColor: theme.borderColor,
+              },
+            ]}
+          >
             <Text
-              style={styles.coursText}
+              style={[styles.coursText, { color: theme.defaultTextColor }]}
               numberOfLines={1}
               ellipsizeMode="tail"
             >
               {course.name}
             </Text>
 
-            <Ionicons name="chevron-forward" size={20} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={theme.defaultTextColor}
+            />
           </View>
         </Pressable>
       </Swipeable>
