@@ -20,11 +20,15 @@ export const lightTheme = {
 
   // Calendrier
   calendarZero: "#FEFAFD",
+  calendarLevelOne:"#CCBBFF",
+  calendarLevelTwo: "#9B7EDE",
+  calendarLevelThree: "#6B5B95",
+  calendarLevelFour: "#2D2A45",
 
   stopColor: "#8b0000",
   stopBorderColor: "#8b0000",
 
-  calendarIconColor: "#000f57"
+  calendarIconColor: "#1d0057"
 };
 
 /* Afin d'avoir les memes declarations de variables, on utilise typeof */
@@ -50,9 +54,13 @@ export const darkTheme: typeof lightTheme = {
 
   // Calendrier
   calendarZero: "#2D2A45",
+  calendarLevelOne:"#6B5B95",
+  calendarLevelTwo: "#9B7EDE",
+  calendarLevelThree: "#AB8BFF",
+  calendarLevelFour: "#CCBBFF",
 
   stopColor: "#f9acac",
   stopBorderColor: "#f9acac",
 
-  calendarIconColor: "#059669"
+  calendarIconColor: "#bba1ee"
 };

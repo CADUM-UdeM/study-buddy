@@ -379,14 +379,18 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                             className="flex-row items-center justify-between mb-2 rounded-xl px-4 py-3"
                             style={{backgroundColor: ROW_BG}}
                         >
-                            <Text className="text-purple-100 font-pixel font-bold w-12">
+                            <Text className="text-purple-100 font-pixel font-bold w-12"
+                            style={{color :theme.defaultTextColor}}> 
+                            {/*activeTextColor*/}
                                 {boundary.letter}
                             </Text>
-                            <Text className="text-neutral-500 font-pixel flex-1">
+                            <Text className="text-neutral-500 font-pixel flex-1"
+                            style={{color :theme.calendarIconColor}}>
                                 {boundary.min}%-{boundary.max}%
                             </Text>
-                            <Text className="text-dark-accent font-pixel font-medium">
-                                GPA: {boundary.gpa}
+                            <Text className="text-dark-accent font-pixel font-medium"
+                            style={{color :theme.anotherTextColor}}>
+                                Valeur: {boundary.gpa}
                             </Text>
                         </View>
                     ))}

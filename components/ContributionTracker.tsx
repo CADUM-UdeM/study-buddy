@@ -81,10 +81,10 @@ export default function ContributionTracker() {
     // Obtient la couleur selon le nombre de contributions
     const getColor = (count: number) => {
         if (count === 0) return theme.calendarZero;
-        if (count <= 3) return "#6B5B95";
-        if (count <= 6) return "#9B7EDE";
-        if (count <= 10) return "#AB8BFF";
-        return "#CCBBFF";
+        if (count <= 3) return theme.calendarLevelOne;
+        if (count <= 6) return theme.calendarLevelTwo;
+        if (count <= 10) return theme.calendarLevelThree;
+        return theme.calendarLevelFour;
     };
 
     const formatDate = (date: Date) => {
@@ -268,7 +268,7 @@ export default function ContributionTracker() {
                         style={[
                             styles.legendSquare,
                             {
-                                backgroundColor: "#6B5B95",
+                                backgroundColor: theme.calendarLevelOne,
                                 width: squareSize,
                                 height: squareSize,
                             },
@@ -278,7 +278,7 @@ export default function ContributionTracker() {
                         style={[
                             styles.legendSquare,
                             {
-                                backgroundColor: "#9B7EDE",
+                                backgroundColor: theme.calendarLevelTwo,
                                 width: squareSize,
                                 height: squareSize,
                             },
@@ -288,7 +288,7 @@ export default function ContributionTracker() {
                         style={[
                             styles.legendSquare,
                             {
-                                backgroundColor: "#AB8BFF",
+                                backgroundColor: theme.calendarLevelThree,
                                 width: squareSize,
                                 height: squareSize,
                             },
@@ -298,7 +298,7 @@ export default function ContributionTracker() {
                         style={[
                             styles.legendSquare,
                             {
-                                backgroundColor: "#CCBBFF",
+                                backgroundColor: theme.calendarLevelFour,
                                 width: squareSize,
                                 height: squareSize,
                             },

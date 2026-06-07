@@ -6,6 +6,9 @@ import React, {
   useEffect,
   useState,
 } from "react";
+import { useColorScheme } from "react-native";
+
+export type ThemeMode = "system" | "light" | "dark";
 
 export interface GradeBoundary {
   letter: string;
@@ -22,6 +25,7 @@ export interface Settings {
   showGPA: boolean;
   showAverage: boolean;
   showCourseCount: boolean;
+  themeMode: ThemeMode;
   isDarkMode: boolean;
 }
 
@@ -80,6 +84,7 @@ const DEFAULT_SETTINGS: Settings = {
   showGPA: true,
   showAverage: true,
   showCourseCount: true,
+  themeMode: "system",
   isDarkMode: true,
 };
 
@@ -95,8 +100,17 @@ const getDefaultBoundariesForFormat = (format: string): GradeBoundary[] => {
 };
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
+  const colorScheme = useColorScheme();
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
   const [isLoading, setIsLoading] = useState(true);
+  const effectiveIsDarkMode =
+    settings.themeMode === "system"
+      ? colorScheme === "dark"
+      : settings.themeMode === "dark";
+  const effectiveSettings: Settings = {
+    ...settings,
+    isDarkMode: effectiveIsDarkMode,
+  };
 
   // Load settings from AsyncStorage on mount
   useEffect(() => {
@@ -148,6 +162,9 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const updateSettings = (newSettings: Partial<Settings>) => {
     setSettings((prev) => {
       const updated = { ...prev, ...newSettings };
+      if (newSettings.isDarkMode !== undefined && newSettings.themeMode === undefined) {
+        updated.themeMode = newSettings.isDarkMode ? "dark" : "light";
+      }
       // If gpaFormat changed, always update gradeBoundaries to match the format
       if (newSettings.gpaFormat && newSettings.gpaFormat !== prev.gpaFormat) {
         updated.gradeBoundaries = getDefaultBoundariesForFormat(
@@ -225,7 +242,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   return (
     <SettingsContext.Provider
       value={{
-        settings,
+        settings: effectiveSettings,
         updateSettings,
         updateGradeBoundaries,
         resetGradeBoundariesToDefault,

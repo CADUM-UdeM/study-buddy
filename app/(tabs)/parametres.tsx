@@ -2,7 +2,7 @@ import React from "react";
 import {Pressable, ScrollView, Switch, Text, View} from "react-native";
 import {ChibiBirdPeek} from "../../components/home/SpritePeeks";
 import {GradeBoundariesEditor} from "../../components/GradeBoundariesEditor";
-import {useSettings} from "../context/SettingsContext";
+import {ThemeMode, useSettings} from "../context/SettingsContext";
 import "../global.css";
 import {darkTheme, lightTheme} from "@/components/colors";
 
@@ -10,6 +10,11 @@ const CARD_BORDER = "#444462";
 
 const ACCENT = "#AB8BFF";
 const SWITCH_TRACK_OFF = "#2D2A45";
+const APPEARANCE_OPTIONS: {label: string; value: ThemeMode}[] = [
+    {label: "Système", value: "system"},
+    {label: "Clair", value: "light"},
+    {label: "Sombre", value: "dark"},
+];
 
 const Parametres = () => {
     const {settings, updateSettings, updateGradeBoundaries, resetGradeBoundariesToDefault} = useSettings();
@@ -126,20 +131,31 @@ const Parametres = () => {
             <View className="rounded-2xl p-4 mb-3 gap-3" style={cardShellStyle}>
                 <Text className="text-lg font-pixel text-neutral-600">Apparence</Text>
 
-                <View
-                    className="flex-row items-center justify-between rounded-xl px-3 py-2"
-                    style={{backgroundColor: ROW_BG}}
-                >
-                    <Text className=" font-pixel text-base"
-                          style={{color :theme.defaultTextColor}}
-                    >Mode sombre</Text>
-                    <Switch
-                        value={settings.isDarkMode}
-                        onValueChange={(value) => handleToggleSetting("isDarkMode", value)}
-                        trackColor={{false: SWITCH_TRACK_OFF, true: ACCENT}}
-                        thumbColor={settings.isDarkMode ? "#e0aaff" : "#6B7280"}
-                    />
-                </View>
+                {APPEARANCE_OPTIONS.map((option) => {
+                    const selected = settings.themeMode === option.value;
+                    return (
+                        <Pressable
+                            key={option.value}
+                            onPress={() => updateSettings({themeMode: option.value})}
+                            className="flex-row items-center rounded-xl px-4 py-3"
+                            style={{backgroundColor: ROW_BG}}
+                        >
+                            <Text
+                                className="flex-1 font-pixel text-base"
+                                style={{color: selected ? theme.activeTextColor : theme.defaultTextColor}}
+                            >
+                                {option.label}
+                            </Text>
+                            <View
+                                className="w-5 h-5 rounded-full border-2"
+                                style={{
+                                    borderColor: selected ? ACCENT : CARD_BORDER,
+                                    backgroundColor: selected ? ACCENT : "transparent",
+                                }}
+                            />
+                        </Pressable>
+                    );
+                })}
             </View>
 
             {/* --- Info Section --- */}
