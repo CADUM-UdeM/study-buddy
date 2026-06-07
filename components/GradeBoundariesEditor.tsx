@@ -35,8 +35,8 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
     const {settings} = useSettings();
     const theme = settings.isDarkMode ? darkTheme : lightTheme;
 
-    const CARD_BG = "#1A1729";
-    const CARD_BORDER = "#444462";
+    const CARD_BG = theme.mainWrapperBgColor;
+    const CARD_BORDER = theme.contentWrapperBgColor;
     const ROW_BG = theme.contentWrapperBgColor;
     const cardShellStyle = {
         backgroundColor: theme.mainWrapperBgColor,
@@ -288,7 +288,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                         className="mb-3 rounded-xl p-3"
                         style={{backgroundColor: `${ROW_BG}99`}}
                     >
-                        <Text className="text-purple-200 font-pixel text-xs leading-5">
+                        <Text className=" font-pixel text-xs leading-5" style={{color:theme.defaultTextColor}}>
                             Les seuils sont ajustés automatiquement. L&apos;ordre des notes est
                             préservé — chaque note doit avoir un minimum inférieur à la note
                             précédente.
@@ -306,7 +306,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                                 className="flex-row items-center mb-2 rounded-xl px-4 py-3"
                                 style={{backgroundColor: ROW_BG}}
                             >
-                                <Text className="text-purple-100 font-pixel font-bold w-12">
+                                <Text className=" font-pixel font-bold w-12" style={{color:theme.defaultTextColor}}>
                                     {boundary.letter}
                                 </Text>
                                 <Text className="text-neutral-500 flex-1 text-sm font-pixel">
@@ -315,9 +315,9 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                                 <TouchableOpacity
                                     onPress={() => openEditModal(index)}
                                     className="rounded-lg px-3 py-1 mr-2"
-                                    style={{backgroundColor: "#7b2cbf"}}
+                                    style={{backgroundColor: theme.mainWrapperBgColor}}
                                 >
-                                    <Text className="text-purple-100 font-pixel text-xs">Éditer</Text>
+                                    <Text className=" font-pixel text-xs" style={{color:theme.defaultTextColor}}>Éditer</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => deleteBoundary(index)}
@@ -333,9 +333,9 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                         <TouchableOpacity
                             onPress={addBoundary}
                             className="flex-1 rounded-xl px-4 py-3"
-                            style={{backgroundColor: "#059669"}}
+                            style={{backgroundColor: theme === lightTheme ? "#cefad0":"#059669"}}
                         >
-                            <Text className="text-purple-100 font-pixel font-medium text-center">
+                            <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                 + Ajouter
                             </Text>
                         </TouchableOpacity>
@@ -345,7 +345,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                                 className="flex-1 rounded-xl px-4 py-3"
                                 style={{backgroundColor: "#c2410c"}}
                             >
-                                <Text className="text-purple-100 font-pixel font-medium text-center">
+                                <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                     Réinitialiser
                                 </Text>
                             </TouchableOpacity>
@@ -357,15 +357,15 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                             onPress={cancelEditing}
                             className="flex-1 rounded-2xl border border-violet-100 py-3 px-4"
                         >
-                            <Text className="text-purple-100 font-pixel font-medium text-center">
+                            <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                 Annuler
                             </Text>
                         </TouchableOpacity>
                         <TouchableOpacity
                             onPress={saveChanges}
-                            className="flex-1 rounded-2xl bg-violet-600 px-4 py-3"
+                            className="flex-1 rounded-2xl  px-4 py-3" style={{backgroundColor: ROW_BG}}
                         >
-                            <Text className="text-purple-100 font-pixel font-medium text-center">
+                            <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                 Enregistrer
                             </Text>
                         </TouchableOpacity>
@@ -413,24 +413,24 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                         style={{backgroundColor: CARD_BG, borderColor: CARD_BORDER}}
                         onPress={(e) => e.stopPropagation()}
                     >
-                        <Text className="text-xl font-pixel text-purple-100 mb-4">
+                        <Text className="text-xl font-pixel  mb-4" style={{color:theme.defaultTextColor}}>
                             Modifier le seuil
                         </Text>
 
-                        <Text className="text-neutral-600 font-pixel mb-2">Lettre</Text>
+                        <Text className=" font-pixel mb-2" style={{color:theme.defaultTextColor}}>Lettre</Text>
                         <TextInput
-                            className="text-purple-100 px-4 py-2 rounded-xl mb-4 font-pixel"
-                            style={{backgroundColor: ROW_BG}}
+                            className=" px-4 py-2 rounded-xl mb-4 font-pixel"
+                            style={{backgroundColor: ROW_BG, color:theme.defaultTextColor}}
                             value={editForm.letter}
                             onChangeText={(text) => setEditForm({...editForm, letter: text})}
                             placeholder="Ex: A+"
                             placeholderTextColor="#6B7280"
                         />
 
-                        <Text className="text-neutral-600 font-pixel mb-2">Minimum (%)</Text>
+                        <Text className=" font-pixel mb-2" style={{color:theme.defaultTextColor}}>Minimum (%)</Text>
                         <TextInput
-                            className="text-purple-100 px-4 py-2 rounded-xl mb-4 font-pixel"
-                            style={{backgroundColor: ROW_BG}}
+                            className=" px-4 py-2 rounded-xl mb-4 font-pixel"
+                            style={{backgroundColor: ROW_BG, color:theme.defaultTextColor}}
                             value={editForm.min}
                             onChangeText={(text) => setEditForm({...editForm, min: text})}
                             keyboardType="numeric"
@@ -439,16 +439,16 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                             editable={editingIndex !== editingBoundaries.length - 1}
                         />
 
-                        <Text className="text-neutral-500 text-xs mb-4 font-pixel">
+                        <Text className=" text-xs mb-4 font-pixel" style={{color:theme.defaultTextColor}}>
                             {editingIndex === editingBoundaries.length - 1
                                 ? "Le seuil le plus bas commence automatiquement à 0%"
                                 : "Le maximum sera automatiquement ajusté en fonction des autres seuils"}
                         </Text>
 
-                        <Text className="text-neutral-600 font-pixel mb-2">Valeur GPA</Text>
+                        <Text className=" font-pixel mb-2" style={{color:theme.defaultTextColor}}>Valeur GPA</Text>
                         <TextInput
-                            className="text-purple-100 px-4 py-2 rounded-xl mb-6 font-pixel"
-                            style={{backgroundColor: ROW_BG}}
+                            className=" px-4 py-2 rounded-xl mb-6 font-pixel"
+                            style={{backgroundColor: ROW_BG, color:theme.defaultTextColor}}
                             value={editForm.gpa}
                             onChangeText={(text) => setEditForm({...editForm, gpa: text})}
                             keyboardType="numeric"
@@ -459,17 +459,19 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                         <View className="flex-row gap-2">
                             <TouchableOpacity
                                 onPress={() => setEditingIndex(null)}
-                                className="flex-1 rounded-2xl border border-violet-100 py-3 px-4"
+                                className="flex-1 rounded-2xl border  py-3 px-4"
+                                style={{backgroundColor:theme.mainWrapperBgColor, borderColor:theme.anotherborderColor}}
                             >
-                                <Text className="text-purple-100 font-pixel font-medium text-center">
+                                <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                     Annuler
                                 </Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 onPress={saveEdit}
-                                className="flex-1 rounded-2xl bg-violet-600 px-4 py-3"
+                                className="flex-1 rounded-2xl  px-4 py-3"
+                                style={{backgroundColor:theme.buttonColor}}
                             >
-                                <Text className="text-purple-100 font-pixel font-medium text-center">
+                                <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                     Enregistrer
                                 </Text>
                             </TouchableOpacity>

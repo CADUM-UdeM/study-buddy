@@ -4,6 +4,7 @@ import {Ionicons} from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import {useLocalSearchParams, useRouter} from "expo-router";
 import React, {useRef, useState} from "react";
+import {darkTheme, lightTheme} from "@/components/colors";
 import {
     Alert,
     Animated,
@@ -21,6 +22,7 @@ import {
 import {AnimatedCircularProgress} from "react-native-circular-progress";
 import {Swipeable} from "react-native-gesture-handler";
 import {GradeBoundariesEditor} from "./GradeBoundariesEditor";
+import theme from "tailwindcss/defaultTheme";
 
 export default function DetailsCours() {
     const router = useRouter();
@@ -31,6 +33,9 @@ export default function DetailsCours() {
         useCourses();
     const {getLetterGrade, getGPAFromPercentage, settings} = useSettings();
     const course = getCourse(courseId);
+
+    const theme = settings.isDarkMode ? darkTheme : lightTheme;
+    const card_bg = theme.contentWrapperBgColor
 
     const [modalVisible, setModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -62,23 +67,23 @@ export default function DetailsCours() {
             <View
                 style={{
                     flex: 1,
-                    backgroundColor: "white",
+                    backgroundColor: theme.contentWrapperBgColor,
                     justifyContent: "center",
                     alignItems: "center",
                 }}
             >
-                <Text style={{fontFamily: "PixelJersey", fontSize: 18, marginBottom: 20}}>
+                <Text style={{fontFamily: "PixelJersey", fontSize: 18, marginBottom: 20, color:theme.defaultTextColor}}>
                     Cours introuvable
                 </Text>
                 <TouchableOpacity
                     style={{
                         padding: 15,
-                        backgroundColor: "#5900a1ff",
+                        backgroundColor: theme.buttonColor,
                         borderRadius: 10,
                     }}
                     onPress={() => router.back()}
                 >
-                    <Text style={{fontFamily: "PixelJersey", color: "white", fontSize: 16}}>Retour</Text>
+                    <Text style={{fontFamily: "PixelJersey", fontSize: 16, color:theme.defaultTextColor}}>Retour</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -388,7 +393,7 @@ export default function DetailsCours() {
             return (
                 <View style={styles.scheduledInfo}>
                     <Ionicons name="calendar-outline" size={20} color="#7f3dff"/>
-                    <Text style={styles.scheduledText}>
+                    <Text style={[styles.scheduledText, {color:theme.defaultTextColor}]}>
                         Évaluation planifiée - La note sera ajoutée plus tard
                     </Text>
                 </View>
@@ -401,14 +406,19 @@ export default function DetailsCours() {
                     <TouchableOpacity
                         style={[
                             styles.gradeModeButton,
-                            gradeMode === "percentage" && styles.gradeModeButtonActive,
+                            {   backgroundColor: theme.contentWrapperBgColor,
+                                borderColor: theme.borderColor,
+                            },
+                            gradeMode === "percentage" && [styles.typeButtonActive, {
+                                backgroundColor: theme.buttonColor,
+                                borderColor: theme.buttonColor,}]
                         ]}
                         onPress={() => setGradeMode("percentage")}
                     >
                         <Text
                             style={[
                                 styles.gradeModeText,
-                                gradeMode === "percentage" && styles.gradeModeTextActive,
+                                {color : gradeMode === "percentage" ? theme.anotherTextColor : theme.defaultTextColor},
                             ]}
                         >
                             Pourcentage
@@ -418,14 +428,20 @@ export default function DetailsCours() {
                     <TouchableOpacity
                         style={[
                             styles.gradeModeButton,
-                            gradeMode === "fraction" && styles.gradeModeButtonActive,
+                            {   backgroundColor: theme.contentWrapperBgColor,
+                                borderColor: theme.borderColor,
+                            },
+                            gradeMode === "fraction" && [styles.typeButtonActive, {
+                                backgroundColor: theme.buttonColor,
+                                borderColor: theme.buttonColor,}]
                         ]}
                         onPress={() => setGradeMode("fraction")}
                     >
                         <Text
                             style={[
                                 styles.gradeModeText,
-                                gradeMode === "fraction" && styles.gradeModeTextActive,
+                                {color : gradeMode === "fraction" ? theme.anotherTextColor : theme.defaultTextColor},
+
                             ]}
                         >
                             Note sur...
@@ -435,8 +451,8 @@ export default function DetailsCours() {
 
                 {gradeMode === "percentage" ? (
                     <TextInput
-                        style={styles.input}
-                        placeholderTextColor={"#6B7282"}
+                        style={[styles.input, {backgroundColor: card_bg, borderColor:theme.borderColor, color:theme.defaultTextColor}]}
+                        placeholderTextColor={theme.defaultTextColor}
                         placeholder="Note (%)"
                         value={evalNote}
                         onChangeText={setEvalNote}
@@ -445,15 +461,17 @@ export default function DetailsCours() {
                 ) : (
                     <View style={styles.fractionInputContainer}>
                         <TextInput
-                            style={[styles.input, styles.fractionInput]}
+                            placeholderTextColor={theme.defaultTextColor}
+                            style={[styles.input, styles.fractionInput, {color:theme.defaultTextColor, backgroundColor: card_bg, borderColor:theme.borderColor}]}
                             placeholder="Note"
                             value={evalNumerator}
                             onChangeText={setEvalNumerator}
                             keyboardType="numeric"
                         />
-                        <Text style={styles.fractionSlash}>/</Text>
+                        <Text style={[styles.fractionSlash, {color:theme.defaultTextColor}]}>/</Text>
                         <TextInput
-                            style={[styles.input, styles.fractionInput]}
+                            placeholderTextColor={theme.defaultTextColor}
+                            style={[styles.input, styles.fractionInput, {color:theme.defaultTextColor, backgroundColor: card_bg, borderColor:theme.borderColor}]}
                             placeholder="Total"
                             value={evalDenominator}
                             onChangeText={setEvalDenominator}
@@ -473,13 +491,13 @@ export default function DetailsCours() {
     };
 
     return (
-        <View style={{flex: 1, backgroundColor: "#221F3D"}}>
+        <View style={{flex: 1, backgroundColor: theme.background}}>
             {/* Header */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()}>
-                    <Ionicons name="arrow-back" size={26} color="white"/>
+                    <Ionicons name="arrow-back" size={26} color={theme.activeColorIcon}/>
                 </TouchableOpacity>
-                <Text style={styles.title} numberOfLines={1} ellipsizeMode="tail">
+                <Text style={[styles.title, {color:theme.defaultTextColor}]} numberOfLines={1} ellipsizeMode="tail">
                     {course.name}
                 </Text>
             </View>
@@ -496,13 +514,13 @@ export default function DetailsCours() {
                         rotation={0}
                         lineCap="round"
                     >
-                        {() => <Text style={styles.percentText}>{currentGrade}%</Text>}
+                        {() => <Text style={[styles.percentText, {color:theme.anotherTextColor}]}>{currentGrade}%</Text>}
                     </AnimatedCircularProgress>
 
                     {completed.length > 0 && (
                         <View style={styles.letterGradeContainer}>
                             <Text style={styles.letterGradeLabel}>Note de lettre:</Text>
-                            <Text style={styles.letterGrade}>
+                            <Text style={[styles.letterGrade, {color:theme.anotherTextColor}]}>
                                 {getLetterGrade(currentGrade, course.customGradeBoundaries)}
                             </Text>
                             <Text style={styles.gpaLabel}>
@@ -511,7 +529,7 @@ export default function DetailsCours() {
                         </View>
                     )}
 
-                    <Text style={styles.objectif}>Objectif: {course.objective}%</Text>
+                    <Text style={[styles.objectif, {color:theme.anotherTextColor}]}>Objectif: {course.objective}%</Text>
                     <Text style={styles.totalWeight}>
                         Pondération totale: {totalWeight.toFixed(2)}%
                         {totalWeight !== 100 && (
@@ -548,12 +566,12 @@ export default function DetailsCours() {
                         </Text>
                         <TouchableOpacity
                             onPress={handleToggleCustomBoundaries}
-                            style={styles.toggleButton}
+                            style={[styles.toggleButton, {backgroundColor: useCustomBoundaries? '#AB8BFF' : "#2D2A45"}]}
                         >
                             <View
                                 style={[
-                                    styles.toggleCircle,
-                                    useCustomBoundaries && styles.toggleCircleActive,
+                                    styles.toggleCircle, {backgroundColor: useCustomBoundaries? "#e0aaff": "#6B7280"},
+                                    useCustomBoundaries && styles.toggleCircleActive ,
                                 ]}
                             />
                         </TouchableOpacity>
@@ -579,13 +597,15 @@ export default function DetailsCours() {
                 {/* Completed Works Section */}
                 {completedWorks.length > 0 && (
                     <>
-                        <Text style={styles.sectionTitle}>Devoirs</Text>
+                        <Text style={[styles.sectionTitle, {color:theme.defaultTextColor}]}>Devoirs</Text>
                         {completedWorks.map((item) => (
                             <EvaluationCard
                                 key={item.id}
                                 item={item}
                                 onPress={() => handleEditEvaluation(item)}
                                 onDelete={(id) => handleDeleteEvaluation(id)}
+                                theme={theme}
+
                             />
                         ))}
                     </>
@@ -594,13 +614,15 @@ export default function DetailsCours() {
                 {/* Completed Exams Section */}
                 {completedExams.length > 0 && (
                     <>
-                        <Text style={styles.sectionTitle}>Examens</Text>
+                        <Text style={[styles.sectionTitle, {color:theme.defaultTextColor}]}>Examens</Text>
                         {completedExams.map((item) => (
                             <EvaluationCard
                                 key={item.id}
                                 item={item}
                                 onPress={() => handleEditEvaluation(item)}
                                 onDelete={(id) => handleDeleteEvaluation(id)}
+                                theme={theme}
+
                             />
                         ))}
                     </>
@@ -609,13 +631,14 @@ export default function DetailsCours() {
                 {/* Scheduled Works Section */}
                 {scheduledWorks.length > 0 && (
                     <>
-                        <Text style={styles.sectionTitle}>Travaux à venir</Text>
+                        <Text style={[styles.sectionTitle, {color:theme.defaultTextColor}]}>Travaux à venir</Text>
                         {scheduledWorks.map((item) => (
                             <EvaluationCard
                                 key={item.id}
                                 item={item}
                                 onPress={() => handleEditEvaluation(item)}
                                 onDelete={(id) => handleDeleteEvaluation(id)}
+                                theme={theme}
                             />
                         ))}
                     </>
@@ -624,13 +647,15 @@ export default function DetailsCours() {
                 {/* Scheduled Exams Section */}
                 {scheduledExams.length > 0 && (
                     <>
-                        <Text style={styles.sectionTitle}>Examens à venir</Text>
+                        <Text style={[styles.sectionTitle, {color:theme.defaultTextColor}]}>Examens à venir</Text>
                         {scheduledExams.map((item) => (
                             <EvaluationCard
                                 key={item.id}
                                 item={item}
                                 onPress={() => handleEditEvaluation(item)}
                                 onDelete={(id) => handleDeleteEvaluation(id)}
+                                theme={theme}
+
                             />
                         ))}
                     </>
@@ -638,10 +663,10 @@ export default function DetailsCours() {
 
                 {/* Add evaluation button */}
                 <TouchableOpacity
-                    style={styles.addEvalButton}
+                    style={[styles.addEvalButton, {backgroundColor:theme.buttonColor, borderColor:theme.borderColor, borderWidth:1}]}
                     onPress={() => setModalVisible(true)}
                 >
-                    <Text style={styles.addEvalText}>+ Ajouter une évaluation</Text>
+                    <Text style={[styles.addEvalText, {color:theme.defaultTextColor}]}>+ Ajouter une évaluation</Text>
                 </TouchableOpacity>
             </ScrollView>
 
@@ -669,7 +694,7 @@ export default function DetailsCours() {
                         }}
                     >
                         <Pressable
-                            style={[styles.modalContent, {maxHeight: "80%"}]}
+                            style={[styles.modalContent, {maxHeight: "80%", backgroundColor:theme.mainWrapperBgColor}]}
                             onPress={(e) => e.stopPropagation()}
                         >
                             <ScrollView
@@ -677,25 +702,25 @@ export default function DetailsCours() {
                                 showsVerticalScrollIndicator={false}
                                 contentContainerStyle={{paddingBottom: 20}}
                             >
-                                <Text style={styles.modalTitle}>Ajouter une évaluation</Text>
+                                <Text style={[styles.modalTitle, {color:theme.defaultTextColor}]}>Ajouter une évaluation</Text>
 
                                 <TextInput
-                                    style={styles.input}
-                                    placeholderTextColor={"#6B7282"}
+                                    style={[styles.input, {color:theme.defaultTextColor, backgroundColor: card_bg, borderColor:theme.borderColor}]}
+                                    placeholderTextColor={theme.defaultTextColor}
                                     placeholder="Nom de l'évaluation"
                                     value={evalName}
                                     onChangeText={setEvalName}
                                     autoFocus
                                 />
                                 <TouchableOpacity
-                                    style={styles.dateField}
+                                    style={[styles.dateField, {backgroundColor:theme.contentWrapperBgColor, borderColor:theme.borderColor}]}
                                     onPress={() => {
                                         setTempDate(evalDate ?? new Date());
                                         setShowDatePicker(true);
                                     }}
                                 >
                                     <Ionicons name="calendar-outline" size={18} color="#555"/>
-                                    <Text style={styles.dateFieldText}>
+                                    <Text style={[styles.dateFieldText, {color:theme.defaultTextColor}]}>
                                         {evalDate
                                             ? evalDate.toLocaleDateString("fr-CA", {
                                                 year: "numeric",
@@ -719,10 +744,10 @@ export default function DetailsCours() {
                                             ]}
                                         >
                                             {isScheduled && (
-                                                <Ionicons name="checkmark" size={16} color="white"/>
+                                                <Ionicons name="checkmark" size={16} color={theme.activeColorIcon}/>
                                             )}
                                         </View>
-                                        <Text style={styles.checkboxLabel}>
+                                        <Text style={[styles.checkboxLabel, {color:theme.defaultTextColor}]}>
                                             Évaluation planifiée (note à venir)
                                         </Text>
                                     </View>
@@ -731,8 +756,8 @@ export default function DetailsCours() {
                                 {renderGradeInput()}
 
                                 <TextInput
-                                    style={styles.input}
-                                    placeholderTextColor={"#6B7282"}
+                                    style={[styles.input, {color:theme.defaultTextColor, backgroundColor: card_bg, borderColor:theme.borderColor}]}
+                                    placeholderTextColor={theme.defaultTextColor}
                                     placeholder="Pondération (%) - Auto si vide"
                                     value={evalWeight}
                                     onChangeText={setEvalWeight}
@@ -743,14 +768,20 @@ export default function DetailsCours() {
                                     <TouchableOpacity
                                         style={[
                                             styles.typeButton,
-                                            evalType === "travail" && styles.typeButtonActive,
+                                            {   backgroundColor: theme.contentWrapperBgColor,
+                                                borderColor: theme.borderColor,
+                                            },
+                                            evalType === "travail" && [styles.typeButtonActive, {
+                                                backgroundColor: theme.buttonColor,
+                                                borderColor: theme.buttonColor,
+                                            }],
                                         ]}
                                         onPress={() => setEvalType("travail")}
                                     >
                                         <Text
                                             style={[
                                                 styles.typeButtonText,
-                                                evalType === "travail" && styles.typeButtonTextActive,
+                                                {color:evalType === "travail" ? theme.anotherTextColor : theme.defaultTextColor},
                                             ]}
                                         >
                                             Devoir
@@ -760,14 +791,20 @@ export default function DetailsCours() {
                                     <TouchableOpacity
                                         style={[
                                             styles.typeButton,
-                                            evalType === "examen" && styles.typeButtonActive,
+                                            {   backgroundColor: theme.contentWrapperBgColor,
+                                                borderColor: theme.borderColor,
+                                            },
+                                            evalType === "examen" && [styles.typeButtonActive, {
+                                                backgroundColor: theme.buttonColor,
+                                                borderColor: theme.buttonColor,
+                                            }],
                                         ]}
                                         onPress={() => setEvalType("examen")}
                                     >
                                         <Text
                                             style={[
                                                 styles.typeButtonText,
-                                                evalType === "examen" && styles.typeButtonTextActive,
+                                                {color:evalType === "examen" ? theme.anotherTextColor : theme.defaultTextColor},
                                             ]}
                                         >
                                             Examen
@@ -775,22 +812,22 @@ export default function DetailsCours() {
                                     </TouchableOpacity>
                                 </View>
 
-                                <View style={styles.modalButtons}>
+                                <View style={[styles.modalButtons,{marginTop:10} ]}>
                                     <TouchableOpacity
-                                        style={[styles.modalButton, styles.cancelButton]}
+                                        style={[styles.modalButton, styles.cancelButton, {backgroundColor:theme.mainWrapperBgColor, borderColor:theme.borderColor}]}
                                         onPress={() => {
                                             setModalVisible(false);
                                             resetForm();
                                         }}
                                     >
-                                        <Text style={styles.cancelButtonText}>Annuler</Text>
+                                        <Text style={[styles.cancelButtonText, {color:theme.defaultTextColor}]}>Annuler</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
-                                        style={[styles.modalButton, styles.addButton]}
+                                        style={[styles.modalButton, {backgroundColor:theme.buttonColor}]}
                                         onPress={handleAddEvaluation}
                                     >
-                                        <Text style={styles.addButtonText}>Ajouter</Text>
+                                        <Text style={[styles.addButtonText, {color:theme.defaultTextColor}]}>Ajouter</Text>
                                     </TouchableOpacity>
                                 </View>
                             </ScrollView>
@@ -850,21 +887,21 @@ export default function DetailsCours() {
                                 <Text style={styles.modalTitle}>Modifier l&#39;évaluation</Text>
 
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, {color:theme.defaultTextColor, backgroundColor: card_bg, borderColor:theme.borderColor}]}
                                     placeholder="Nom de l'évaluation"
                                     value={evalName}
                                     onChangeText={setEvalName}
                                     autoFocus
                                 />
                                 <TouchableOpacity
-                                    style={styles.dateField}
+                                    style={[styles.dateField, {backgroundColor:theme.contentWrapperBgColor, borderColor:theme.borderColor}]}
                                     onPress={() => {
                                         setTempDate(evalDate ?? new Date());
                                         setShowDatePicker(true);
                                     }}
                                 >
                                     <Ionicons name="calendar-outline" size={18} color="#555"/>
-                                    <Text style={styles.dateFieldText}>
+                                    <Text style={[styles.dateFieldText,  {color:theme.defaultTextColor}]}>
                                         {evalDate ? formatDate(evalDate) : "Choisir une date"}
                                     </Text>
                                 </TouchableOpacity>
@@ -882,7 +919,7 @@ export default function DetailsCours() {
                                             ]}
                                         >
                                             {isScheduled && (
-                                                <Ionicons name="checkmark" size={16} color="white"/>
+                                                <Ionicons name="checkmark" size={16} color={theme.activeColorIcon}/>
                                             )}
                                         </View>
                                         <Text style={styles.checkboxLabel}>
@@ -894,7 +931,7 @@ export default function DetailsCours() {
                                 {renderGradeInput()}
 
                                 <TextInput
-                                    style={styles.input}
+                                    style={[styles.input, {backgroundColor: card_bg, borderColor:theme.borderColor}]}
                                     placeholder="Pondération (%) - Auto si vide"
                                     value={evalWeight}
                                     onChangeText={setEvalWeight}
@@ -912,7 +949,7 @@ export default function DetailsCours() {
                                         <Text
                                             style={[
                                                 styles.typeButtonText,
-                                                evalType === "travail" && styles.typeButtonTextActive,
+                                                {color:evalType === "travail" ? theme.anotherTextColor : theme.defaultTextColor},
                                             ]}
                                         >
                                             Devoir
@@ -929,7 +966,7 @@ export default function DetailsCours() {
                                         <Text
                                             style={[
                                                 styles.typeButtonText,
-                                                evalType === "examen" && styles.typeButtonTextActive,
+                                                {color:evalType === "examen" ? theme.anotherTextColor : theme.defaultTextColor},
                                             ]}
                                         >
                                             Examen
@@ -939,18 +976,18 @@ export default function DetailsCours() {
 
                                 <View style={styles.modalButtons}>
                                     <TouchableOpacity
-                                        style={[styles.modalButton, styles.cancelButton]}
+                                        style={[styles.modalButton, styles.cancelButton, {backgroundColor:theme.mainWrapperBgColor, borderColor:theme.borderColor}]}
                                         onPress={() => {
                                             setEditModalVisible(false);
                                             resetForm();
                                             setEditingEvalId(null);
                                         }}
                                     >
-                                        <Text style={styles.cancelButtonText}>Annuler</Text>
+                                        <Text style={[styles.cancelButtonText, {color:theme.defaultTextColor}]}>Annuler</Text>
                                     </TouchableOpacity>
 
                                     <TouchableOpacity
-                                        style={[styles.modalButton, styles.addButton]}
+                                        style={[styles.modalButton, {backgroundColor:theme.buttonColor}]}
                                         onPress={handleUpdateEvaluation}
                                     >
                                         <Text style={styles.addButtonText}>Modifier</Text>
@@ -982,14 +1019,16 @@ export default function DetailsCours() {
 }
 
 // Card component
-function EvaluationCard({
+function EvaluationCard ({
                             item,
                             onPress,
                             onDelete,
+                             theme
                         }: {
     item: Evaluation;
     onPress: () => void;
     onDelete: (id: string) => void;
+    theme  : typeof lightTheme;
 }) {
     const swipeRef = useRef<Swipeable>(null);
     const parseLocalDate = (s: string) => {
@@ -1003,6 +1042,8 @@ function EvaluationCard({
             day: "numeric",
         })
         : null;
+
+
 
     const confirmDelete = () => {
         Alert.alert(
@@ -1099,10 +1140,10 @@ function EvaluationCard({
             }}
         >
             <TouchableOpacity activeOpacity={0.85} onPress={onPress}>
-                <View style={[styles.card, isScheduled && styles.scheduledCard]}>
+                <View style={[styles.card, isScheduled && styles.scheduledCard, {backgroundColor: theme.mainWrapperBgColor}]}>
                     <View style={{flex: 1}}>
                         <Text
-                            style={styles.cardTitle}
+                            style={[styles.cardTitle, {color:theme.anotherTextColor}]}
                             numberOfLines={1}
                             ellipsizeMode="tail"
                         >
@@ -1155,12 +1196,10 @@ const styles = StyleSheet.create({
         ...pixelFont,
         fontSize: 27,
         flex: 1,
-        color: "white",
     },
     percentText: {
         ...pixelFont,
         fontSize: 37,
-        color: "#7f3dff",
     },
     letterGradeContainer: {
         marginTop: 12,
@@ -1176,7 +1215,6 @@ const styles = StyleSheet.create({
         ...pixelFont,
         fontSize: 28,
         fontWeight: "bold",
-        color: "#7f3dff",
     },
     gpaLabel: {
         ...pixelFont,
@@ -1213,7 +1251,6 @@ const styles = StyleSheet.create({
         fontSize: 20,
         marginTop: 15,
         marginBottom: 10,
-        color: "white",
     },
     card: {
         backgroundColor: "#f3f3f3",
@@ -1245,7 +1282,6 @@ const styles = StyleSheet.create({
     },
     noteText: {...pixelFont, fontSize: 14},
     addEvalButton: {
-        backgroundColor: "#5900a1ff",
         padding: 18,
         borderRadius: 14,
         marginVertical: 30,
@@ -1264,7 +1300,6 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     modalContent: {
-        backgroundColor: "#221f3d",
         borderRadius: 20,
         padding: 30,
         width: "85%",
@@ -1287,8 +1322,6 @@ const styles = StyleSheet.create({
     input: {
         ...pixelFont,
         borderWidth: 1,
-        backgroundColor: "#444462",
-        borderColor: "#444462",
         borderRadius: 10,
         padding: 15,
         fontSize: 16,
@@ -1398,12 +1431,9 @@ const styles = StyleSheet.create({
     typeButtonText: {
         ...pixelFont,
         fontSize: 15,
-        color: "#666",
         fontWeight: "600",
     },
-    typeButtonTextActive: {
-        color: "white",
-    },
+
     modalButtons: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -1417,16 +1447,12 @@ const styles = StyleSheet.create({
     },
     cancelButton: {
         borderWidth: 1,
-        borderColor: '#ddd6fe',
     },
     cancelButtonText: {
         ...pixelFont,
         color: "#f5f3ff",
         fontSize: 16,
         fontWeight: "600",
-    },
-    addButton: {
-        backgroundColor: "#5900a1ff",
     },
     addButtonText: {
         ...pixelFont,
@@ -1490,14 +1516,11 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         gap: 10,
-        backgroundColor: "#444462",
-        borderColor: "#444462",
 
     },
     dateFieldText: {
         ...pixelFont,
         fontSize: 16,
-        color: "#6B7282",
     },
     sheetTitle: {
         ...pixelFont,
@@ -1508,20 +1531,6 @@ const styles = StyleSheet.create({
 
     },
 
-    confirmDateButton: {
-        backgroundColor: "#7D3EFF",
-        paddingVertical: 14,
-        borderRadius: 12,
-        marginTop: 20,
-        alignItems: "center",
-    },
-
-    confirmDateText: {
-        ...pixelFont,
-        color: "white",
-        fontSize: 16,
-        fontWeight: "600",
-    },
     customBoundariesSection: {
         backgroundColor: "#f9f9f9",
         borderRadius: 12,
@@ -1545,7 +1554,6 @@ const styles = StyleSheet.create({
         width: 50,
         height: 28,
         borderRadius: 14,
-        backgroundColor: "#ddd",
         justifyContent: "center",
         padding: 3,
     },
@@ -1561,7 +1569,6 @@ const styles = StyleSheet.create({
         elevation: 2,
     },
     toggleCircleActive: {
-        backgroundColor: "#5900a1ff",
         alignSelf: "flex-end",
     },
     customBoundariesHint: {
