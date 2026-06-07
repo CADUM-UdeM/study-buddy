@@ -1,9 +1,9 @@
 import React, {useCallback, useMemo, useState} from "react";
-import {StyleSheet, Text, View} from "react-native";
+import {Text, View} from "react-native";
 import {sessionContext} from "@/app/context/SessionContext";
 import {useFocusEffect} from "@react-navigation/core";
 import IonIcons from "@expo/vector-icons/Ionicons";
-import styleTracker, {getStyles} from './styleTracker'
+import {getStyles} from './styleTracker'
 import {useSettings} from "@/app/context/SettingsContext";
 import {darkTheme, lightTheme} from "@/components/colors";
 
@@ -18,27 +18,30 @@ export default function LastStreakTracker() {
         date: string,
     }
     const [sessions, setSessions] = useState<Session[]>([]);
-    const [totalContributions, setTotalContributions] = useState(0);
 
     /* Variables pour css */
     const {settings} = useSettings();
     const theme = settings.isDarkMode ? darkTheme : lightTheme;
     const styles = getStyles();
+    const textStyle = {left: 5, color: theme.defaultTextColor};
 
     /* Avant de modifier historique récupère les données enregistrées. */
     useFocusEffect(
         useCallback(() => {
             /* Si on a des données, met à jour la variable contenant nos sessions */
             sessionContext.getSessionsAsync().then(setSessions);
-            setTotalContributions(sessions.length);
-        }, [sessions.length]));
+        }, []));
 
     {/* Dernière session de pomodoro */
     }
-    const lastSession = useMemo(() => {
-        if (sessions.length === 0) return null;
-        return sessions.at(-1)
+    const completedSessions = useMemo(() => {
+        return sessions.filter((session) => session.isCompleted);
     }, [sessions]);
+
+    const lastSession = useMemo(() => {
+        if (completedSessions.length === 0) return null;
+        return completedSessions.at(-1)
+    }, [completedSessions]);
 
     const dateLastPomodoro = useMemo(() => {
         if (!lastSession) return null;
@@ -61,11 +64,19 @@ export default function LastStreakTracker() {
                 {dateLastPomodoro && (
                     <View style={{flexDirection: 'row'}}>
                         <IonIcons name="time-outline"  color={theme.defaultTextColor} size={20} style={{bottom:1, right:5}}/>
-                        <Text className=" font-pixel text-md" style={{left:5, color:theme.defaultTextColor}}>
+                        <Text className=" font-pixel text-md" style={textStyle}>
                             Dernier pomodoro le {dateLastPomodoro} de {durationLastPomodoro} minutes.
                         </Text>
                     </View>)
                 }
+                {!dateLastPomodoro && (
+                    <View style={{flexDirection: 'row'}}>
+                        <IonIcons name="time-outline" color={theme.defaultTextColor} size={20} style={{bottom: 1, right: 5}}/>
+                        <Text className=" font-pixel text-md" style={textStyle}>
+                            Aucun pomodoro terminé pour le moment.
+                        </Text>
+                    </View>
+                )}
             </View>
         </View>
     );
