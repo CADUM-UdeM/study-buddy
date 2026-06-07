@@ -145,7 +145,7 @@ export default function Donnees() {
     setSelectedSessionId(null);
     setModalVisible(false);
     router.push({
-      pathname: "/(tabs)/detailscours",
+      pathname: "/detailscours",
       params: { courseId: newCourseId },
     });
   };
@@ -203,7 +203,7 @@ export default function Donnees() {
 
   const navigateToCourseDetails = (courseId: string) => {
     router.push({
-      pathname: "/(tabs)/detailscours",
+      pathname: "/detailscours",
       params: { courseId },
     });
   };

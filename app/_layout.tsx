@@ -41,6 +41,7 @@ export default function RootLayout() {
               <CoursesProvider>
                 <Stack screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="(tabs)" />
+                  <Stack.Screen name="detailscours" />
                 </Stack>
               </CoursesProvider>
             </SessionsProvider>

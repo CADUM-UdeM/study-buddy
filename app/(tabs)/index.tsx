@@ -70,7 +70,8 @@ export default function Accueil() {
       {/* --- GPA Section --- */}
       <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: theme.mainWrapperBgColor}}>
         <View className="flex-row items-center justify-between mb-2">
-          <Text className="text-neutral-600 font-pixel text-lg">
+          <Text className="text-neutral-600 font-pixel text-lg"
+          style={{color:theme.defaultTextColor}}>
             {showGlobalGPA
               ? "GPA Global"
               : activeSession
@@ -99,7 +100,8 @@ export default function Accueil() {
               {overallStats.gpaDisplay}
             </Text>
               {settings.showCourseCount && (
-                  <Text className="text-sm text-neutral-500 mt-1 font-pixel">
+                  <Text className="text-sm text-neutral-500 mt-1 font-pixel"
+                  style={{color:theme.gray}}>
                       {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
                       crédits
                   </Text>
