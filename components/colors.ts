@@ -32,6 +32,8 @@ export const lightTheme = {
 
   calendarIconColor: "#1d0057",
   gray: "#8d8d8d",
+
+  white:"#ffffff",
 };
 
 /* Afin d'avoir les memes declarations de variables, on utilise typeof */
@@ -70,4 +72,6 @@ export const darkTheme: typeof lightTheme = {
   calendarIconColor: "#bba1ee",
 
   gray: "#d3d3d3",
+
+  white:"#ffffff",
 };

@@ -335,7 +335,9 @@ export default function Pomodoro() {
             )}
             scrollIndicatorInsets={{top: insets.top + 8}}
             scrollEventThrottle={16}
-            style={{backgroundColor:theme.background}}
+            style={{backgroundColor:theme.background, 
+                marginTop:20
+            }}
         >
             {/* --- Timer card (index-style) --- */}
             <View

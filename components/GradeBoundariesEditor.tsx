@@ -274,6 +274,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                     <TouchableOpacity
                         onPress={startEditing}
                         className="rounded-2xl bg-violet-600 px-4 py-2"
+                        
                     >
                         <Text className="text-purple-100 font-pixel text-base font-medium">
                             Modifier
@@ -337,7 +338,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                             className="flex-1 rounded-xl px-4 py-3"
                             style={{backgroundColor:theme.activeTextColor}}
                         >
-                            <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
+                            <Text className=" font-pixel font-medium text-center" style={{color:theme.white}}>
                                 Ajouter
                             </Text>
                         </TouchableOpacity>
@@ -347,7 +348,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                                 className="flex-1 rounded-xl px-4 py-3"
                                 style={{backgroundColor: theme.xColor}}
                             >
-                                <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
+                                <Text className=" font-pixel font-medium text-center" style={{color:theme.white}}>
                                     Réinitialiser
                                 </Text>
                             </TouchableOpacity>
