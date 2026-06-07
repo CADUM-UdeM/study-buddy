@@ -17,9 +17,11 @@ import {
 } from "react-native";
 import { Swipeable } from "react-native-gesture-handler";
 import { darkTheme, lightTheme } from "@/components/colors";
+import { TopStatusBarGuard } from "@/components/TopStatusBarGuard";
 import { Course, useCourses } from "../context/CoursesContext";
 import { useSessions } from "../context/SessionsContext";
 import { useSettings } from "../context/SettingsContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type AppTheme = typeof lightTheme;
 
@@ -41,6 +43,8 @@ export default function Donnees() {
     setActiveSession,
   } = useSessions();
   const { settings } = useSettings();
+  const insets = useSafeAreaInsets();
+  const scrollY = useRef(new Animated.Value(0)).current;
   const theme = settings.isDarkMode ? darkTheme : lightTheme;
   const placeholderColor = settings.isDarkMode ? "#B9A8D8" : "#9372BA";
   const mutedTextColor = settings.isDarkMode ? "#D6C8EA" : "#9372BA";
@@ -55,6 +59,11 @@ export default function Donnees() {
     color: theme.defaultTextColor,
   };
   const router = useRouter();
+  const guardOpacity = scrollY.interpolate({
+    inputRange: [0, 4, 16],
+    outputRange: [0, 0.4, 1],
+    extrapolate: "clamp",
+  });
   const [modalVisible, setModalVisible] = useState(false);
   const [courseName, setCourseName] = useState("");
   const [courseObjective, setCourseObjective] = useState("");
@@ -323,7 +332,13 @@ export default function Donnees() {
       </View>
 
       {/* Scrollable content in the middle */}
-      <ScrollView
+      <Animated.ScrollView
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true },
+        )}
+        scrollIndicatorInsets={{ top: insets.top + 8 }}
+        scrollEventThrottle={16}
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: "flex-start",
@@ -369,7 +384,7 @@ export default function Donnees() {
             Ajouter un cours
           </Text>
         </TouchableOpacity>
-      </ScrollView>
+      </Animated.ScrollView>
 
       {/* Modal for adding courses */}
       <Modal
@@ -901,6 +916,7 @@ export default function Donnees() {
           </Pressable>
         </Pressable>
       </Modal>
+      <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity} />
     </View>
   );
 }
@@ -1112,7 +1128,7 @@ const styles = StyleSheet.create({
   title: {
     ...pixelFont,
     fontSize: 24,
-    marginTop: 70,
+    marginTop: 78,
     marginBottom: 5,
     alignSelf: "center",
     color: "#f3e8ff",

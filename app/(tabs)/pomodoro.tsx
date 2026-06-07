@@ -1,8 +1,9 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {
+    Animated,
     Modal,
     Pressable,
     ScrollView,
@@ -17,7 +18,9 @@ import {AnimatedCircularProgress} from "react-native-circular-progress";
 import "../global.css";
 import {sessionContext} from "@/app/context/SessionContext";
 import {darkTheme, lightTheme} from "@/components/colors";
+import {TopStatusBarGuard} from "@/components/TopStatusBarGuard";
 import {useSettings} from "@/app/context/SettingsContext";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 
 export default function Pomodoro() {
@@ -311,12 +314,29 @@ export default function Pomodoro() {
 
 
     const {settings} = useSettings();
+    const insets = useSafeAreaInsets();
+    const scrollY = useRef(new Animated.Value(0)).current;
     /* Appliquer la couleur du theme */
     const theme = settings.isDarkMode ? darkTheme : lightTheme;
     const cardBg = {backgroundColor: theme.mainWrapperBgColor};
+    const guardOpacity = scrollY.interpolate({
+        inputRange: [0, 4, 16],
+        outputRange: [0, 0.4, 1],
+        extrapolate: "clamp",
+    });
 
     return (
-        <ScrollView className="flex-1  px-5 pt-16" style={{backgroundColor:theme.background}}>
+        <View style={{flex: 1, backgroundColor: theme.background}}>
+        <Animated.ScrollView
+            className="flex-1  px-5 pt-20"
+            onScroll={Animated.event(
+                [{nativeEvent: {contentOffset: {y: scrollY}}}],
+                {useNativeDriver: true},
+            )}
+            scrollIndicatorInsets={{top: insets.top + 8}}
+            scrollEventThrottle={16}
+            style={{backgroundColor:theme.background}}
+        >
             {/* --- Timer card (index-style) --- */}
             <View
                 className="rounded-2xl p-6 mb-4"
@@ -702,7 +722,9 @@ export default function Pomodoro() {
             </ScrollView>
 
             <View className="h-10"/>
-        </ScrollView>
+        </Animated.ScrollView>
+        <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity}/>
+        </View>
     );
 }
 

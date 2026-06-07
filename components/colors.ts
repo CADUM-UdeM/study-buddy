@@ -11,7 +11,7 @@ export const lightTheme = {
   activeColorIcon: "#A45EFB",
 
   defaultTextColor: "#9372BA",
-  activeTextColor: "#F78AE1",
+  activeTextColor: "#f78ae1",
 
   buttonColor: "#F0D3FF",
 
@@ -20,7 +20,7 @@ export const lightTheme = {
 
   // Calendrier
   calendarZero: "#FEFAFD",
-  calendarLevelOne:"#CCBBFF",
+  calendarLevelOne: "#CCBBFF",
   calendarLevelTwo: "#9B7EDE",
   calendarLevelThree: "#6B5B95",
   calendarLevelFour: "#2D2A45",
@@ -28,7 +28,10 @@ export const lightTheme = {
   stopColor: "#8b0000",
   stopBorderColor: "#8b0000",
 
-  calendarIconColor: "#1d0057"
+  xColor: "#8b0000",
+
+  calendarIconColor: "#1d0057",
+  gray: "#8d8d8d",
 };
 
 /* Afin d'avoir les memes declarations de variables, on utilise typeof */
@@ -54,7 +57,7 @@ export const darkTheme: typeof lightTheme = {
 
   // Calendrier
   calendarZero: "#2D2A45",
-  calendarLevelOne:"#6B5B95",
+  calendarLevelOne: "#6B5B95",
   calendarLevelTwo: "#9B7EDE",
   calendarLevelThree: "#AB8BFF",
   calendarLevelFour: "#CCBBFF",
@@ -62,5 +65,9 @@ export const darkTheme: typeof lightTheme = {
   stopColor: "#f9acac",
   stopBorderColor: "#f9acac",
 
-  calendarIconColor: "#bba1ee"
+  xColor: "#8b0000",
+
+  calendarIconColor: "#bba1ee",
+
+  gray: "#d3d3d3",
 };

@@ -267,7 +267,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
     return (
         <View className="rounded-2xl p-4 mb-3" style={cardShellStyle}>
             <View className="flex-row items-center justify-between mb-4">
-                <Text className="text-lg font-pixel text-neutral-600 flex-1 pr-2">
+                <Text className="text-lg font-pixel text-neutral-600 flex-1 pr-2" style={{color:theme.calendarLevelFour}}>
                     {title}
                 </Text>
                 {!isEditing && (
@@ -290,7 +290,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                     >
                         <Text className=" font-pixel text-xs leading-5" style={{color:theme.defaultTextColor}}>
                             Les seuils sont ajustés automatiquement. L&apos;ordre des notes est
-                            préservé — chaque note doit avoir un minimum inférieur à la note
+                            préservé. Chaque note doit avoir un minimum inférieur à la note
                             précédente.
                         </Text>
                     </View>
@@ -309,7 +309,8 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                                 <Text className=" font-pixel font-bold w-12" style={{color:theme.defaultTextColor}}>
                                     {boundary.letter}
                                 </Text>
-                                <Text className="text-neutral-500 flex-1 text-sm font-pixel">
+                                <Text className="text-neutral-500 flex-1 text-sm font-pixel"
+                                style={{color :theme.calendarIconColor}}>
                                     {boundary.min}%-{boundary.max}% → GPA: {boundary.gpa}
                                 </Text>
                                 <TouchableOpacity
@@ -321,7 +322,8 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => deleteBoundary(index)}
-                                    className="bg-red-600 px-3 py-1 rounded-lg"
+                                    className="px-2 py-0.4 rounded-lg" 
+                                    style={{backgroundColor:theme.xColor}}
                                 >
                                     <Text className="text-purple-100 font-pixel text-xs">×</Text>
                                 </TouchableOpacity>
@@ -333,17 +335,17 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                         <TouchableOpacity
                             onPress={addBoundary}
                             className="flex-1 rounded-xl px-4 py-3"
-                            style={{backgroundColor: theme === lightTheme ? "#cefad0":"#059669"}}
+                            style={{backgroundColor:theme.activeTextColor}}
                         >
                             <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
-                                + Ajouter
+                                Ajouter
                             </Text>
                         </TouchableOpacity>
                         {onReset && (
                             <TouchableOpacity
                                 onPress={handleReset}
                                 className="flex-1 rounded-xl px-4 py-3"
-                                style={{backgroundColor: "#c2410c"}}
+                                style={{backgroundColor: theme.xColor}}
                             >
                                 <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                     Réinitialiser

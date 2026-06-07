@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { useRef, useState } from "react";
+import { Animated, Pressable, Text, View } from "react-native";
 import { useGPA } from "@/app/hooks/useGPA";
 import { useSettings } from "../context/SettingsContext";
 import ContributionTracker from "../../components/ContributionTracker";
@@ -9,14 +9,18 @@ import { WalkingBirdPeek } from "../../components/home/SpritePeeks";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
 import LastStreakTracker from "@/components/LastStreakTracker";
+import { TopStatusBarGuard } from "@/components/TopStatusBarGuard";
 import WeekStreakTracker from "@/components/WeekStreakTracker";
 import {darkTheme, lightTheme} from "@/components/colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function Accueil() {
   const router = useRouter();
   const { calculateOverallStats } = useGPA();
   const { activeSession } = useSessions();
   const [showGlobalGPA, setShowGlobalGPA] = useState(false);
+  const insets = useSafeAreaInsets();
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   /* Récupère les paramètres pour savoir quelles données afficher */
   const {settings} = useSettings();
@@ -26,9 +30,27 @@ export default function Accueil() {
 
   /* Appliquer la couleur du theme */
   const theme = settings.isDarkMode ? darkTheme : lightTheme;
+  const guardOpacity = scrollY.interpolate({
+    inputRange: [0, 4, 16],
+    outputRange: [0, 0.4, 1],
+    extrapolate: "clamp",
+  });
 
   return (
-    <ScrollView className="flex-1 px-5 pt-16" style={{backgroundColor:theme.background}}>
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
+    <Animated.ScrollView
+      className="flex-1 px-5 pt-20"
+    
+      onScroll={Animated.event(
+        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+        { useNativeDriver: true },
+      )}
+      scrollIndicatorInsets={{ top: insets.top + 8 }}
+      scrollEventThrottle={16}
+      style={{backgroundColor:theme.background,
+        marginTop:30
+      }}
+    >
 
       <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
         <ContributionTracker />
@@ -113,6 +135,8 @@ export default function Accueil() {
       </Link>
 
       <View className="h-10" />
-    </ScrollView>
+    </Animated.ScrollView>
+    <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity} />
+    </View>
   );
 }

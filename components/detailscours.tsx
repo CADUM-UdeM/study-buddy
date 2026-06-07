@@ -22,10 +22,13 @@ import {
 import {AnimatedCircularProgress} from "react-native-circular-progress";
 import {Swipeable} from "react-native-gesture-handler";
 import {GradeBoundariesEditor} from "./GradeBoundariesEditor";
-import theme from "tailwindcss/defaultTheme";
+import {TopStatusBarGuard} from "./TopStatusBarGuard";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function DetailsCours() {
     const router = useRouter();
+    const insets = useSafeAreaInsets();
+    const scrollY = useRef(new Animated.Value(0)).current;
     const params = useLocalSearchParams();
     const courseId = params.courseId as string;
 
@@ -36,6 +39,11 @@ export default function DetailsCours() {
 
     const theme = settings.isDarkMode ? darkTheme : lightTheme;
     const card_bg = theme.contentWrapperBgColor
+    const guardOpacity = scrollY.interpolate({
+        inputRange: [0, 4, 16],
+        outputRange: [0, 0.4, 1],
+        extrapolate: "clamp",
+    });
 
     const [modalVisible, setModalVisible] = useState(false);
     const [editModalVisible, setEditModalVisible] = useState(false);
@@ -502,7 +510,15 @@ export default function DetailsCours() {
                 </Text>
             </View>
 
-            <ScrollView contentContainerStyle={{padding: 20}}>
+            <Animated.ScrollView
+                contentContainerStyle={{padding: 20}}
+                onScroll={Animated.event(
+                    [{nativeEvent: {contentOffset: {y: scrollY}}}],
+                    {useNativeDriver: true},
+                )}
+                scrollIndicatorInsets={{top: insets.top + 8}}
+                scrollEventThrottle={16}
+            >
                 {/* Circular Progress */}
                 <View style={{alignItems: "center", marginTop: 10}}>
                     <AnimatedCircularProgress
@@ -668,7 +684,7 @@ export default function DetailsCours() {
                 >
                     <Text style={[styles.addEvalText, {color:theme.defaultTextColor}]}>+ Ajouter une évaluation</Text>
                 </TouchableOpacity>
-            </ScrollView>
+            </Animated.ScrollView>
 
             {/* Add Evaluation Modal */}
             <Modal
@@ -1014,6 +1030,7 @@ export default function DetailsCours() {
             </Modal>
 
             {/* Context Menu */}
+            <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity}/>
         </View>
     );
 }
@@ -1186,7 +1203,7 @@ const pixelFont = {fontFamily: "PixelJersey" as const};
 
 const styles = StyleSheet.create({
     header: {
-        marginTop: 60,
+        marginTop: 68,
         flexDirection: "row",
         alignItems: "center",
         gap: 20,

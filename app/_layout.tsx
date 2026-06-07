@@ -1,6 +1,7 @@
 import { DarkTheme, ThemeProvider } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { CoursesProvider } from "./context/CoursesContext";
 import { SettingsProvider } from "./context/SettingsContext";
 import { SessionsProvider } from "./context/SessionsContext";
@@ -33,17 +34,19 @@ export default function RootLayout() {
     <GestureHandlerRootView
       style={{ flex: 1, backgroundColor: CORE_BACKGROUND }}
     >
-      <ThemeProvider value={navigationTheme}>
-        <SettingsProvider>
-          <SessionsProvider>
-            <CoursesProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(tabs)" />
-              </Stack>
-            </CoursesProvider>
-          </SessionsProvider>
-        </SettingsProvider>
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <ThemeProvider value={navigationTheme}>
+          <SettingsProvider>
+            <SessionsProvider>
+              <CoursesProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(tabs)" />
+                </Stack>
+              </CoursesProvider>
+            </SessionsProvider>
+          </SettingsProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
