@@ -313,7 +313,7 @@ export default function Pomodoro() {
     const {settings} = useSettings();
     /* Appliquer la couleur du theme */
     const theme = settings.isDarkMode ? darkTheme : lightTheme;
-    const cardBg = {backgroundColor: theme.contentWrapperBgColor};
+    const cardBg = {backgroundColor: theme.mainWrapperBgColor};
 
     return (
         <ScrollView className="flex-1  px-5 pt-16" style={{backgroundColor:theme.background}}>
@@ -324,7 +324,7 @@ export default function Pomodoro() {
                     cardBg,
                     {
                         borderWidth: 1,
-                        borderColor: inBreakTime ? "#7b2cbf" : theme.borderColor,
+                        borderColor: inBreakTime ? theme.buttonColor : theme.borderColor,
                     },
                 ]}
             >
@@ -353,8 +353,8 @@ export default function Pomodoro() {
                         size={176}
                         width={8}
                         fill={phaseTotalSeconds > 0 ? (timeLeft / phaseTotalSeconds) * 100 : 100}
-                        tintColor="#AB8BFF"
-                        backgroundColor="#444462"
+                        tintColor={theme.buttonColor}
+                        backgroundColor={theme.contentWrapperBgColor}
                         rotation={0}
                         lineCap="round"
                     >
@@ -383,7 +383,7 @@ export default function Pomodoro() {
                         onPress={() => setClickParam(!clickParam)}
                         disabled={isRunning}
                         className="rounded-full p-2"
-                        style={{backgroundColor: !isRunning ? "#AB8BFF" : "#6B7280"}}
+                        style={{backgroundColor: !isRunning ? theme.buttonColor : "#6B7280"}}
                     >
                         <IonIcons name="options-outline" size={20} color="#10002b"/>
                     </TouchableOpacity>
@@ -408,7 +408,7 @@ export default function Pomodoro() {
                         <View
                             style={[
                                 stylesProfil.confContainer,
-                                {height: "77%", ...cardBg, borderColor: theme.borderColor, borderWidth: 1},
+                                {height: "77%", ...cardBg, borderColor: theme.borderColor, borderWidth: 1, backgroundColor:theme.mainWrapperBgColor},
                             ]}
                         >
                             <Text
@@ -421,23 +421,23 @@ export default function Pomodoro() {
                             <View style={{padding: 10, gap: 20, zIndex:3}}>
                                 <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2"
                                       style={cardBg}>
-                                    <Text className="text-purple-100 font-pixel text-xl"
+                                    <Text className=" font-pixel text-xl" style={{color:theme.defaultTextColor}}
                                           >Temps d&apos;étude</Text>
                                      <View>
                                     <TouchableOpacity
                                         className="flex-row items-center gap-1 rounded-lg px-3 py-2"
-                                        style={{backgroundColor: "#444462"}}
+                                        style={{backgroundColor: theme.contentWrapperBgColor}}
                                         onPress={() => setClickSelectStudy(!clickSelectStudy)}
                                     >
                                         <TextInput
                                             keyboardType="numeric"
                                             maxLength={4}
-                                            className="text-purple-100 min-w-[40px] font-pixel"
-                                            style={{padding: 0, height: 24, fontSize:20}}
+                                            className=" min-w-[40px] font-pixel"
+                                            style={{padding: 0, height: 24, fontSize:20, color:theme.defaultTextColor}}
                                             value={`${defaultStudyTime}`}
                                             onChangeText={handleStudyText}
                                         />
-                                        <Text className="text-purple-200 font-pixel text-xl" >min</Text>
+                                        <Text className=" font-pixel text-xl" style={{color:theme.defaultTextColor}}>min</Text>
                                         <IonIcons name="chevron-down" size={20} color="#e0aaff"/>
                                     </TouchableOpacity>
 
@@ -466,14 +466,15 @@ export default function Pomodoro() {
                                                         onPress={() => clickStudyTime(m)}
                                                         className="rounded-lg py-2 items-center"
                                                         style={{
-                                                            backgroundColor: defaultStudyTime === m ? "#7b2cbf" : "#444462",
+                                                            backgroundColor: defaultStudyTime === m ? theme.buttonColor : theme.contentWrapperBgColor,
                                                             marginBottom:4,
                                                         }}
                                                     >
                                                         <Text
                                                             className={
-                                                                defaultStudyTime === m ? "text-white font-semibold font-pixel" : "text-purple-200 font-pixel"
+                                                                "font-pixel"
                                                             }
+                                                            style={{color: defaultStudyTime === m ? theme.anotherTextColor : theme.defaultTextColor}}
                                                         >
                                                             {m} min
                                                         </Text>
@@ -486,23 +487,23 @@ export default function Pomodoro() {
                                 </View>
                                 <View className="flex-row items-center justify-between rounded-xl py-3 px-4 mb-2"
                                       style={cardBg}>
-                                    <Text className="text-purple-100 font-pixel text-xl">Temps de pause </Text>
+                                    <Text className=" font-pixel text-xl" style={{color:theme.defaultTextColor}}>Temps de pause </Text>
                                     <View>
 
                                     <TouchableOpacity
                                         className="flex-row items-center gap-1 rounded-lg px-3 py-2"
-                                        style={{backgroundColor: "#444462"}}
+                                        style={{backgroundColor: theme.contentWrapperBgColor}}
                                         onPress={() => setClickSelectBreak(!clickSelectBreak)}
                                     >
                                         <TextInput
                                             keyboardType="numeric"
                                             maxLength={4}
-                                            className="text-purple-100 min-w-[40px] font-pixel"
-                                            style={{padding: 0, height: 24, fontSize:20}}
+                                            className=" min-w-[40px] font-pixel"
+                                            style={{padding: 0, height: 24, fontSize:20, color:theme.defaultTextColor}}
                                             value={`${defaultBreakTime}`}
                                             onChangeText={handleBreakText}
                                         />
-                                        <Text className="text-purple-200 text-xl font-pixel">min</Text>
+                                        <Text className=" text-xl font-pixel" style={{color:theme.defaultTextColor}}>min</Text>
                                         <IonIcons name="chevron-down" size={20} color="#e0aaff"/>
                                     </TouchableOpacity>
 
@@ -531,14 +532,15 @@ export default function Pomodoro() {
                                                         onPress={() => clickBreakTime(m)}
                                                         className="rounded-lg py-2 items-center"
                                                         style={{
-                                                            backgroundColor: defaultBreakTime === m ? "#7b2cbf" : "#444462",
+                                                            backgroundColor: defaultBreakTime === m ? theme.buttonColor : theme.contentWrapperBgColor,
                                                             marginBottom:4,
                                                         }}
                                                     >
                                                         <Text
                                                             className={
-                                                                defaultBreakTime === m ? "text-white font-semibold font-pixel" : "text-purple-200 font-pixel"
+                                                                "font-pixel"
                                                             }
+                                                            style={{color: defaultBreakTime === m ? theme.anotherTextColor : theme.defaultTextColor}}
                                                         >
                                                             {m} min
                                                         </Text>
@@ -551,7 +553,7 @@ export default function Pomodoro() {
                             </View>
 
                                 <View className="mb-4">
-                                    <Text className="text-purple-100 mb-2 text-xl font-pixel">Répétitions</Text>
+                                    <Text className=" mb-2 text-xl font-pixel" style={{color:theme.defaultTextColor}}>Répétitions</Text>
                                     <View className="flex-row gap-2">
                                         {[1, 2, 3, 4, 5].map((n) => (
                                             <Pressable
@@ -559,13 +561,14 @@ export default function Pomodoro() {
                                                 onPress={() => clickRepeat(n)}
                                                 className="flex-1 py-2 rounded-xl items-center"
                                                 style={{
-                                                    backgroundColor: defaultRepetition === n ? "#7b2cbf" : "#444462",
+                                                    backgroundColor: defaultRepetition === n ? theme.buttonColor : theme.contentWrapperBgColor,
                                                 }}
                                             >
                                                 <Text
                                                     className={
-                                                        defaultRepetition === n ? "text-white font-pixel" : "text-purple-200 font-pixel"
+                                                        "font-pixel"
                                                     }
+                                                    style={{color: defaultRepetition === n ? theme.anotherTextColor : theme.defaultTextColor}}
                                                 >
                                                     {n}
                                                 </Text>
@@ -583,9 +586,9 @@ export default function Pomodoro() {
                                             setBreakDuration(defaultBreakTime);
                                             updateTime(Number(defaultStudyTime));
                                         }}
-                                        className="rounded-2xl bg-violet-600 py-3 px-8"
+                                        className="rounded-2xl  py-3 px-8" style={{backgroundColor:theme.buttonColor}}
                                     >
-                                        <Text className="text-purple-100 text-xl font-pixel">OK</Text>
+                                        <Text className=" text-xl font-pixel" style={{color:theme.defaultTextColor}}>OK</Text>
                                     </Pressable>
                                     <Pressable
                                         onPress={() => {
@@ -596,7 +599,7 @@ export default function Pomodoro() {
                                         }}
                                         className="rounded-2xl border border-violet-200 py-3 px-8"
                                     >
-                                        <Text className="text-purple-100 text-xl font-pixel">Annuler</Text>
+                                        <Text className=" text-xl font-pixel" style={{color:theme.defaultTextColor}}>Annuler</Text>
                                     </Pressable>
                                 </View>
                             </View>
@@ -611,11 +614,11 @@ export default function Pomodoro() {
                 style={cardBg}
             >
                 <IonIcons name="time-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 text-xl font-pixel" style={{color:theme.defaultTextColor}}>{pomodoroDuration} min</Text>
+                <Text className=" text-xl font-pixel" style={{color:theme.defaultTextColor}}>{pomodoroDuration} min</Text>
                 <IonIcons name="cafe-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 text-xl font-pixel" style={{color:theme.defaultTextColor}}>{breakDuration} min</Text>
+                <Text className=" text-xl font-pixel" style={{color:theme.defaultTextColor}}>{breakDuration} min</Text>
                 <IonIcons name="refresh-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 text-xl font-pixel" style={{color:theme.defaultTextColor}}>{numCycle}</Text>
+                <Text className=" text-xl font-pixel" style={{color:theme.defaultTextColor}}>{numCycle}</Text>
             </View>
 
             {/* --- Actions (index-style buttons) --- */}
@@ -625,10 +628,10 @@ export default function Pomodoro() {
                     disabled={timeLeft === 0}
                     className={`flex-1 rounded-2xl py-4 ${timeLeft === 0 ? "opacity-60" : ""}`}
                     style={{
-                        backgroundColor: isRunning ? "#444462" : timeLeft === 0 ? "#6B7280" : "#7b2cbf",
+                        backgroundColor: isRunning ? theme.contentWrapperBgColor : timeLeft === 0 ? "#6B7280" : theme.buttonColor,
                     }}
                 >
-                    <Text className="text-purple-100 text-center  text-xl font-pixel">{button_start_text}</Text>
+                    <Text className=" text-center  text-xl font-pixel" style={{color:theme.defaultTextColor}}>{button_start_text}</Text>
                 </Pressable>
                 <Pressable
                     onPress={stop_button}
@@ -641,10 +644,10 @@ export default function Pomodoro() {
 
             {/* --- Historique --- */}
             <Text className="text-2xl  mb-2 mt-2 font-pixel" style={{color:theme.defaultTextColor}}>Historique</Text>
-            <View style={{height: 2, backgroundColor: "#444462", width: width * 0.5, marginBottom: 12}}/>
+            <View style={{height: 2, backgroundColor: theme.contentWrapperBgColor, width: width * 0.5, marginBottom: 12}}/>
             <Modal transparent visible={isFinished} animationType="fade">
                 <View style={[stylesProfil.confPage, {backgroundColor: "rgba(0,0,0,0.6)"}]}>
-                    <View style={[stylesProfil.confContainer, cardBg, {borderWidth: 1, borderColor: theme.borderColor}]}>
+                    <View style={[stylesProfil.confContainer, cardBg,  {borderWidth: 1, borderColor: theme.borderColor, }]}>
                         <Text className=" text-center mb-2 text-2xl font-pixel" style={{color:theme.defaultTextColor}}>
                             Bravo pour avoir fini la session de pomodoro !
                         </Text>
@@ -652,7 +655,7 @@ export default function Pomodoro() {
                                   style={{alignSelf: "center", marginVertical: 8}}/>
                         <Pressable
                             onPress={() => setIsFinished(false)}
-                            className="rounded-2xl bg-violet-600 py-3 px-8 mt-2 items-center"
+                            className="rounded-2xl  py-3 px-8 mt-2 items-center" style={{backgroundColor:theme.buttonColor}}
                         >
                             <Text className=" font-semibold font-pixel text-2xl" style={{color:theme.defaultTextColor}}>OK</Text>
                         </Pressable>
@@ -690,9 +693,9 @@ export default function Pomodoro() {
                             onPress={() => handleDeleteSession(session.id)}
                             hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
                             className="rounded-full p-1.5 ml-1"
-                            style={{backgroundColor: "#444462"}}
+                            style={{backgroundColor: theme.contentWrapperBgColor}}
                         >
-                            <IonIcons name="trash-outline" size={14} color="#e0aaff"/>
+                            <IonIcons name="trash-outline" size={14} color={theme===lightTheme? '#DC9EFF' : '#e0aaff'}/>
                         </TouchableOpacity>
                     </View>
                 ))}
@@ -718,7 +721,6 @@ const styles = StyleSheet.create({
         transform: [{scale: 1.2}]
     },
     setting_button: {
-        backgroundColor: "#FFC943",
         width: 40,
         height: 40,
         padding: 8,
@@ -746,7 +748,6 @@ const styles = StyleSheet.create({
     },
     infoButton: {},
     infoBloc: {
-        backgroundColor: '#D9D9D9',
         alignItems: 'center',
         alignSelf: 'center',
         justifyContent: 'center',
@@ -768,7 +769,6 @@ const styles = StyleSheet.create({
         elevation: 3
     },
     paramContent: {
-        backgroundColor: '#D9D9D9',
         height: 50,
         borderRadius: 25,
         padding: 10,
@@ -791,7 +791,6 @@ const styles = StyleSheet.create({
         marginLeft: 200,
         padding: 10,
         marginTop: -100,
-        backgroundColor: '#D9D9D9',
     },
     styleSelectBreak: {
         width: 80,
@@ -799,7 +798,6 @@ const styles = StyleSheet.create({
         marginLeft: 60,
         padding: 10,
         marginTop: 40,
-        backgroundColor: '#D9D9D9',
     },
 });
 
