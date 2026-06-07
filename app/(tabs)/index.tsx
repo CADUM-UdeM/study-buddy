@@ -59,14 +59,15 @@ export default function Accueil() {
           <Pressable
             onPress={() => setShowGlobalGPA(!showGlobalGPA)}
             className="flex-row items-center gap-2 px-3 py-1.5 rounded-lg bg-white/50"
+            style={{backgroundColor:theme.background}}
           >
             <Ionicons
-              name={showGlobalGPA ? "globe" : "calendar"}
+              name={showGlobalGPA ? "calendar" : "globe"}
               size={16}
-              color="#059669"
+              style={{color:theme.calendarIconColor}}
             />
-            <Text className="text-base font-medium text-purple-100 font-pixel">
-              {showGlobalGPA ? "Global" : "Session"}
+            <Text className="text-base font-medium text-purple-100 font-pixel" style={{color:theme.defaultTextColor}}>
+              {showGlobalGPA ? "Session" : "Global"}
             </Text>
           </Pressable>
         </View>
@@ -106,8 +107,8 @@ export default function Accueil() {
       </Pressable>
 
       <Link href="/(tabs)/donnees" asChild>
-        <Pressable className="mt-3 rounded-2xl border border-violet-100 py-4">
-          <Text className="text-center font-medium text-purple-100 font-pixel text-xl">Voir mes données</Text>
+        <Pressable className="mt-3 rounded-2xl border border-violet-100 py-4" style={{borderColor:theme.anotherborderColor}} >
+          <Text className=" text-center font-medium font-pixel text-xl" style={{color:theme.anotherTextColor}}>Voir mes données</Text>
         </Pressable>
       </Link>
 

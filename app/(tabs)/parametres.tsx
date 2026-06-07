@@ -36,7 +36,7 @@ const Parametres = () => {
     };
     return (
         <ScrollView className="flex-1 px-5 pt-16" style={{backgroundColor: theme.background}}>
-            <Text className="text-2xl text-purple-100 font-pixel mb-4">
+            <Text className="text-2xl text-purple-100 font-pixel mb-4" style={{color:theme.defaultTextColor}}>
                 Paramètres
             </Text>
 

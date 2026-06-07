@@ -366,7 +366,7 @@ export default function Donnees() {
               { color: buttonTextColor },
             ]}
           >
-            + Ajouter un cours
+            Ajouter un cours
           </Text>
         </TouchableOpacity>
       </ScrollView>

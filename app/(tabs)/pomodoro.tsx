@@ -611,11 +611,11 @@ export default function Pomodoro() {
                 style={cardBg}
             >
                 <IonIcons name="time-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 text-xl font-pixel">{pomodoroDuration} min</Text>
+                <Text className="text-purple-100 text-xl font-pixel" style={{color:theme.defaultTextColor}}>{pomodoroDuration} min</Text>
                 <IonIcons name="cafe-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 text-xl font-pixel">{breakDuration} min</Text>
+                <Text className="text-purple-100 text-xl font-pixel" style={{color:theme.defaultTextColor}}>{breakDuration} min</Text>
                 <IonIcons name="refresh-outline" size={22} color="#e0aaff"/>
-                <Text className="text-purple-100 text-xl font-pixel">{numCycle}</Text>
+                <Text className="text-purple-100 text-xl font-pixel" style={{color:theme.defaultTextColor}}>{numCycle}</Text>
             </View>
 
             {/* --- Actions (index-style buttons) --- */}
@@ -633,9 +633,9 @@ export default function Pomodoro() {
                 <Pressable
                     onPress={stop_button}
                     className="flex-1 rounded-2xl border border-red-300 py-4"
-                    style={{borderColor: theme.borderColor}}
+                    style={{borderColor: theme.stopBorderColor}}
                 >
-                    <Text className="text-red-200 text-center text-xl font-pixel">Stop</Text>
+                    <Text className="text-red-200 text-center text-xl font-pixel" style={{color:theme.stopColor}}>Stop</Text>
                 </Pressable>
             </View>
 
