@@ -375,7 +375,7 @@ export default function Pomodoro() {
                         size={176}
                         width={8}
                         fill={phaseTotalSeconds > 0 ? (timeLeft / phaseTotalSeconds) * 100 : 100}
-                        tintColor={theme.buttonColor}
+                        tintColor={theme.circleColor}
                         backgroundColor={theme.contentWrapperBgColor}
                         rotation={0}
                         lineCap="round"

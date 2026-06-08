@@ -682,7 +682,7 @@ export default function DetailsCours() {
                     style={[styles.addEvalButton, {backgroundColor:theme.buttonColor, borderColor:theme.borderColor, borderWidth:1}]}
                     onPress={() => setModalVisible(true)}
                 >
-                    <Text style={[styles.addEvalText, {color:theme.defaultTextColor}]}>+ Ajouter une évaluation</Text>
+                    <Text style={[styles.addEvalText, {color:theme.defaultTextColor}]}>Ajouter une évaluation</Text>
                 </TouchableOpacity>
             </Animated.ScrollView>
 

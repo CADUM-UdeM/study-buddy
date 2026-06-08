@@ -34,6 +34,8 @@ export const lightTheme = {
   gray: "#8d8d8d",
 
   white:"#ffffff",
+
+  circleColor:"#b18af5",
 };
 
 /* Afin d'avoir les memes declarations de variables, on utilise typeof */
@@ -74,4 +76,6 @@ export const darkTheme: typeof lightTheme = {
   gray: "#d3d3d3",
 
   white:"#ffffff",
+
+  circleColor:"#7c3aed",
 };
