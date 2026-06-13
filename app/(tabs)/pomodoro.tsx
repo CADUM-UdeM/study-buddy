@@ -1,6 +1,6 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import {Audio} from 'expo-av'
 import React, {useEffect, useRef, useState} from "react";
 import {
     Animated,
@@ -38,14 +38,7 @@ export default function Pomodoro() {
     const [inBreakTime, setInBreakTime] = useState(false)
 
     {/* Fonction pour formatage du minuteur */ }
-    const addZero = (num: number): string => {
-        if (num < 10) {
-            return `0${num}`
-        } else {
-            return `${num}`
-        }
-    };
-
+    const addZero = (num: number): string => String(num).padStart(2, "0");
 
     const [initHours, setInitHours] = useState(0)
     const [hours, setHours] = useState(addZero(initHours))
@@ -82,6 +75,7 @@ export default function Pomodoro() {
             handleAddSession(pomodoroDuration, breakDuration, String(numCycle), false, false);
             setHasTimerBeenStarted(false);
         }
+        setInBreakTime(false);
         setMin(addZero(initMin));
         setHours(addZero(initHours));
         setSec(addZero(initSec));
@@ -145,6 +139,7 @@ export default function Pomodoro() {
         } else if (timeLeft === 0 && remainingCycle > 0) {
             if (!inBreakTime) {
                 setRemainingCycle(remainingCycle - 1)
+                setWasAudioTransition(false)
             }
             setHasTimerBeenStarted(false);
             if (inBreakTime) {
@@ -160,12 +155,13 @@ export default function Pomodoro() {
             setInBreakTime(!inBreakTime)
         } else {
             setIsRunning(false);
-            if (remainingCycle === 0 && timeLeft === 0) {
+            if (remainingCycle === 0 && timeLeft === 0 && inBreakTime) {
                 setHasTimerBeenStarted(false);
                 setIsFinished(true);
+                setInBreakTime(false);
             }
         }
-    }, [timeLeft, isRunning])
+    }, [timeLeft, isRunning, inBreakTime])
 
     useEffect(() => {
         timeLeftFormating(timeLeft)
@@ -325,6 +321,43 @@ export default function Pomodoro() {
         extrapolate: "clamp",
     });
 
+
+    /* Logique pour l'audio fin */
+    const [wasAudioEnd, setWasAudioEnd] = useState(false);
+
+    /* Pour lancer l'audio */
+    useEffect(() => {
+        /* Jouer l'audio quand session finie */
+        if (!wasAudioEnd && isFinished){
+           Audio.Sound.createAsync(require("../../assets/endAudio.m4a"), {shouldPlay : true}
+           ).catch((_)=> console.log("erreur dans chargement de l'audio"))
+
+            setWasAudioEnd(true);
+        }
+    }, [wasAudioEnd, isFinished]);
+
+    /* Logique pour l'audio transition */
+    const [wasAudioTransition, setWasAudioTransition] = useState(false);
+
+    /* Pour lancer l'audio */
+    useEffect(() => {
+        if (!isFinished){
+            /* Jouer audio transition focus → pause */
+            if (!wasAudioTransition && inBreakTime){
+                Audio.Sound.createAsync(require("../../assets/switchAudio.mp3"), {shouldPlay : true}
+                ).catch((_)=> console.log("erreur dans chargement de l'audio"))
+                setWasAudioTransition(true);
+            }
+            /* Jouer audio transition pause → focus */
+            else if (!inBreakTime && wasAudioTransition) {
+                setWasAudioTransition(false)
+                Audio.Sound.createAsync(require("../../assets/switchAudio.mp3"), {shouldPlay : true}
+                ).catch((_)=> console.log("erreur dans chargement de l'audio"))
+            }
+        }
+    }, [inBreakTime, isFinished, wasAudioTransition]);
+
+
     return (
         <View style={{flex: 1, backgroundColor: theme.background}}>
         <Animated.ScrollView
@@ -335,7 +368,7 @@ export default function Pomodoro() {
             )}
             scrollIndicatorInsets={{top: insets.top + 8}}
             scrollEventThrottle={16}
-            style={{backgroundColor:theme.background, 
+            style={{backgroundColor:theme.background,
                 marginTop:20
             }}
         >
@@ -423,13 +456,13 @@ export default function Pomodoro() {
             {/* --- Params modal --- */}
             <Modal transparent visible={clickParam} animationType="fade">
                 <Pressable
-                    style={[stylesProfil.confPage, {backgroundColor: "rgba(0,0,0,0.6)"}]}
+                    style={[styles.confPage, {backgroundColor: "rgba(0,0,0,0.6)"}]}
                     onPress={() => setClickParam(false)}
                 >
                     <Pressable onPress={(e) => e.stopPropagation()}>
                         <View
                             style={[
-                                stylesProfil.confContainer,
+                                styles.confContainer,
                                 {height: "77%", ...cardBg, borderColor: theme.borderColor, borderWidth: 1, backgroundColor:theme.mainWrapperBgColor},
                             ]}
                         >
@@ -668,15 +701,20 @@ export default function Pomodoro() {
             <Text className="text-2xl  mb-2 mt-2 font-pixel" style={{color:theme.defaultTextColor}}>Historique</Text>
             <View style={{height: 2, backgroundColor: theme.contentWrapperBgColor, width: width * 0.5, marginBottom: 12}}/>
             <Modal transparent visible={isFinished} animationType="fade">
-                <View style={[stylesProfil.confPage, {backgroundColor: "rgba(0,0,0,0.6)"}]}>
-                    <View style={[stylesProfil.confContainer, cardBg,  {borderWidth: 1, borderColor: theme.borderColor, }]}>
+                <View style={[styles.confPage, {backgroundColor: "rgba(0,0,0,0.6)"}]}>
+                    <View style={[styles.confContainer, cardBg,  {borderWidth: 1, borderColor: theme.borderColor, }]}>
                         <Text className=" text-center mb-2 text-2xl font-pixel" style={{color:theme.defaultTextColor}}>
                             Bravo pour avoir fini la session de pomodoro !
                         </Text>
                         <IonIcons name="ribbon-outline" size={40} color="#e0aaff"
                                   style={{alignSelf: "center", marginVertical: 8}}/>
                         <Pressable
-                            onPress={() => setIsFinished(false)}
+                            onPress={() => {
+                                setIsFinished(false);
+                                setWasAudioEnd(false);
+                                setWasAudioTransition(false);
+                                stop_button();
+                            }}
                             className="rounded-2xl  py-3 px-8 mt-2 items-center" style={{backgroundColor:theme.buttonColor}}
                         >
                             <Text className=" font-semibold font-pixel text-2xl" style={{color:theme.defaultTextColor}}>OK</Text>
@@ -731,129 +769,17 @@ export default function Pomodoro() {
 }
 
 const styles = StyleSheet.create({
-    styleText: {
-        alignItems: 'center',
-        marginBottom: 10,
-        borderRadius: 20,
-    },
-    bodyStyle: {
-        paddingTop: 20,
-        padding: 30,
-        alignItems: "center",
-    },
     time_button: {
         transform: [{scale: 1.2}]
-    },
-    setting_button: {
-        width: 40,
-        height: 40,
-        padding: 8,
-        borderRadius: 50,
-        textAlign: 'center'
-    },
-    timer: {
-        borderRadius: "100%",
-        borderWidth: 2,
-        width: 200,
-        height: 200,
-        alignSelf: 'center',
-        justifyContent: 'center'
-    },
-    timerSection: {
-        borderRadius: 20,
-        borderWidth: 2,
-    },
-    actionButton: {
-        alignItems: "center",
-        padding: 10,
-        margin: 10,
-        minWidth: 110,
-        borderRadius: 15,
-    },
-    infoButton: {},
-    infoBloc: {
-        alignItems: 'center',
-        alignSelf: 'center',
-        justifyContent: 'center',
-        flexDirection: 'row',
-        width: '80%',
-        height: 50,
-        gap: 5,
-        marginTop: 40,
-        borderRadius: 10
-    },
-
-    shadow: {
-        shadowColor: 'black',
-        shadowOpacity: 0.1,
-        shadowOffset: {
-            width: 0,
-            height: 3,
-        },
-        elevation: 3
-    },
-    paramContent: {
-        height: 50,
-        borderRadius: 25,
-        padding: 10,
-        flexDirection: 'row',
-    },
-    selectRepetition: {
-        width: '80%',
-        height: 20,
-        borderRadius: 20,
-        alignItems: 'center',
-        margin: 2
-    },
-    styleToSelectTime: {
-        marginTop: -10,
-        width: 95
-    },
-    styleSelectTime: {
-        width: 80,
-        height: 200,
-        marginLeft: 200,
-        padding: 10,
-        marginTop: -100,
-    },
-    styleSelectBreak: {
-        width: 80,
-        height: 200,
-        marginLeft: 60,
-        padding: 10,
-        marginTop: 40,
-    },
-});
-
-const stylesProfil = StyleSheet.create({
-    confPage: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
     },
     confContainer: {
         borderRadius: 20,
         padding: 20,
         width: '85%',
     },
-    confText: {
-        fontFamily: 'PixelJersey',
-        fontSize: 18,
-        fontWeight: 'bold',
-    },
-    shadow: {
-        shadowColor: 'black',
-        shadowOpacity: 0.1,
-        shadowOffset: {width: 0, height: 3},
-        elevation: 3,
-    },
-    clickButton: {
+    confPage: {
+        flex: 1,
+        justifyContent: 'center',
         alignItems: 'center',
-        padding: 12,
-        minWidth: 80,
-        borderRadius: 15,
-    },
-    drawHorLine: {
-        height: 2,
     },
 });
