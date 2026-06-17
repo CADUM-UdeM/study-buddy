@@ -50,9 +50,9 @@ export default function LastStreakTracker() {
 
     const durationLastPomodoro = useMemo(() => {
         if (!lastSession) return null;
-        return (parseFloat(lastSession.durationSession) +
+        return ((parseFloat(lastSession.durationSession) +
                 parseFloat(lastSession.breakSession)) *
-            parseFloat(lastSession.repeatSession)
+            parseFloat(lastSession.repeatSession)).toFixed(2);
     }, [lastSession]);
 
 

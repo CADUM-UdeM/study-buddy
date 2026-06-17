@@ -44,10 +44,11 @@ export default function WeekStreakTracker() {
 
     const durationStudyWeek = useMemo(() => {
         if (!dateWeekPomodoro) return null;
-        return dateWeekPomodoro.reduce((total: number, session : Session) : number => Number(total + (
+        return (dateWeekPomodoro.reduce((total: number, session : Session) : number => Number(total + (
             (parseFloat(session.durationSession || '0') + parseFloat(session.breakSession || '0')) *
-            parseFloat(session.repeatSession || '0')  )),0)
+            parseFloat(session.repeatSession || '0')  )),0)).toFixed(2);
     }, [dateWeekPomodoro]);
+
     const hasPomodoroThisWeek = Boolean(dateWeekPomodoro?.length);
     return (
         <View style={[styles.container, {backgroundColor: theme.mainWrapperBgColor, borderColor: theme.borderColor}]}>

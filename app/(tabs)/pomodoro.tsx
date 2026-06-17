@@ -3,8 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {Audio} from 'expo-av'
 import React, {useEffect, useRef, useState} from "react";
 import {
-    Animated, Modal, Pressable, ScrollView, StyleSheet,
-    Text, TextInput, TouchableOpacity, useWindowDimensions, View
+    Animated, AppState, Modal, Pressable, ScrollView, StyleSheet,
+    Text, TouchableOpacity, useWindowDimensions, View
 } from "react-native";
 import "../global.css";
 import {sessionContext} from "@/app/context/SessionContext";
@@ -47,7 +47,10 @@ export default function Pomodoro() {
     const [phaseTotalSeconds, setPhaseTotalSeconds] = useState(Number(DEFAULT_STUDY_TIME) * 60);
     const [wasAudioTransition, setWasAudioTransition] = useState(false);
     const [wasAudioEnd, setWasAudioEnd] = useState(false);
-
+    const endTimeRef = useRef<number | null>(null);
+    const [wasUpdated, setWasUpdated] = useState(false);
+    const [hasClickedBreak, setHasClickedBreak] = useState(false);
+    const [timeOutsideApps, setTimeOutsideApps] = useState(0);
 
     { /* -------------- Fonctions -------------- */
     }
@@ -58,10 +61,12 @@ export default function Pomodoro() {
     }
     const pause_button = () => {
         setIsRunning(false);
+        setHasClickedBreak(true);
     }
 
     const stop_button = () => {
         setIsRunning(false);
+        setHasClickedBreak(false);
         if (hasTimerBeenStarted) {
             handleAddSession(pomodoroDuration, breakDuration, String(numCycle), false, false);
             setHasTimerBeenStarted(false);
@@ -84,37 +89,76 @@ export default function Pomodoro() {
     }, [hours, isRunning, min, sec]);
 
     useEffect(() => {
+        /* Si chrono tourne */
         if (timeLeft > 0 && isRunning) {
+            setTimeOutsideApps(0);
+            if (!endTimeRef.current || wasUpdated) endTimeRef.current = Date.now() + timeLeft * 1000;
+            setWasUpdated(false);
             const timer = setInterval(() => {
                 setTimeLeft((timeBefore) => timeBefore - 1)
             }, 1000)
-            return () => clearInterval(timer)
-        } else if (timeLeft === 0 && remainingCycle > 0) {
+            return () => {
+                clearInterval(timer)
+                if (!isRunning && !hasClickedBreak) endTimeRef.current = null;
+            }
+        }
+        /* Si on change de transition pause/focus */
+        else if (timeLeft === 0 && remainingCycle > 0) {
+            endTimeRef.current = null;
+            /* En mode focus */
             if (!inBreakTime) {
                 setRemainingCycle(remainingCycle - 1)
                 setWasAudioTransition(false)
             }
             setHasTimerBeenStarted(false);
-            if (inBreakTime) {
-                const next = Number(pomodoroDuration) * 60;
-                setTimeLeft(next);
-                setPhaseTotalSeconds(next);
-            } else {
-                const next = Number(breakDuration) * 60;
-                setTimeLeft(next);
-                setPhaseTotalSeconds(next);
-            }
 
-            setInBreakTime(!inBreakTime)
-        } else {
+            let next;
+            /* En mode pause */
+            if (inBreakTime) next = Number(pomodoroDuration) * 60 - timeOutsideApps;
+            else next = Number(breakDuration) * 60 - timeOutsideApps;
+
+            /* Met à jour le temps sur le prochain état */
+            if (next <= 0) {
+                setTimeOutsideApps(Math.abs(next));
+                next = 0
+            }
+            else setTimeOutsideApps(0);
+
+            setTimeOutsideApps(0);
+            setTimeLeft(next);
+            setPhaseTotalSeconds(next);
+            setInBreakTime(!inBreakTime);
+        } /* Si on a fini totalement le pomodoro */
+        else {
             setIsRunning(false);
             if (remainingCycle === 0 && timeLeft === 0 && inBreakTime) {
                 setHasTimerBeenStarted(false);
                 setIsFinished(true);
+                setTimeOutsideApps(0);
                 setInBreakTime(false);
+                endTimeRef.current = null;
             }
         }
     }, [timeLeft, isRunning, inBreakTime])
+
+    useEffect(() => {
+        const appState = AppState.addEventListener('change', (nextAppState) => {
+            /* Si changement d'etat (ferme l'apps et réouvre) */
+            if (nextAppState === 'active' && isRunning && endTimeRef.current) {
+                const now = Date.now();
+                let secLeft = Math.round((endTimeRef.current - now) / 1000);
+                setTimeOutsideApps(0);
+
+                if (secLeft <= 0) {
+                    /* Passer à prochain état (en cours) */
+                    /* Pour le moment juste passer au début de l'autre état */
+                    setTimeLeft(0);
+                    setTimeOutsideApps(Math.abs(secLeft));
+                } else setTimeLeft(secLeft);
+            }
+        });
+        return () => appState.remove();
+    }, [isRunning]);
 
     useEffect(() => {
         timeLeftFormating(timeLeft)
@@ -138,6 +182,7 @@ export default function Pomodoro() {
     { /*  Pour changer les paramètres du pomodoro -------------------- */
     }
     const updateTime = (minutes: number) => {
+        setWasUpdated(true)
         const newHours = addZero(Number(Math.floor(minutes / 60)))
         setHours(newHours)
         setInitHours(Number(newHours))
@@ -153,6 +198,7 @@ export default function Pomodoro() {
 
     {/* Pour l'historique --------------------*/
     }
+
     interface Session {
         id: string,
         durationSession: string,
@@ -238,7 +284,6 @@ export default function Pomodoro() {
         if (!wasAudioEnd && isFinished) {
             Audio.Sound.createAsync(require("../../assets/endAudio.m4a"), {shouldPlay: true}
             ).catch((_) => console.log("erreur dans chargement de l'audio"))
-
             setWasAudioEnd(true);
         }
     }, [wasAudioEnd, isFinished]);

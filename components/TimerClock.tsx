@@ -33,12 +33,15 @@ export const TimerClock = ({
                            }: infoParams) => {
     const {settings} = useSettings();
     const theme = settings.isDarkMode ? darkTheme : lightTheme;
-    const cardBg = {backgroundColor: theme.mainWrapperBgColor};
 
 
     return (
         <View className="rounded-2xl p-6 mb-4"
-              style={[cardBg, {borderWidth: 1, borderColor: inBreakTime ? theme.buttonColor : theme.borderColor,},]}>
+              style={{
+                  backgroundColor: inBreakTime ?
+                      theme.borderColor : theme.mainWrapperBgColor,
+                  borderWidth: 1, borderColor: inBreakTime ? theme.circleColor : theme.borderColor
+              }}>
 
             {/* --- Indicateur du mode Focus ou Pause ---*/}
             <Text className="text-center text-lg  mb-6 font-pixel text-[20px]"
@@ -49,7 +52,8 @@ export const TimerClock = ({
                 <AnimatedCircularProgress size={176} width={8}
                                           fill={phaseTotalSeconds > 0 ? (timeLeft / phaseTotalSeconds) * 100 : 100}
                                           tintColor={theme.circleColor}
-                                          backgroundColor={theme.contentWrapperBgColor}
+                                          backgroundColor={theme === lightTheme ?
+                                              theme.background : theme.contentWrapperBgColor}
                                           rotation={0} lineCap="round">
 
                     {() => (<Text className="text-3xl font-pixel "
