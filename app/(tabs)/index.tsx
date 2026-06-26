@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Animated, Pressable, Text, View } from "react-native";
 import { useGPA } from "@/app/hooks/useGPA";
 import { useSettings } from "../context/SettingsContext";
@@ -8,9 +8,8 @@ import ContributionTracker from "../../components/ContributionTracker";
 import { WalkingBirdPeek } from "../../components/home/SpritePeeks";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
-import LastStreakTracker from "@/components/LastStreakTracker";
+import SessionTracker from "@/components/SessionTracker";
 import { TopStatusBarGuard } from "@/components/TopStatusBarGuard";
-import WeekStreakTracker from "@/components/WeekStreakTracker";
 import {darkTheme, lightTheme} from "@/components/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -40,7 +39,7 @@ export default function Accueil() {
     <View style={{ flex: 1, backgroundColor: theme.background }}>
     <Animated.ScrollView
       className="flex-1 px-5 pt-20"
-    
+
       onScroll={Animated.event(
         [{ nativeEvent: { contentOffset: { y: scrollY } } }],
         { useNativeDriver: true },
@@ -57,18 +56,12 @@ export default function Accueil() {
         <WalkingBirdPeek displayHeight={82} overlap={44} right={2} />
       </View>
 
-        {/* Série actuelle */}
-        {settings.showStreak && (
-            <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
-                <LastStreakTracker />
-            </View>)}
-        {/* Temps de la série de la semaine */}
-        {settings.showStudyTime && (
-            <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
-                <WeekStreakTracker />
-            </View>)}
+        {/* Informations pomodoro */}
+        {settings.showStreak && (<SessionTracker/>)}
+
       {/* --- GPA Section --- */}
-      <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: theme.mainWrapperBgColor}}>
+      <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: theme.mainWrapperBgColor,
+          borderWidth:1, borderColor:theme.borderColor}}>
         <View className="flex-row items-center justify-between mb-2">
           <Text className="text-neutral-600 font-pixel text-lg"
           style={{color:theme.defaultTextColor}}>

@@ -1,9 +1,9 @@
 export const lightTheme = {
-  background: "#FBF0FB",
+  background: "#FCF4FC",
   mainWrapperBgColor: "#ffffff",
-  contentWrapperBgColor: "#F1E1F9",
+  contentWrapperBgColor: "#f9ecfe",
 
-  navBarBgColor: "#FEF9FC",
+  navBarBgColor: "#FCF4FC",
   borderColor: "#F1E1F9",
   //FEF9FC
   // Icons de navigation
@@ -19,7 +19,7 @@ export const lightTheme = {
   anotherborderColor: "#7c3aed",
 
   // Calendrier
-  calendarZero: "#FEFAFD",
+  calendarZero: "#F3F0F9",
   calendarLevelOne: "#CCBBFF",
   calendarLevelTwo: "#9B7EDE",
   calendarLevelThree: "#6B5B95",

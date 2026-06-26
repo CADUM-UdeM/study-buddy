@@ -135,11 +135,7 @@ const Parametres = () => {
         </Text>
 
         {[
-          {
-            key: "showStudyTime" as const,
-            label: "Temps d'étude cette semaine",
-          },
-          { key: "showStreak" as const, label: "Série actuelle" },
+          { key: "showStreak" as const, label: "Progrès pomodoro" },
           { key: "showAverage" as const, label: "Moyenne actuelle" },
           { key: "showGPA" as const, label: "GPA Global" },
           { key: "showCourseCount" as const, label: "Nombre de cours" },

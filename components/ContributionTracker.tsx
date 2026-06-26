@@ -180,8 +180,11 @@ export default function ContributionTracker() {
     const monthLabels = getMonthLabels();
 
     return (
-        <View style={[styles.container, {backgroundColor:theme.contentWrapperBgColor, borderRadius:20}]}>
-            <Text style={[styles.title, {color:theme.defaultTextColor}]}>
+        <View style={[styles.container, {
+            backgroundColor: theme.mainWrapperBgColor,
+            borderRadius: 25, borderColor: theme.borderColor, borderWidth: 1
+        }]}>
+            <Text style={[styles.title, {color: theme.defaultTextColor}]}>
                 {totalContributions} séances d&#39;études cette session
             </Text>
 
@@ -313,7 +316,6 @@ export default function ContributionTracker() {
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: 12,
         padding: 16,
         marginVertical: 10,
     },

@@ -150,8 +150,6 @@ export default function Pomodoro() {
                 setTimeOutsideApps(0);
 
                 if (secLeft <= 0) {
-                    /* Passer à prochain état (en cours) */
-                    /* Pour le moment juste passer au début de l'autre état */
                     setTimeLeft(0);
                     setTimeOutsideApps(Math.abs(secLeft));
                 } else setTimeLeft(secLeft);
