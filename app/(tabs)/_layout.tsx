@@ -1,6 +1,7 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import {Tabs} from "expo-router";
 import {Icon, Label, NativeTabs, VectorIcon} from "expo-router/unstable-native-tabs";
+import {Calendar} from "lucide-react-native";
 import {Platform} from "react-native";
 import {darkTheme, lightTheme} from "@/components/colors";
 import {useSettings} from "@/app/context/SettingsContext";
@@ -27,6 +28,11 @@ export default function TabLayout() {
                 <NativeTabs.Trigger name="index">
                     <Icon src={<VectorIcon family={IonIcons} name="home"/>}/>
                     <Label>Accueil</Label>
+                </NativeTabs.Trigger>
+
+                <NativeTabs.Trigger name="calendar">
+                    <Icon src={<Calendar size={22} strokeWidth={1.75}/>}/>
+                    <Label>Calendrier</Label>
                 </NativeTabs.Trigger>
 
                 <NativeTabs.Trigger name="donnees">
@@ -73,6 +79,15 @@ export default function TabLayout() {
                     title: "Accueil",
                     tabBarIcon: ({color}) => (
                         <IonIcons name="home" size={24} color={color}/>
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name="calendar"
+                options={{
+                    title: "Calendrier",
+                    tabBarIcon: ({color}) => (
+                        <Calendar size={22} color={color} strokeWidth={1.75}/>
                     ),
                 }}
             />
