@@ -1,9 +1,10 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import {Tabs} from "expo-router";
 import {Icon, Label, NativeTabs, VectorIcon} from "expo-router/unstable-native-tabs";
-import {Platform} from "react-native";
+import {Platform, View} from "react-native";
 import {darkTheme, lightTheme} from "@/components/colors";
 import {useSettings} from "@/app/context/SettingsContext";
+import {NavBar} from "@/components/NavBarAnimation";
 
 const isIOS26Plus =
     Platform.OS === "ios" && parseInt(Platform.Version as string, 10) >= 26;
@@ -42,7 +43,6 @@ export default function TabLayout() {
                     <Icon src={<VectorIcon family={IonIcons} name="settings"/>}/>
                     <Label>Paramètres</Label>
                 </NativeTabs.Trigger>
-                <NativeTabs.Trigger name="notifications" hidden/>
             </NativeTabs>
         );
     }
@@ -53,57 +53,38 @@ export default function TabLayout() {
             screenOptions={{
                 headerShown: false,
 
-                tabBarActiveTintColor: theme.activeColorIcon,
-                tabBarInactiveTintColor: theme.inactiveColorIcon,
-                tabBarStyle: {
-                    backgroundColor: theme.navBarBgColor,
-                    borderTopWidth:0,
-                    elevation: 0,
-
-                },
-                tabBarLabelStyle: {fontFamily: "PixelJersey", fontSize: 11},
+                /* Animation */
                 animation: "fade",
-                sceneStyle: {backgroundColor: theme.background},
-
+                sceneStyle: {backgroundColor: theme.background,
+                    flex: 1,
+                },
             }}
-        >
-            <Tabs.Screen
-                name="index"
-                options={{
-                    title: "Accueil",
-                    tabBarIcon: ({color}) => (
-                        <IonIcons name="home" size={24} color={color}/>
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="donnees"
-                options={{
-                    title: "Données",
-                    tabBarIcon: ({color}) => (
-                        <IonIcons name="stats-chart" size={24} color={color}/>
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="pomodoro"
-                options={{
-                    title: "Pomodoro",
-                    tabBarIcon: ({color}) => (
-                        <IonIcons name="alarm" size={24} color={color}/>
-                    ),
-                }}
-            />
-            <Tabs.Screen
-                name="parametres"
-                options={{
-                    title: "Paramètres",
-                    tabBarIcon: ({color}) => (
-                        <IonIcons name="settings" size={24} color={color}/>
-                    ),
-                }}
-            />
-            <Tabs.Screen name="notifications" options={{href: null}}/>
+            tabBar={({state, navigation}) => {
+                const currentRouteName = state.routes[state.index].name;
+
+                const handleTabPress = (routeName: string) => {
+                    const event = navigation.emit({
+                        type: 'tabPress', target: routeName, canPreventDefault: true,
+                    });
+                    if (!event.defaultPrevented) {
+                        navigation.navigate(routeName);
+                    }
+                };
+
+                return (
+                    <View style={{
+                        position: 'absolute', bottom: 0,
+                        left: 0, right: 0, backgroundColor: 'transparent'
+                    }}>
+                        <NavBar dark={settings.isDarkMode}
+                                currentActive={currentRouteName} onTabPress={handleTabPress} theme={theme}/>
+                    </View>
+                );
+            }}>
+            <Tabs.Screen name="index" options={{title: "Accueil"}}/>
+            <Tabs.Screen name="donnees" options={{title: "Données"}}/>
+            <Tabs.Screen name="pomodoro" options={{title: "Pomodoro"}}/>
+            <Tabs.Screen name="parametres" options={{title: "Paramètres"}}/>
         </Tabs>
     );
 }

@@ -207,6 +207,7 @@ const Parametres = () => {
                 <View className="h-10"/>
             </Animated.ScrollView>
             <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity}/>
+            <View style={{paddingTop:100}} />
         </View>
     );
 };

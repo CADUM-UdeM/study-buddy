@@ -54,7 +54,7 @@ export const darkTheme: typeof lightTheme = {
   mainWrapperBgColor: "#1A1729",
   contentWrapperBgColor: "#444462",
 
-  navBarBgColor: "#221f3d",
+  navBarBgColor: "#2A2350",
   borderColor: "#22103d",
 
   // Icons de navigation

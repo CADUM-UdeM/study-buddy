@@ -4,7 +4,7 @@ import {setAudioModeAsync, useAudioPlayer} from 'expo-audio'
 import React, {useEffect, useRef, useState} from "react";
 import {
     Animated, AppState, Modal, Pressable, StyleSheet,
-    Text, useWindowDimensions, View
+    Text, View
 } from "react-native";
 import "../global.css";
 import {sessionContext} from "@/app/context/SessionContext";
@@ -15,7 +15,7 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {TimerInfoRow} from "@/components/TimerInfoRow";
 import {TimerClock} from "@/components/TimerClock";
 import {DEFAULT_BREAK_TIME, DEFAULT_REPETITION, DEFAULT_STUDY_TIME, TimerParams} from "@/components/TimerParams";
-import {manageNotif, startNotif, stopNotif} from "@/components/TimerNotification";
+import {manageNotif, stopNotif} from "@/components/TimerNotification";
 import {LinearGradient} from "expo-linear-gradient";
 
 export default function Pomodoro() {
@@ -27,11 +27,9 @@ export default function Pomodoro() {
     { /* -------------- Constantes -------------- */
     }
     const key_session = '@sessions_history';
-    const {width} = useWindowDimensions();
     const [isRunning, setIsRunning] = useState(false);
     const [hasTimerBeenStarted, setHasTimerBeenStarted] = useState(false);
     const button_start_text = isRunning ? "Pause" : "Débuter";
-    const [isModalDeleteOpen, setIsModalDeleteOpen] = useState(false);
     const [inBreakTime, setInBreakTime] = useState(false)
     const [initHours, setInitHours] = useState(0)
     const [hours, setHours] = useState(addZero(initHours))
@@ -217,19 +215,7 @@ export default function Pomodoro() {
     }
 
     const [sessions, setSessions] = useState<Session[]>([]);
-    const handleDeleteSession = (id: string) => {
-        setSessions(session => {
-            const newSession = session.filter((actual) => actual.id !== id);
 
-            /* Stockage en local */
-            AsyncStorage.setItem(key_session, JSON.stringify(newSession)).catch(error =>
-                console.log("Erreur :" + error + ".Impossible de sauvegarder l'historique"));
-
-            return newSession;
-        });
-
-        setIsModalDeleteOpen(!isModalDeleteOpen)
-    }
 
     const handleAddSession =
         /* Paramètres */
