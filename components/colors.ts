@@ -14,6 +14,7 @@ export const lightTheme = {
   activeTextColor: "#f78ae1",
 
   buttonColor: "#F0D3FF",
+    buttonTextColor:"#9372BA",
 
   anotherTextColor: "#7c3aed",
   anotherborderColor: "#7c3aed",
@@ -36,6 +37,15 @@ export const lightTheme = {
   white:"#ffffff",
 
   circleColor:"#b18af5",
+
+  /*Pomodoro */
+  cycleDefault : "#7C3AED26",
+  cycleInactive: "#6d28d91a",
+  cycleActive : "#7c3aed",
+
+    gradientOne:"#fff9ff",
+    gradientTwo :"#fff0fb",
+    gradientThree:"#f5e7ff"
 };
 
 /* Afin d'avoir les memes declarations de variables, on utilise typeof */
@@ -55,7 +65,7 @@ export const darkTheme: typeof lightTheme = {
   activeTextColor: "#AB8BFF",
 
   buttonColor: "#7c3aed",
-
+    buttonTextColor:"#f3e8ff",
   anotherTextColor: "#AB8BFF",
   anotherborderColor: "#AB8BFF",
 
@@ -78,4 +88,13 @@ export const darkTheme: typeof lightTheme = {
   white:"#ffffff",
 
   circleColor:"#7c3aed",
+
+  /*Pomodoro */
+  cycleDefault : "#7c3aed73",
+  cycleInactive: "#6d28d91a",
+  cycleActive : "#7c3aed",
+
+    gradientOne: "#12182E",
+    gradientTwo: "#2A2350",
+    gradientThree: "#221F3D"
 };

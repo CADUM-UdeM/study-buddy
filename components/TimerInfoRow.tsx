@@ -18,23 +18,43 @@ export const TimerInfoRow = ({pomodoroDuration, breakDuration, numCycle}: infoPa
 
 
     return (
-    <View
-        className="rounded-2xl flex-row items-center justify-center gap-4 py-4 mb-4"
-        style={cardBg}
-    >
-        {/* ---Temps de focus ---*/}
-        <IonIcons name="time-outline" size={22} color="#e0aaff"/>
-        <Text className=" text-xl font-pixel"
-              style={{color: theme.defaultTextColor}}>{pomodoroDuration} min</Text>
+        <View className="rounded-2xl flex-row items-center justify-center gap-4 py-4 mt-3"
+        >
+            {/* ---Temps de focus ---*/}
+            <View style={{alignItems: 'center'}}>
+                <Text className=" text-lg font-pixel"
+                      style={{color: theme.defaultTextColor}}>Focus</Text>
+                <Text className=" text-xl font-pixel"
+                      style={{color: theme.anotherTextColor}}>{pomodoroDuration} min</Text>
+            </View>
 
-        {/* ---Temps de pause ---*/}
-        <IonIcons name="cafe-outline" size={22} color="#e0aaff"/>
-        <Text className=" text-xl font-pixel"
-              style={{color: theme.defaultTextColor}}>{breakDuration} min</Text>
+            {/* --- Separation ---*/}
+            <View style={{
+                width: 1, height: 24, backgroundColor: theme === lightTheme ?
+                    "rgba(124,58,237,0.2)" : "rgba(109,40,217,0.15)"
+            }}/>
 
-        {/* ---Nombre de cycle ---*/}
-        <IonIcons name="refresh-outline" size={22} color="#e0aaff"/>
-        <Text className=" text-xl font-pixel" style={{color: theme.defaultTextColor}}>{numCycle}</Text>
-    </View>
+            {/* ---Temps de pause ---*/}
+            <View style={{alignItems: 'center'}}>
+                <Text className=" text-lg font-pixel"
+                      style={{color: theme.defaultTextColor}}>Pause</Text>
+                <Text className=" text-xl font-pixel"
+                      style={{color: theme.anotherTextColor}}>{breakDuration} min</Text>
+            </View>
+
+            {/* --- Separation ---*/}
+            <View style={{
+                width: 1, height: 24, backgroundColor: theme === lightTheme ?
+                    "rgba(124,58,237,0.2)" : "rgba(109,40,217,0.15)"
+            }}/>
+
+            {/* ---Nombre de cycle ---*/}
+            <View style={{alignItems: 'center'}}>
+                <Text className=" text-lg font-pixel"
+                      style={{color: theme.defaultTextColor}}>Cycle</Text>
+                <Text className=" text-xl font-pixel"
+                      style={{color: theme.anotherTextColor}}>{numCycle}</Text>
+            </View>
+        </View>
     );
 };

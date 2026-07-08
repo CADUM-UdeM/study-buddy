@@ -17,6 +17,7 @@ interface infoParams {
     setClickParam: React.Dispatch<React.SetStateAction<boolean>>;
     clickParam: boolean;
     remainingCycle: number;
+    numCycle: number;
 }
 
 export const TimerClock = ({
@@ -29,24 +30,22 @@ export const TimerClock = ({
                                isRunning,
                                setClickParam,
                                clickParam,
-                               remainingCycle
+                               remainingCycle,
+                               numCycle
                            }: infoParams) => {
     const {settings} = useSettings();
     const theme = settings.isDarkMode ? darkTheme : lightTheme;
 
 
     return (
-        <View className="rounded-2xl p-6 mb-4"
-              style={{
-                  backgroundColor: inBreakTime ?
-                      theme.borderColor : theme.mainWrapperBgColor,
-                  borderWidth: 1, borderColor: inBreakTime ? theme.circleColor : theme.borderColor
-              }}>
+        <View>
 
-            {/* --- Indicateur du mode Focus ou Pause ---*/}
-            <Text className="text-center text-lg  mb-6 font-pixel text-[20px]"
-                  style={{color: theme.defaultTextColor}}>{!inBreakTime ? "Focus" : "Pause"}</Text>
-
+            {/* ---Bouton paramètre pomodoro ---*/}
+            <View className="relative flex-row items-center justify-center w-full gap-2 mt-5 mb-6">
+                {/* --- Indicateur du mode Focus ou Pause ---*/}
+                <Text className="text-center text-lg font-pixel text-[20px]"
+                      style={{color: theme.defaultTextColor}}>{!inBreakTime ? "Focus" : "Pause"}</Text>
+            </View>
             {/* ---Cercle qui tourne ---*/}
             <View className="flex-row items-center justify-center gap-4">
                 <AnimatedCircularProgress size={176} width={8}
@@ -56,27 +55,33 @@ export const TimerClock = ({
                                               theme.background : theme.contentWrapperBgColor}
                                           rotation={0} lineCap="round">
 
-                    {() => (<Text className="text-3xl font-pixel "
-                                  style={{color: theme.defaultTextColor}}>{hours}:{min}:{sec}</Text>)}
+                    {() => (<View>
+                        <Text className="text-3xl font-pixel "
+                                        style={{color: theme.defaultTextColor}}>{hours}:{min}:{sec}</Text></View>)}
                 </AnimatedCircularProgress>
             </View>
             {/* ------ */}
 
-            {/* ---Bouton paramètre pomodoro ---*/}
-            <View className="flex-row items-center justify-center gap-6 mt-5">
-                <TouchableOpacity onPress={() => setClickParam(!clickParam)} disabled={isRunning}
-                                  className="rounded-full p-2"
-                                  style={{backgroundColor: !isRunning ? theme.buttonColor : "#6B7280"}}>
-                    <IonIcons name="options-outline" size={20} color="#10002b"/></TouchableOpacity>
-
-                {/* --- Nombre de cycle restant ---*/}
-                <View className="rounded-xl px-4 py-2" style={{backgroundColor: "#AB8BFF40"}}>
-                    <Text className="text-lg font-semibold font-pixel" style={{color: theme.defaultTextColor}}>
-                        Cycle : {remainingCycle}
-                    </Text>
+            {/* --- Nombre de cycle restant ---*/}
+            <View style={{alignItems: 'center', gap: 8, paddingTop: 20,}}>
+                <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                    {Array.from({length: numCycle}).map((_, i) => {
+                        const isActive = i === (numCycle - remainingCycle);
+                        const isDone = i < (numCycle - remainingCycle);
+                        let color = theme.cycleDefault;
+                        if (isActive) color = theme.cycleActive;
+                        if (isDone) color = theme.cycleInactive;
+                        return (
+                            <View key={i} style={{
+                                height: 7, borderRadius: 4,
+                                width: isActive ? 20 : 7, backgroundColor: color,
+                            }}/>);
+                    })}
                 </View>
-
             </View>
+            {/* ------ */}
+
         </View>
+
     );
 };

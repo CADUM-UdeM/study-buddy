@@ -1,10 +1,10 @@
 import IonIcons from "@expo/vector-icons/Ionicons";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {Audio} from 'expo-av'
+import {setAudioModeAsync, useAudioPlayer} from 'expo-audio'
 import React, {useEffect, useRef, useState} from "react";
 import {
-    Animated, AppState, Modal, Pressable, ScrollView, StyleSheet,
-    Text, TouchableOpacity, useWindowDimensions, View
+    Animated, AppState, Modal, Pressable, StyleSheet,
+    Text, useWindowDimensions, View
 } from "react-native";
 import "../global.css";
 import {sessionContext} from "@/app/context/SessionContext";
@@ -15,6 +15,8 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {TimerInfoRow} from "@/components/TimerInfoRow";
 import {TimerClock} from "@/components/TimerClock";
 import {DEFAULT_BREAK_TIME, DEFAULT_REPETITION, DEFAULT_STUDY_TIME, TimerParams} from "@/components/TimerParams";
+import {manageNotif, startNotif, stopNotif} from "@/components/TimerNotification";
+import {LinearGradient} from "expo-linear-gradient";
 
 export default function Pomodoro() {
 
@@ -121,10 +123,9 @@ export default function Pomodoro() {
             if (next <= 0) {
                 setTimeOutsideApps(Math.abs(next));
                 next = 0
-            }
-            else setTimeOutsideApps(0);
+            } else setTimeOutsideApps(0);
 
-            setTimeOutsideApps(0);
+            //setTimeOutsideApps(0);
             setTimeLeft(next);
             setPhaseTotalSeconds(next);
             setInBreakTime(!inBreakTime);
@@ -140,6 +141,14 @@ export default function Pomodoro() {
             }
         }
     }, [timeLeft, isRunning, inBreakTime])
+
+    useEffect(() => {
+        if (timeLeft > 0 && isRunning) {
+            manageNotif(timeLeft, remainingCycle, inBreakTime, isFinished,
+                Number(pomodoroDuration) * 60, Number(breakDuration) * 60);
+        } else stopNotif().catch(err => console.log(err));
+    }, [isRunning]);
+
 
     useEffect(() => {
         const appState = AppState.addEventListener('change', (nextAppState) => {
@@ -275,79 +284,124 @@ export default function Pomodoro() {
         extrapolate: "clamp",
     });
 
+    {/* --- Audio quand sur application --- */
+    }
+    setAudioModeAsync({
+        playsInSilentMode: true,
+    }).catch((e) => console.log(e));
+
+    const end_audio = useAudioPlayer(require("../../assets/endAudio.m4a"));
+    const middle_audio = useAudioPlayer(require("../../assets/switchAudio.mp3"));
 
     /* Logique pour l'audio fin */
     useEffect(() => {
         /* Jouer l'audio quand session finie */
         if (!wasAudioEnd && isFinished) {
-            Audio.Sound.createAsync(require("../../assets/endAudio.m4a"), {shouldPlay: true}
-            ).catch((_) => console.log("erreur dans chargement de l'audio"))
+            if (end_audio.currentTime > 0) {
+                end_audio.seekTo(0).catch((e) => console.log(e));
+            }
+            end_audio.play();
             setWasAudioEnd(true);
         }
-    }, [wasAudioEnd, isFinished]);
+    }, [wasAudioEnd, isFinished, end_audio]);
 
     /* Logique pour l'audio transition */
     useEffect(() => {
         if (!isFinished) {
             /* Jouer audio transition focus → pause */
             if (!wasAudioTransition && inBreakTime) {
-                Audio.Sound.createAsync(require("../../assets/switchAudio.mp3"), {shouldPlay: true}
-                ).catch((_) => console.log("erreur dans chargement de l'audio"))
+                if (middle_audio.currentTime > 0) {
+                    middle_audio.seekTo(0).catch((e) => console.log(e));
+                }
+                middle_audio.play();
+
                 setWasAudioTransition(true);
             }
             /* Jouer audio transition pause → focus */
             else if (!inBreakTime && wasAudioTransition) {
                 setWasAudioTransition(false)
-                Audio.Sound.createAsync(require("../../assets/switchAudio.mp3"), {shouldPlay: true}
-                ).catch((_) => console.log("erreur dans chargement de l'audio"))
+                if (middle_audio.currentTime > 0) {
+                    middle_audio.seekTo(0).catch((e) => console.log(e));
+                }
+                middle_audio.play();
             }
         }
-    }, [inBreakTime, isFinished, wasAudioTransition]);
+    }, [inBreakTime, isFinished, wasAudioTransition, middle_audio]);
 
 
     { /* -------------- Code pour visualiser la page -------------- */
     }
     return (
         <View style={{flex: 1, backgroundColor: theme.background}}>
+            <LinearGradient
+                colors={theme === lightTheme ?[theme.gradientOne, theme.gradientTwo, theme.gradientThree] : [theme.gradientOne, theme.gradientTwo, theme.gradientThree]}
+                locations={[0, 0.4, 1]}
+                style={{position: 'absolute', left: 0, right: 0, top: 0, bottom: 0}}
+            />
             <Animated.ScrollView className="flex-1  px-5 pt-20"
                                  onScroll={Animated.event([{nativeEvent: {contentOffset: {y: scrollY}}}], {useNativeDriver: true},)}
                                  scrollIndicatorInsets={{top: insets.top + 8}} scrollEventThrottle={16}
-                                 style={{backgroundColor: theme.background, marginTop: 20}}>
+                                 style={{ marginTop: 20}}>
 
-                {/* --- Timer card (index-style) --- */}
-                <TimerClock inBreakTime={inBreakTime} phaseTotalSeconds={phaseTotalSeconds} timeLeft={timeLeft}
-                            hours={hours} min={min} sec={sec} isRunning={isRunning} setClickParam={setClickParam}
-                            clickParam={clickParam} remainingCycle={remainingCycle}/>
+                {/* Section timer pomodoro */}
+                <View className="rounded-2xl p-6 mb-4"
+                      style={{
+                          backgroundColor: inBreakTime ? `${theme.borderColor}E6` : `${theme.mainWrapperBgColor}E6`,
+                          borderWidth: 1, borderColor: inBreakTime ? theme.circleColor : theme.borderColor,
+                          borderRadius:90
+                      }}>
+                    {/* --- Timer card (index-style) --- */}
+                    <TimerClock inBreakTime={inBreakTime} phaseTotalSeconds={phaseTotalSeconds} timeLeft={timeLeft}
+                                hours={hours} min={min} sec={sec} isRunning={isRunning} setClickParam={setClickParam}
+                                clickParam={clickParam} remainingCycle={remainingCycle} numCycle={numCycle}/>
 
-                {/* --- Params modal --- */}
-                <TimerParams clickParam={clickParam} setClickParam={setClickParam} setNumCycle={setNumCycle}
-                             setPomodoroDuration={setPomodoroDuration} setBreakDuration={setBreakDuration}
-                             numCycle={numCycle} pomodoroDuration={pomodoroDuration} breakDuration={breakDuration}
-                             updateTime={updateTime}/>
+                    {/* --- Params modal --- */}
+                    <TimerParams clickParam={clickParam} setClickParam={setClickParam} setNumCycle={setNumCycle}
+                                 setPomodoroDuration={setPomodoroDuration} setBreakDuration={setBreakDuration}
+                                 numCycle={numCycle} pomodoroDuration={pomodoroDuration} breakDuration={breakDuration}
+                                 updateTime={updateTime}/>
 
-                {/* --- Info row (index-style card) --- */}
-                <TimerInfoRow pomodoroDuration={pomodoroDuration} breakDuration={breakDuration} numCycle={numCycle}/>
+
+                    {/* --- Info row (index-style card) --- */}
+                    <TimerInfoRow pomodoroDuration={pomodoroDuration} breakDuration={breakDuration}
+                                  numCycle={numCycle}/>
+                </View>
 
                 {/* --- Actions (index-style buttons) --- */}
-                <View className="flex-row gap-3 mb-6">
+                <View className="flex-row gap-3 mb-6 px-8 mt-6">
+                    {/* --- Bouton débuter --- */}
                     <Pressable
                         onPress={isRunning ? pause_button : start_button}
                         disabled={timeLeft === 0}
-                        className={`flex-1 rounded-2xl py-4 ${timeLeft === 0 ? "opacity-60" : ""}`}
+                        className={`rounded-2xl py-4 ${timeLeft === 0 ? "opacity-60" : ""}`}
                         style={{
-                            backgroundColor: isRunning ? theme.contentWrapperBgColor : timeLeft === 0 ? "#6B7280" : theme.buttonColor,
+                            backgroundColor: isRunning ? theme.contentWrapperBgColor : timeLeft === 0 ? "#6B7280" :
+                                theme.buttonColor, width:'40%'
                         }}
                     >
                         <Text className=" text-center  text-xl font-pixel"
-                              style={{color: theme.defaultTextColor}}>{button_start_text}</Text>
+                              style={{color: theme.buttonTextColor}}>{button_start_text}</Text>
                     </Pressable>
+
+                    {/* --- Bouton stop --- */}
                     <Pressable
                         onPress={stop_button}
-                        className="flex-1 rounded-2xl border border-red-300 py-4"
-                        style={{borderColor: theme.stopBorderColor}}
+                        className="rounded-2xl border border-red-300 py-4"
+                        style={{borderColor: theme.stopBorderColor, width:'40%'}}
                     >
                         <Text className="text-red-200 text-center text-xl font-pixel"
                               style={{color: theme.stopColor}}>Stop</Text>
+                    </Pressable>
+
+                    {/* --- Bouton Param --- */}
+                    <Pressable
+                        onPress={() => setClickParam(!clickParam)}
+                        disabled={isRunning}
+                        className={`flex-[2] justify-center items-center rounded-full p-2 ${isRunning ? "opacity-60" : ""}`}
+                        style={{ backgroundColor: !isRunning ? theme.buttonColor : "#6B7280", width:'15%' }}
+                    >
+
+                        <IonIcons name="options-outline" size={20} color={theme.buttonTextColor}/>
                     </Pressable>
                 </View>
 
@@ -378,56 +432,7 @@ export default function Pomodoro() {
                     </View>
                 </Modal>
 
-                {/* --- Historique --- */}
-                <Text className="text-2xl  mb-2 mt-2 font-pixel"
-                      style={{color: theme.defaultTextColor}}>Historique</Text>
-                <View style={{
-                    height: 2,
-                    backgroundColor: theme.contentWrapperBgColor,
-                    width: width * 0.5,
-                    marginBottom: 12
-                }}/>
-                <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    className="-mx-5"
-                    contentContainerStyle={{paddingRight: 20}}
-                >
-                    {sessions.map((session) => (
-                        <View
-                            key={session.id}
-                            className="rounded-xl flex-row items-center py-2.5 px-3 mr-2"
-                            style={{...cardBg, borderWidth: 1, borderColor: theme.borderColor, minWidth: 140}}
-                        >
-                            {session.isCompleted && (
-                                <IonIcons
-                                    name="checkmark-circle"
-                                    size={18}
-                                    color="#4BAE4F"
-                                    style={{marginRight: 8}}
-                                />
-                            )}
-                            <View className="flex-1 min-w-0">
-                                <Text className=" text-base font-medium font-pixel" numberOfLines={1}
-                                      style={{color: theme.defaultTextColor}}>
-                                    {session.durationSession}min · {session.breakSession}min pause ·
-                                    ×{session.repeatSession}
-                                </Text>
-                            </View>
-                            <TouchableOpacity
-                                onPress={() => handleDeleteSession(session.id)}
-                                hitSlop={{top: 8, bottom: 8, left: 8, right: 8}}
-                                className="rounded-full p-1.5 ml-1"
-                                style={{backgroundColor: theme.contentWrapperBgColor}}
-                            >
-                                <IonIcons name="trash-outline" size={14}
-                                          color={theme === lightTheme ? '#DC9EFF' : '#e0aaff'}/>
-                            </TouchableOpacity>
-                        </View>
-                    ))}
-                </ScrollView>
 
-                <View className="h-10"/>
             </Animated.ScrollView>
             <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity}/>
         </View>
