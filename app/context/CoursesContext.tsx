@@ -25,6 +25,7 @@ export interface Course {
   name: string;
   objective: number;
   credits: number; // credits field
+  weeklyHoursGoal: number;
   session?: string; // optional session field
   evaluations: Evaluation[];
   customGradeBoundaries?: GradeBoundary[]; // optional course-specific grade boundaries
@@ -37,6 +38,7 @@ interface CoursesContextType {
     objective: number,
     credits: number,
     sessionId?: string,
+    weeklyHoursGoal?: number,
   ) => string;
   updateCourse: (
     id: string,
@@ -44,6 +46,7 @@ interface CoursesContextType {
     objective: number,
     credits: number,
     sessionId?: string,
+    weeklyHoursGoal?: number,
   ) => void;
   deleteCourse: (id: string) => void;
   getCourse: (id: string) => Course | undefined;
@@ -163,6 +166,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
         const coursesWithNewProps = parsedCourses.map((course: Course) => ({
           ...course,
           credits: course.credits ?? 3, // default to 3 if missing
+          weeklyHoursGoal: course.weeklyHoursGoal ?? 3,
           evaluations: course.evaluations.map((e: any) => ({
             ...e,
             isAutoWeight: e.isAutoWeight ?? false,
@@ -180,6 +184,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
             name: "Placeholder Cours",
             objective: 85,
             credits: 3,
+            weeklyHoursGoal: 3,
             evaluations: [
               {
                 id: "1",
@@ -233,12 +238,14 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     objective: number,
     credits: number,
     sessionId?: string,
+    weeklyHoursGoal = 3,
   ): string => {
     const newCourse: Course = {
       id: Date.now().toString(),
       name,
       objective,
       credits,
+      weeklyHoursGoal,
       session: sessionId,
       evaluations: [],
     };
@@ -252,6 +259,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
     objective: number,
     credits: number,
     sessionId?: string,
+    weeklyHoursGoal = 3,
   ) => {
     setCourses(
       courses.map((course) =>
@@ -261,6 +269,7 @@ export function CoursesProvider({ children }: { children: ReactNode }) {
               name,
               objective,
               credits,
+              weeklyHoursGoal,
               session: sessionId,
               evaluations: recalculateEvaluations(
                 course.evaluations,
