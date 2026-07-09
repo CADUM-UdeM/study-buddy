@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useMemo } from "react";
 import {
   Alert,
   Animated,
@@ -15,15 +15,18 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Swipeable } from "react-native-gesture-handler";
 import { darkTheme, lightTheme } from "@/components/colors";
+import { CourseGridCard } from "@/components/courses/CourseGridCard";
+import { buildCourseColorMap } from "@/components/courses/courseColors";
+import {
+  getPastelChipStyle,
+  getPastelSurfaceStyle,
+} from "@/components/home/pastelStyles";
 import { TopStatusBarGuard } from "@/components/TopStatusBarGuard";
 import { Course, useCourses } from "../context/CoursesContext";
 import { useSessions } from "../context/SessionsContext";
 import { useSettings } from "../context/SettingsContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-type AppTheme = typeof lightTheme;
 
 export default function Donnees() {
   const {
@@ -49,10 +52,7 @@ export default function Donnees() {
   const placeholderColor = settings.isDarkMode ? "#B9A8D8" : "#9372BA";
   const mutedTextColor = settings.isDarkMode ? "#D6C8EA" : "#9372BA";
   const buttonTextColor = settings.isDarkMode ? "white" : theme.defaultTextColor;
-  const surfaceStyle = {
-    backgroundColor: theme.mainWrapperBgColor,
-    borderColor: theme.borderColor,
-  };
+  const surfaceStyle = getPastelSurfaceStyle(theme);
   const inputStyle = {
     backgroundColor: theme.contentWrapperBgColor,
     borderColor: theme.borderColor,
@@ -68,6 +68,7 @@ export default function Donnees() {
   const [courseName, setCourseName] = useState("");
   const [courseObjective, setCourseObjective] = useState("");
   const [courseCredits, setCourseCredits] = useState("");
+  const [courseWeeklyHours, setCourseWeeklyHours] = useState("");
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(
     null,
   );
@@ -111,6 +112,23 @@ export default function Donnees() {
     return num;
   };
 
+  const validateWeeklyHours = (value: string): number | null => {
+    const num = parseFloat(value);
+    if (isNaN(num) || num <= 0 || num > 168) {
+      Alert.alert(
+        "Erreur",
+        "Les heures par semaine doivent être un nombre positif (max. 168)",
+      );
+      return null;
+    }
+    return num;
+  };
+
+  const courseColorMap = useMemo(
+    () => buildCourseColorMap(courses, theme),
+    [courses, theme],
+  );
+
   const handleAddCourse = () => {
     if (!courseName.trim()) {
       Alert.alert("Erreur", "Veuillez entrer un nom de cours");
@@ -127,21 +145,31 @@ export default function Donnees() {
       return;
     }
 
+    if (!courseWeeklyHours.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer les heures par semaine");
+      return;
+    }
+
     const objective = validateObjective(courseObjective);
     if (objective === null) return;
 
     const credits = validateCredits(courseCredits);
     if (credits === null) return;
 
+    const weeklyHours = validateWeeklyHours(courseWeeklyHours);
+    if (weeklyHours === null) return;
+
     const newCourseId = addCourse(
       courseName.trim(),
       objective,
       credits,
       selectedSessionId || activeSession?.id,
+      weeklyHours,
     );
     setCourseName("");
     setCourseObjective("");
     setCourseCredits("");
+    setCourseWeeklyHours("");
     setSelectedSessionId(null);
     setModalVisible(false);
     router.push({
@@ -159,6 +187,7 @@ export default function Donnees() {
     setCourseName(course.name);
     setCourseObjective(course.objective.toString());
     setCourseCredits(course.credits.toString());
+    setCourseWeeklyHours(course.weeklyHoursGoal.toString());
     setSelectedSessionId(course.session || null);
     setMenuVisible(null);
     setEditModalVisible(true);
@@ -180,11 +209,19 @@ export default function Donnees() {
       return;
     }
 
+    if (!courseWeeklyHours.trim()) {
+      Alert.alert("Erreur", "Veuillez entrer les heures par semaine");
+      return;
+    }
+
     const objective = validateObjective(courseObjective);
     if (objective === null || !editingCourse) return;
 
     const credits = validateCredits(courseCredits);
     if (credits === null) return;
+
+    const weeklyHours = validateWeeklyHours(courseWeeklyHours);
+    if (weeklyHours === null) return;
 
     updateCourse(
       editingCourse.id,
@@ -192,10 +229,12 @@ export default function Donnees() {
       objective,
       credits,
       selectedSessionId || undefined,
+      weeklyHours,
     );
     setCourseName("");
     setCourseObjective("");
     setCourseCredits("");
+    setCourseWeeklyHours("");
     setSelectedSessionId(null);
     setEditModalVisible(false);
     setEditingCourse(null);
@@ -277,10 +316,7 @@ export default function Donnees() {
               key={session.id}
               style={[
                 styles.sessionChip,
-                {
-                  backgroundColor: theme.contentWrapperBgColor,
-                  borderColor: theme.borderColor,
-                },
+                getPastelChipStyle(theme),
                 activeSession?.id === session.id && {
                   backgroundColor: theme.buttonColor,
                   borderColor: theme.buttonColor,
@@ -316,10 +352,8 @@ export default function Donnees() {
           <TouchableOpacity
             style={[
               styles.addSessionChip,
-              {
-                backgroundColor: theme.mainWrapperBgColor,
-                borderColor: theme.activeColorIcon,
-              },
+              getPastelChipStyle(theme),
+              { borderColor: theme.activeColorIcon },
             ]}
             onPress={() => setSessionModalVisible(true)}
           >
@@ -341,9 +375,9 @@ export default function Donnees() {
         scrollEventThrottle={16}
         contentContainerStyle={{
           flexGrow: 1,
-          justifyContent: "flex-start",
-          alignItems: "center",
-          paddingTop: 20,
+          paddingTop: 16,
+          paddingHorizontal: 16,
+          paddingBottom: 24,
         }}
       >
         {displayedCourses.length === 0 ? (
@@ -357,22 +391,32 @@ export default function Donnees() {
             </Text>
           </View>
         ) : (
-          <>
+          <View style={styles.courseGrid}>
             {displayedCourses.map((course) => (
-              <CourseCard
+              <CourseGridCard
                 key={course.id}
                 course={course}
+                accentColor={
+                  courseColorMap.get(course.id) ?? theme.coursePastels[0]
+                }
                 theme={theme}
                 onPress={() => navigateToCourseDetails(course.id)}
                 onEdit={() => handleEditCourse(course)}
                 onDelete={() => handleDeleteCourse(course.id)}
               />
             ))}
-          </>
+          </View>
         )}
 
         <TouchableOpacity
-          style={[styles.addCoursButton, { backgroundColor: theme.buttonColor }]}
+          style={[
+            styles.addCoursButton,
+            getPastelSurfaceStyle(theme, {
+              borderRadius: 20,
+              backgroundColor: theme.buttonColor,
+            }),
+            { alignSelf: "center", marginTop: 20 },
+          ]}
           onPress={() => setModalVisible(true)}
         >
           <Text
@@ -446,6 +490,15 @@ export default function Donnees() {
                   keyboardType="numeric"
                 />
 
+                <TextInput
+                  style={[styles.input, inputStyle]}
+                  placeholder="Heures par semaine"
+                  placeholderTextColor={placeholderColor}
+                  value={courseWeeklyHours}
+                  onChangeText={setCourseWeeklyHours}
+                  keyboardType="decimal-pad"
+                />
+
                 <Text style={[styles.label, { color: theme.defaultTextColor }]}>
                   Session
                 </Text>
@@ -512,6 +565,7 @@ export default function Donnees() {
                       setCourseName("");
                       setCourseObjective("");
                       setCourseCredits("");
+                      setCourseWeeklyHours("");
                       setSelectedSessionId(null);
                     }}
                   >
@@ -554,6 +608,7 @@ export default function Donnees() {
           setCourseName("");
           setCourseObjective("");
           setCourseCredits("");
+          setCourseWeeklyHours("");
           setEditingCourse(null);
         }}
       >
@@ -564,6 +619,7 @@ export default function Donnees() {
             setCourseName("");
             setCourseObjective("");
             setCourseCredits("");
+            setCourseWeeklyHours("");
             setEditingCourse(null);
           }}
         >
@@ -614,6 +670,15 @@ export default function Donnees() {
                   placeholderTextColor={placeholderColor}
                   onChangeText={setCourseCredits}
                   keyboardType="numeric"
+                />
+
+                <TextInput
+                  style={[styles.input, inputStyle]}
+                  placeholder="Heures par semaine"
+                  placeholderTextColor={placeholderColor}
+                  value={courseWeeklyHours}
+                  onChangeText={setCourseWeeklyHours}
+                  keyboardType="decimal-pad"
                 />
 
                 <Text style={[styles.label, { color: theme.defaultTextColor }]}>
@@ -685,6 +750,7 @@ export default function Donnees() {
                       setCourseName("");
                       setCourseObjective("");
                       setCourseCredits("");
+                      setCourseWeeklyHours("");
                       setSelectedSessionId(null);
                       setEditingCourse(null);
                     }}
@@ -759,8 +825,8 @@ export default function Donnees() {
                 }
               }}
             >
-              <Ionicons name="trash-outline" size={18} color="#d32f2f" />
-              <Text style={[styles.menuText, { color: "#d32f2f" }]}>
+              <Ionicons name="trash-outline" size={18} color={theme.stopColor} />
+              <Text style={[styles.menuText, { color: theme.stopColor }]}>
                 Supprimer
               </Text>
             </TouchableOpacity>
@@ -917,207 +983,6 @@ export default function Donnees() {
         </Pressable>
       </Modal>
       <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity} />
-    </View>
-  );
-}
-
-function CourseCard({
-  course,
-  theme,
-  onPress,
-  onEdit,
-  onDelete,
-}: {
-  course: Course;
-  theme: AppTheme;
-  onPress: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
-  const swipeRef = useRef<Swipeable>(null);
-
-  const confirmDelete = () => {
-    Alert.alert(
-      "Supprimer le cours",
-      `Souhaitez-vous vraiment supprimer "${course.name}" ?`,
-      [
-        {
-          text: "Annuler",
-          style: "cancel",
-          onPress: () => swipeRef.current?.close(),
-        },
-        {
-          text: "Supprimer",
-          style: "destructive",
-          onPress: () => {
-            onDelete();
-            swipeRef.current?.close();
-          },
-        },
-      ],
-      { cancelable: true },
-    );
-  };
-
-  const handleEdit = () => {
-    onEdit();
-    swipeRef.current?.close();
-  };
-
-  const renderLeftActions = (
-    progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>,
-  ) => {
-    const reveal = dragX.interpolate({
-      inputRange: [0, 60, 120],
-      outputRange: [0, 2, 1],
-      extrapolate: "clamp",
-    });
-
-    const iconScale = dragX.interpolate({
-      inputRange: [0, 60, 120],
-      outputRange: [0.4, 0.9, 1],
-      extrapolate: "clamp",
-    });
-
-    const iconTranslateX = dragX.interpolate({
-      inputRange: [0, 60, 120],
-      outputRange: [-20, -2, 0],
-      extrapolate: "clamp",
-    });
-
-    return (
-      <View
-        style={{
-          width: 88,
-          marginBottom: 12,
-          justifyContent: "center",
-          alignItems: "flex-start",
-        }}
-      >
-        <Animated.View
-          style={{
-            height: "60%",
-            width: "65%",
-            borderRadius: 12,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: theme.contentWrapperBgColor,
-            opacity: reveal,
-          }}
-        >
-          <Animated.View
-            style={{
-              transform: [{ scale: iconScale }, { translateX: iconTranslateX }],
-            }}
-          >
-            <Ionicons
-              name="pencil-outline"
-              size={22}
-              color={theme.defaultTextColor}
-            />
-          </Animated.View>
-        </Animated.View>
-      </View>
-    );
-  };
-
-  const renderRightActions = (
-    progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>,
-  ) => {
-    const reveal = dragX.interpolate({
-      inputRange: [-120, -60, 0],
-      outputRange: [1, 0.6, 0],
-      extrapolate: "clamp",
-    });
-
-    const iconScale = dragX.interpolate({
-      inputRange: [-120, -60, 0],
-      outputRange: [1, 0.9, 0.4],
-      extrapolate: "clamp",
-    });
-
-    const iconTranslateX = dragX.interpolate({
-      inputRange: [-120, -60, 0],
-      outputRange: [0, 2, 20],
-      extrapolate: "clamp",
-    });
-
-    return (
-      <View
-        style={{
-          width: 88,
-          marginBottom: 12,
-          justifyContent: "center",
-          alignItems: "flex-end",
-        }}
-      >
-        <Animated.View
-          style={{
-            height: "60%",
-            width: "65%",
-            borderRadius: 12,
-            justifyContent: "center",
-            alignItems: "center",
-            backgroundColor: "#f30000ff",
-            opacity: reveal,
-          }}
-        >
-          <Animated.View
-            style={{
-              transform: [{ scale: iconScale }, { translateX: iconTranslateX }],
-            }}
-          >
-            <Ionicons name="trash-outline" size={22} color="white" />
-          </Animated.View>
-        </Animated.View>
-      </View>
-    );
-  };
-
-  return (
-    <View style={{ width: "100%", paddingHorizontal: 30 }}>
-      <Swipeable
-        ref={swipeRef}
-        renderLeftActions={renderLeftActions}
-        renderRightActions={renderRightActions}
-        leftThreshold={70}
-        rightThreshold={70}
-        friction={2}
-        overshootLeft={false}
-        overshootRight={false}
-        onSwipeableOpen={(direction) => {
-          if (direction === "right") confirmDelete();
-          if (direction === "left") handleEdit();
-        }}
-      >
-        <Pressable onPress={onPress} onLongPress={onEdit}>
-          <View
-            style={[
-              styles.coursContainer,
-              {
-                backgroundColor: theme.mainWrapperBgColor,
-                borderColor: theme.borderColor,
-              },
-            ]}
-          >
-            <Text
-              style={[styles.coursText, { color: theme.defaultTextColor }]}
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {course.name}
-            </Text>
-
-            <Ionicons
-              name="chevron-forward"
-              size={20}
-              color={theme.defaultTextColor}
-            />
-          </View>
-        </Pressable>
-      </Swipeable>
     </View>
   );
 }
@@ -1388,22 +1253,12 @@ const styles = StyleSheet.create({
     color: "#999",
     marginTop: 8,
   },
-  coursContainer: {
-    backgroundColor: "lightgray",
-    paddingVertical: 25,
-    paddingHorizontal: 14,
-    width: "100%",
-    borderRadius: 15,
+  courseGrid: {
     flexDirection: "row",
-    alignItems: "center",
+    flexWrap: "wrap",
     justifyContent: "space-between",
-    marginBottom: 12,
-  },
-
-  coursText: {
-    ...pixelFont,
-    fontSize: 16,
-    flex: 1,
-    marginRight: 12,
+    rowGap: 14,
+    width: "100%",
+    overflow: "visible",
   },
 });
