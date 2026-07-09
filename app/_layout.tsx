@@ -3,6 +3,8 @@ import { Stack } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { CoursesProvider } from "./context/CoursesContext";
+import { PlannedStudyProvider } from "./context/PlannedStudyContext";
+import { PomodoroStudyProvider } from "./context/PomodoroStudyContext";
 import { SettingsProvider } from "./context/SettingsContext";
 import { SessionsProvider } from "./context/SessionsContext";
 import { useFonts} from "expo-font"
@@ -38,12 +40,16 @@ export default function RootLayout() {
         <ThemeProvider value={navigationTheme}>
           <SettingsProvider>
             <SessionsProvider>
-              <CoursesProvider>
-                <Stack screenOptions={{ headerShown: false }}>
-                  <Stack.Screen name="(tabs)" />
-                  <Stack.Screen name="detailscours" />
-                </Stack>
-              </CoursesProvider>
+              <PlannedStudyProvider>
+                <CoursesProvider>
+                  <PomodoroStudyProvider>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="(tabs)" />
+                      <Stack.Screen name="detailscours" />
+                    </Stack>
+                  </PomodoroStudyProvider>
+                </CoursesProvider>
+              </PlannedStudyProvider>
             </SessionsProvider>
           </SettingsProvider>
         </ThemeProvider>
