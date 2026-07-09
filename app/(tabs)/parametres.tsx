@@ -1,14 +1,12 @@
 import { darkTheme, lightTheme } from "@/components/colors";
+import { getPastelSurfaceStyle } from "@/components/home/pastelStyles";
 import React, { useRef } from "react";
 import { Animated, Pressable, Switch, Text, View } from "react-native";
 import { GradeBoundariesEditor } from "../../components/GradeBoundariesEditor";
 import { TopStatusBarGuard } from "../../components/TopStatusBarGuard";
-import { ChibiBirdPeek } from "../../components/home/SpritePeeks";
 import { ThemeMode, useSettings } from "../context/SettingsContext";
 import "../global.css";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const CARD_BORDER = "#444462";
 
 const ACCENT = "#AB8BFF";
 const SWITCH_TRACK_OFF = "#2D2A45";
@@ -40,11 +38,7 @@ const Parametres = () => {
   const theme = settings.isDarkMode ? darkTheme : lightTheme;
   const ROW_BG = theme.contentWrapperBgColor;
 
-  const cardShellStyle = {
-    backgroundColor: theme.mainWrapperBgColor,
-    borderWidth: 1,
-    borderColor: theme.borderColor,
-  };
+  const cardShellStyle = getPastelSurfaceStyle(theme);
   const guardOpacity = scrollY.interpolate({
     inputRange: [0, 4, 16],
     outputRange: [0, 0.4, 1],
@@ -72,11 +66,7 @@ const Parametres = () => {
       </Text>
 
       {/* --- GPA Format Section --- */}
-      <View
-        style={{ position: "relative", overflow: "visible" }}
-        className="mb-3"
-      >
-        <View className="rounded-2xl p-4 gap-3" style={cardShellStyle}>
+      <View className="rounded-2xl p-4 gap-3 mb-3" style={cardShellStyle}>
           <Text
             className="text-lg font-pixel text-neutral-600"
             style={{ color: theme.calendarLevelFour }}
@@ -121,8 +111,6 @@ const Parametres = () => {
               </Pressable>
             );
           })}
-        </View>
-        <ChibiBirdPeek displayHeight={74} overlap={38} right={4} />
       </View>
 
       {/* --- Display Options Section --- */}

@@ -12,6 +12,7 @@ import {
 import {GradeBoundary} from "../app/context/SettingsContext";
 import {useSettings} from "@/app/context/SettingsContext";
 import {darkTheme, lightTheme} from "@/components/colors";
+import {getPastelSurfaceStyle} from "@/components/home/pastelStyles";
 
 
 
@@ -38,11 +39,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
     const CARD_BG = theme.mainWrapperBgColor;
     const CARD_BORDER = theme.contentWrapperBgColor;
     const ROW_BG = theme.contentWrapperBgColor;
-    const cardShellStyle = {
-        backgroundColor: theme.mainWrapperBgColor,
-        borderWidth: 1,
-        borderColor: theme.borderColor,
-    };
+    const cardShellStyle = getPastelSurfaceStyle(theme);
     const [isEditing, setIsEditing] = useState(false);
     const [editingBoundaries, setEditingBoundaries] = useState<GradeBoundary[]>([]);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
