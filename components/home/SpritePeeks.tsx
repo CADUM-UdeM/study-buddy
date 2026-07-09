@@ -127,13 +127,41 @@ export function WalkingBirdPeek({
         transform: [{ translateY: -overlap }],
       }}
     >
-      <FramedSprite
-        source={WALKING_SHEET}
-        frame={frame}
-        maxSourceW={WALK_MAX_W}
-        maxSourceH={WALK_MAX_H}
-        displayHeight={displayHeight}
-      />
+      <WalkingBirdSprite displayHeight={displayHeight} frame={frame} />
+    </View>
+  );
+}
+
+function WalkingBirdSprite({
+  displayHeight,
+  frame,
+}: {
+  displayHeight: number;
+  frame: (typeof WALK_FRAMES)[number];
+}) {
+  return (
+    <FramedSprite
+      source={WALKING_SHEET}
+      frame={frame}
+      maxSourceW={WALK_MAX_W}
+      maxSourceH={WALK_MAX_H}
+      displayHeight={displayHeight}
+    />
+  );
+}
+
+/** Inline walking bird for side-by-side layouts (e.g. home GPA row). */
+export function WalkingBirdInline({ displayHeight = 76 }: { displayHeight?: number }) {
+  const [i, setI] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setI((x) => (x + 1) % WALK_SEQUENCE.length), 175);
+    return () => clearInterval(t);
+  }, []);
+  const frame = WALK_FRAMES[WALK_SEQUENCE[i]];
+
+  return (
+    <View pointerEvents="none" style={{ alignItems: "center", justifyContent: "flex-end" }}>
+      <WalkingBirdSprite displayHeight={displayHeight} frame={frame} />
     </View>
   );
 }

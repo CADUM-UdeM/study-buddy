@@ -1,17 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link, useRouter } from "expo-router";
-import React, { useRef, useState } from "react";
-import { Animated, Pressable, Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { Pressable, Text, View } from "react-native";
 import { useGPA } from "@/app/hooks/useGPA";
 import { useSettings } from "../context/SettingsContext";
 import ContributionTracker from "../../components/ContributionTracker";
-import { WalkingBirdPeek } from "../../components/home/SpritePeeks";
+import { WalkingBirdInline } from "../../components/home/SpritePeeks";
+import { getPastelChipStyle, PastelCard } from "../../components/home/PastelCard";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
 import SessionTracker from "@/components/SessionTracker";
+import { WeeklyCalendarCard } from "@/components/home/WeeklyCalendarCard";
 import { TopStatusBarGuard } from "@/components/TopStatusBarGuard";
-import {darkTheme, lightTheme} from "@/components/colors";
+import { darkTheme, lightTheme } from "@/components/colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const MASCOT_SLOT_WIDTH = 92;
 
 export default function Accueil() {
   const router = useRouter();
@@ -19,119 +23,142 @@ export default function Accueil() {
   const { activeSession } = useSessions();
   const [showGlobalGPA, setShowGlobalGPA] = useState(false);
   const insets = useSafeAreaInsets();
-  const scrollY = useRef(new Animated.Value(0)).current;
 
-  /* Récupère les paramètres pour savoir quelles données afficher */
-  const {settings} = useSettings();
-
-  // Calculate stats based on toggle
+  const { settings } = useSettings();
   const overallStats = calculateOverallStats(showGlobalGPA);
-
-  /* Appliquer la couleur du theme */
   const theme = settings.isDarkMode ? darkTheme : lightTheme;
-  const guardOpacity = scrollY.interpolate({
-    inputRange: [0, 4, 16],
-    outputRange: [0, 0.4, 1],
-    extrapolate: "clamp",
-  });
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
-    <Animated.ScrollView
-      className="flex-1 px-5 pt-20"
+      <TopStatusBarGuard backgroundColor={theme.background} />
 
-      onScroll={Animated.event(
-        [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-        { useNativeDriver: true },
-      )}
-      scrollIndicatorInsets={{ top: insets.top + 8 }}
-      scrollEventThrottle={16}
-      style={{backgroundColor:theme.background,
-        marginTop:30
-      }}
-    >
+      <View
+        className="flex-1 px-5"
+        style={{
+          paddingTop: insets.top + 16,
+          paddingBottom: insets.bottom + 8,
+        }}
+      >
+          <View className="flex-row items-end mb-3" style={{ overflow: "visible" }}>
+            <PastelCard
+              theme={theme}
+              animated
+              animationDelay={0}
+              style={{ flex: 1 }}
+              contentStyle={{ padding: 16 }}
+            >
+              <View className="flex-row items-center justify-between mb-2">
+                <Text
+                  className="font-pixel text-lg flex-1 pr-2"
+                  style={{ color: theme.defaultTextColor }}
+                  numberOfLines={1}
+                >
+                  {showGlobalGPA
+                    ? "GPA Global"
+                    : activeSession
+                      ? `GPA ${activeSession.name}`
+                      : "GPA Global"}{" "}
+                  :
+                </Text>
+                <Pressable
+                  onPress={() => setShowGlobalGPA(!showGlobalGPA)}
+                  className="flex-row items-center gap-2 px-3 py-1.5 rounded-xl"
+                  style={getPastelChipStyle(theme)}
+                >
+                  <Ionicons
+                    name={showGlobalGPA ? "calendar" : "globe"}
+                    size={16}
+                    style={{ color: theme.activeColorIcon }}
+                  />
+                  <Text
+                    className="text-base font-medium font-pixel"
+                    style={{ color: theme.activeTextColor }}
+                  >
+                    {showGlobalGPA ? "Session" : "Global"}
+                  </Text>
+                </Pressable>
+              </View>
 
-      <View style={{ position: "relative", overflow: "visible" }} className="mb-3">
-        <ContributionTracker />
-        <WalkingBirdPeek displayHeight={82} overlap={44} right={2} />
-      </View>
-
-        {/* Informations pomodoro */}
-        {settings.showStreak && (<SessionTracker/>)}
-
-      {/* --- GPA Section --- */}
-      <View className="rounded-2xl p-4 mb-3" style={{backgroundColor: theme.mainWrapperBgColor,
-          borderWidth:1, borderColor:theme.borderColor}}>
-        <View className="flex-row items-center justify-between mb-2">
-          <Text className="text-neutral-600 font-pixel text-lg"
-          style={{color:theme.defaultTextColor}}>
-            {showGlobalGPA
-              ? "GPA Global"
-              : activeSession
-                ? `GPA ${activeSession.name}`
-                : "GPA Global"}{" "}
-            :
-          </Text>
-          <Pressable
-            onPress={() => setShowGlobalGPA(!showGlobalGPA)}
-            className="flex-row items-center gap-2 px-3 py-1.5 rounded-lg bg-white/50"
-            style={{backgroundColor:theme.background}}
-          >
-            <Ionicons
-              name={showGlobalGPA ? "calendar" : "globe"}
-              size={16}
-              style={{color:theme.calendarIconColor}}
-            />
-            <Text className="text-base font-medium text-purple-100 font-pixel" style={{color:theme.defaultTextColor}}>
-              {showGlobalGPA ? "Session" : "Global"}
-            </Text>
-          </Pressable>
-        </View>
-        {overallStats ? (
-          <>
-            <Text className="text-3xl font-semibold text-purple-200 font-pixel">
-              {overallStats.gpaDisplay}
-            </Text>
-              {settings.showCourseCount && (
-                  <Text className="text-sm text-neutral-500 mt-1 font-pixel"
-                  style={{color:theme.gray}}>
+              {overallStats ? (
+                <>
+                  <Text
+                    className="text-3xl font-semibold font-pixel"
+                    style={{ color: theme.activeTextColor }}
+                  >
+                    {overallStats.gpaDisplay}
+                  </Text>
+                  {settings.showCourseCount && (
+                    <Text
+                      className="text-sm mt-1 font-pixel"
+                      style={{ color: theme.gray }}
+                    >
                       {overallStats.courseCount} cours • {overallStats.totalCredits}{" "}
                       crédits
+                    </Text>
+                  )}
+                </>
+              ) : (
+                <View className="py-2">
+                  <Text
+                    className="text-lg font-pixel"
+                    style={{ color: theme.gray }}
+                  >
+                    Aucune note disponible
                   </Text>
+                  <Text
+                    className="text-sm mt-1 font-pixel"
+                    style={{ color: theme.gray }}
+                  >
+                    Ajoutez des notes pour voir votre GPA
+                  </Text>
+                </View>
               )}
-          </>
-        ) : (
-          <View className="py-2">
-            <Text className="text-xl text-neutral-500 italic font-pixel">
-              Aucune note disponible pour le moment
-            </Text>
-            <Text className="text-base text-neutral-400 mt-1 font-pixel ">
-              Ajoutez des notes à vos cours pour voir votre GPA
-            </Text>
+            </PastelCard>
+
+            <View
+              style={{
+                width: MASCOT_SLOT_WIDTH,
+                marginLeft: 8,
+                minHeight: 96,
+                justifyContent: "flex-end",
+              }}
+            >
+              <WalkingBirdInline displayHeight={78} />
+            </View>
           </View>
-        )}
+
+          <PastelCard theme={theme} animated animationDelay={120} className="mb-3">
+            <ContributionTracker embedded />
+          </PastelCard>
+
+          {settings.showStreak && (
+            <PastelCard theme={theme} animated animationDelay={240} className="mb-3">
+              <SessionTracker embedded />
+            </PastelCard>
+          )}
+
+          <WeeklyCalendarCard theme={theme} animated animationDelay={360} />
+
+          <PastelCard
+            theme={theme}
+            animated
+            animationDelay={480}
+            onPress={() => router.push("/(tabs)/pomodoro")}
+            className="mt-5"
+            contentStyle={{ paddingVertical: 18, paddingHorizontal: 16 }}
+            style={{
+              backgroundColor: theme.buttonColor,
+              borderColor: theme.cardBorderSoft,
+            }}
+          >
+            <Text
+              className="text-center font-semibold font-pixel text-xl"
+              style={{ color: theme.defaultTextColor }}
+            >
+              Démarrer un Pomodoro
+            </Text>
+          </PastelCard>
       </View>
-
-      {/* --- Actions --- */}
-      <Pressable
-        onPress={() => router.push("/(tabs)/pomodoro")}
-        className="mt-5 rounded-2xl  py-4"
-        style={{backgroundColor:theme.buttonColor}}
-      >
-        <Text className=" text-center font-semibold font-pixel text-xl" style={{color:theme.defaultTextColor}}>
-          Démarrer un Pomodoro
-        </Text>
-      </Pressable>
-
-      <Link href="/(tabs)/donnees" asChild>
-        <Pressable className="mt-3 rounded-2xl border border-violet-100 py-4" style={{borderColor:theme.anotherborderColor}} >
-          <Text className=" text-center font-medium font-pixel text-xl" style={{color:theme.anotherTextColor}}>Voir mes données</Text>
-        </Pressable>
-      </Link>
-
-      <View className="h-10" />
-    </Animated.ScrollView>
-    <TopStatusBarGuard backgroundColor={theme.background} opacity={guardOpacity} />
     </View>
   );
 }
