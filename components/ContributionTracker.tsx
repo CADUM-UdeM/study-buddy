@@ -1,378 +1,309 @@
-import React, {useCallback, useState} from "react";
-import {Dimensions, StyleSheet, Text, View} from "react-native";
-import {sessionContext} from "@/app/context/SessionContext";
-import {useFocusEffect} from "@react-navigation/core";
-import {useSettings} from "@/app/context/SettingsContext";
-import {darkTheme, lightTheme} from "@/components/colors";
+import React, { useMemo } from "react";
+import { Dimensions, StyleSheet, Text, View } from "react-native";
+import { useStudyHours } from "@/app/hooks/useStudyHours";
+import { useSettings } from "@/app/context/SettingsContext";
+import { darkTheme, lightTheme } from "@/components/colors";
+import { getRecordsInDateRange } from "@/services/studyHours/StudyHoursFacade";
 
-export default function ContributionTracker() {
-    // Détermine la session actuelle et ses dates
-    const getCurrentSession = () => {
-        const now = new Date();
-        const month = now.getMonth(); // 0-11
+export default function ContributionTracker({ embedded = false }: { embedded?: boolean }) {
+  const getCurrentSession = () => {
+    const now = new Date();
+    const month = now.getMonth();
 
-        let sessionName = "";
-        let startMonth = 0;
-        let endMonth = 3;
+    let sessionName = "";
+    let startMonth = 0;
+    let endMonth = 3;
 
-        if (month >= 0 && month <= 3) {
-            // Janvier à avril = Session Hiver
-            sessionName = "Hiver";
-            startMonth = 0; // Janvier
-            endMonth = 3; // Avril
-        } else if (month >= 4 && month <= 7) {
-            // Mai à août = Session Été
-            sessionName = "Été";
-            startMonth = 4; // Mai
-            endMonth = 7; // Août
-        } else {
-            // Septembre à décembre = Session Automne
-            sessionName = "Automne";
-            startMonth = 8; // Septembre
-            endMonth = 11; // Décembre
-        }
-
-        const year = now.getFullYear();
-        const startDate = new Date(year, startMonth, 1);
-        const endDate = new Date(year, endMonth + 1, 0); // Dernier jour du mois
-
-        return {sessionName, startDate, endDate};
-    };
-
-
-    const {sessionName, startDate, endDate} = getCurrentSession();
-
-    // Génère les semaines de la session
-    const generateWeeks = () => {
-        const weeks: (Date | null)[][] = [];
-
-        // Commence au début de la session
-        const firstDay = new Date(startDate);
-
-        // Ajuste pour commencer un lundi
-        const dayOfWeek = firstDay.getDay();
-        const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-        firstDay.setDate(firstDay.getDate() - daysToMonday);
-
-        let currentDate = new Date(firstDay);
-
-        // Continue jusqu'à la fin de la session
-        while (currentDate <= endDate) {
-            const week: (Date | null)[] = [];
-
-            for (let day = 0; day < 7; day++) {
-                if (currentDate < startDate || currentDate > endDate) {
-                    week.push(null);
-                } else {
-                    week.push(new Date(currentDate));
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-
-            weeks.push(week);
-
-            // Sécurité pour éviter une boucle infinie
-            if (weeks.length > 20) break;
-        }
-
-        return weeks;
-    };
-
-    // Obtient la couleur selon le nombre de contributions
-    const getColor = (count: number) => {
-        if (count === 0) return theme.calendarZero;
-        if (count <= 3) return theme.calendarLevelOne;
-        if (count <= 6) return theme.calendarLevelTwo;
-        if (count <= 10) return theme.calendarLevelThree;
-        return theme.calendarLevelFour;
-    };
-
-    const formatDate = (date: Date) => {
-        return date.toISOString().split("T")[0];
-    };
-
-    const weeks = generateWeeks();
-    const {settings} = useSettings();
-
-
-    /* Appliquer la couleur du theme */
-    const theme = settings.isDarkMode ? darkTheme : lightTheme;
-
-    interface Session {
-        id: string,
-        durationSession: string,
-        breakSession: string,
-        repeatSession: string,
-        isCompleted: boolean,
-        isDeleteOpen: boolean,
-        date: string,
+    if (month >= 0 && month <= 3) {
+      sessionName = "Hiver";
+      startMonth = 0;
+      endMonth = 3;
+    } else if (month >= 4 && month <= 7) {
+      sessionName = "Été";
+      startMonth = 4;
+      endMonth = 7;
+    } else {
+      sessionName = "Automne";
+      startMonth = 8;
+      endMonth = 11;
     }
 
-    const [sessions, setSessions] = useState<Session[]>([]);
+    const year = now.getFullYear();
+    const startDate = new Date(year, startMonth, 1);
+    const endDate = new Date(year, endMonth + 1, 0);
 
-    const [totalContributions, setTotalContributions] = useState(0);
+    return { sessionName, startDate, endDate };
+  };
 
-    /* Avant de modifier historique récupère les données enregistrées. */
-    useFocusEffect(
-        useCallback(() => {
-            /* Si on a des données, met à jour la variable contenant nos sessions */
-            sessionContext.getSessionsAsync().then(setSessions);
-            setTotalContributions(sessions.length);
-        }, [sessions.length]));
+  const { sessionName, startDate, endDate } = getCurrentSession();
+  const { settings } = useSettings();
+  const theme = settings.isDarkMode ? darkTheme : lightTheme;
+  const { records, getContributionsByDate } = useStudyHours();
 
-    // Génère des données de démo pour la session
-    const generateDemoData = (sessions: Session[]) => {
-        const data: Record<string, number> = {};
+  const sessionRecords = useMemo(
+    () => getRecordsInDateRange(records, startDate, endDate),
+    [endDate, records, startDate],
+  );
 
-        sessions.forEach((session) => {
-            const dateStr = session.date;
-            data[dateStr] = (data[dateStr] ?? 0) + 1
-        })
-        return data;
-    };
+  const totalContributions = sessionRecords.length;
+  const contributions = useMemo(
+    () => getContributionsByDate(),
+    [getContributionsByDate],
+  );
 
-    const contributions = generateDemoData(sessions);
+  const generateWeeks = () => {
+    const weeks: (Date | null)[][] = [];
+    const firstDay = new Date(startDate);
+    const dayOfWeek = firstDay.getDay();
+    const daysToMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    firstDay.setDate(firstDay.getDate() - daysToMonday);
 
-    // Calcule la taille des carrés dynamiquement (GARDÉ LA MÊME LOGIQUE)
-    const screenWidth = Dimensions.get("window").width;
-    const containerPadding = 32;
-    const dayLabelsWidth = 35;
-    const availableWidth = screenWidth - containerPadding - dayLabelsWidth - 18;
-    const numberOfWeeks = weeks.length; // Maintenant basé sur la session
-    const gap = 3;
-    const squareSize = Math.floor(
-        (availableWidth - gap * (numberOfWeeks - 1)) / numberOfWeeks,
-    );
+    let currentDate = new Date(firstDay);
 
-    // Obtient les labels de mois
-    const getMonthLabels = () => {
-        const months = [
-            "Jan",
-            "Fév",
-            "Mar",
-            "Avr",
-            "Mai",
-            "Jun",
-            "Jul",
-            "Aoû",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Déc",
-        ];
-        const labels: { month: string; position: number }[] = [];
+    while (currentDate <= endDate) {
+      const week: (Date | null)[] = [];
 
-        let lastMonth = -1;
-        weeks.forEach((week, weekIndex) => {
-            const firstDay = week.find((day) => day !== null);
-            if (firstDay) {
-                const month = firstDay.getMonth();
-                if (month !== lastMonth) {
-                    labels.push({month: months[month], position: weekIndex});
-                    lastMonth = month;
-                }
-            }
-        });
+      for (let day = 0; day < 7; day++) {
+        if (currentDate < startDate || currentDate > endDate) {
+          week.push(null);
+        } else {
+          week.push(new Date(currentDate));
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
 
-        return labels;
-    };
+      weeks.push(week);
+      if (weeks.length > 20) break;
+    }
 
-    const monthLabels = getMonthLabels();
+    return weeks;
+  };
 
-    return (
-        <View style={[styles.container, {
-            backgroundColor: theme.mainWrapperBgColor,
-            borderRadius: 25, borderColor: theme.borderColor, borderWidth: 1
-        }]}>
-            <Text style={[styles.title, {color: theme.defaultTextColor}]}>
-                {totalContributions} séances d&#39;études cette session
+  const getColor = (count: number) => {
+    if (count === 0) return theme.calendarZero;
+    if (count <= 3) return theme.calendarLevelOne;
+    if (count <= 6) return theme.calendarLevelTwo;
+    if (count <= 10) return theme.calendarLevelThree;
+    return theme.calendarLevelFour;
+  };
+
+  const formatDate = (date: Date) => date.toISOString().split("T")[0];
+
+  const weeks = generateWeeks();
+  const screenWidth = Dimensions.get("window").width;
+  const containerPadding = 32;
+  const dayLabelsWidth = 35;
+  const availableWidth = screenWidth - containerPadding - dayLabelsWidth - 18;
+  const numberOfWeeks = weeks.length;
+  const gap = 3;
+  const squareSize = Math.floor(
+    (availableWidth - gap * (numberOfWeeks - 1)) / numberOfWeeks,
+  );
+
+  const getMonthLabels = () => {
+    const months = [
+      "Jan",
+      "Fév",
+      "Mar",
+      "Avr",
+      "Mai",
+      "Jun",
+      "Jul",
+      "Aoû",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Déc",
+    ];
+    const labels: { month: string; position: number }[] = [];
+
+    let lastMonth = -1;
+    weeks.forEach((week, weekIndex) => {
+      const firstDay = week.find((day) => day !== null);
+      if (firstDay) {
+        const month = firstDay.getMonth();
+        if (month !== lastMonth) {
+          labels.push({ month: months[month], position: weekIndex });
+          lastMonth = month;
+        }
+      }
+    });
+
+    return labels;
+  };
+
+  const monthLabels = getMonthLabels();
+
+  const content = (
+    <>
+      <Text style={[styles.title, { color: theme.defaultTextColor }]}>
+        {totalContributions} séances d&apos;études cette session ({sessionName})
+      </Text>
+
+      <View style={styles.content}>
+        <View style={[styles.monthsRow]}>
+          {monthLabels.map((label, index) => (
+            <Text
+              key={index}
+              style={[
+                styles.monthLabel,
+                { left: dayLabelsWidth + label.position * (squareSize + gap) },
+              ]}
+            >
+              {label.month}
             </Text>
-
-            <View style={styles.content}>
-                {/* Labels des mois */}
-                <View style={[styles.monthsRow]}>
-                    {monthLabels.map((label, index) => (
-                        <Text
-                            key={index}
-                            style={[
-                                styles.monthLabel,
-                                {left: dayLabelsWidth + label.position * (squareSize + gap)},
-                            ]}
-                        >
-                            {label.month}
-                        </Text>
-                    ))}
-                </View>
-
-                <View style={styles.graphContainer}>
-                    {/* Labels des jours */}
-                    <View style={styles.dayLabels}>
-                        <Text style={styles.dayLabel}>Lun</Text>
-                        <View style={{height: squareSize}}/>
-                        <Text style={styles.dayLabel}>Mer</Text>
-                        <View style={{height: squareSize}}/>
-                        <Text style={styles.dayLabel}>Ven</Text>
-                    </View>
-
-                    {/* Grille */}
-                    <View style={styles.grid}>
-                        {weeks.map((week, weekIndex) => (
-                            <View key={weekIndex} style={[styles.column, {gap}]}>
-                                {week.map((day, dayIndex) => {
-                                    if (!day) {
-                                        return (
-                                            <View
-                                                key={dayIndex}
-                                                style={[
-                                                    styles.emptySquare,
-                                                    {width: squareSize, height: squareSize},
-                                                ]}
-                                            />
-                                        );
-                                    }
-
-                                    const dateStr = formatDate(day);
-                                    const count = contributions[dateStr] || 0;
-                                    const color = getColor(count);
-
-                                    return (
-                                        <View
-                                            key={dayIndex}
-                                            style={[
-                                                styles.square,
-                                                {
-                                                    backgroundColor: color,
-                                                    width: squareSize,
-                                                    height: squareSize,
-                                                },
-                                            ]}
-                                        />
-                                    );
-                                })}
-                            </View>
-                        ))}
-                    </View>
-                </View>
-
-                {/* Légende */}
-                <View style={styles.legend}>
-                    <Text style={styles.legendText}>Moins</Text>
-                    <View
-                        style={[
-                            styles.legendSquare,
-                            {
-                                backgroundColor: theme.calendarZero,
-                                width: squareSize,
-                                height: squareSize,
-                            },
-                        ]}
-                    />
-                    <View
-                        style={[
-                            styles.legendSquare,
-                            {
-                                backgroundColor: theme.calendarLevelOne,
-                                width: squareSize,
-                                height: squareSize,
-                            },
-                        ]}
-                    />
-                    <View
-                        style={[
-                            styles.legendSquare,
-                            {
-                                backgroundColor: theme.calendarLevelTwo,
-                                width: squareSize,
-                                height: squareSize,
-                            },
-                        ]}
-                    />
-                    <View
-                        style={[
-                            styles.legendSquare,
-                            {
-                                backgroundColor: theme.calendarLevelThree,
-                                width: squareSize,
-                                height: squareSize,
-                            },
-                        ]}
-                    />
-                    <View
-                        style={[
-                            styles.legendSquare,
-                            {
-                                backgroundColor: theme.calendarLevelFour,
-                                width: squareSize,
-                                height: squareSize,
-                            },
-                        ]}
-                    />
-                    <Text style={styles.legendText}>Plus</Text>
-                </View>
-            </View>
+          ))}
         </View>
-    );
+
+        <View style={styles.graphContainer}>
+          <View style={styles.dayLabels}>
+            <Text style={styles.dayLabel}>Lun</Text>
+            <View style={{ height: squareSize }} />
+            <Text style={styles.dayLabel}>Mer</Text>
+            <View style={{ height: squareSize }} />
+            <Text style={styles.dayLabel}>Ven</Text>
+          </View>
+
+          <View style={styles.grid}>
+            {weeks.map((week, weekIndex) => (
+              <View key={weekIndex} style={[styles.column, { gap }]}>
+                {week.map((day, dayIndex) => {
+                  if (!day) {
+                    return (
+                      <View
+                        key={dayIndex}
+                        style={[
+                          styles.emptySquare,
+                          { width: squareSize, height: squareSize },
+                        ]}
+                      />
+                    );
+                  }
+
+                  const dateStr = formatDate(day);
+                  const count = contributions[dateStr] || 0;
+                  const color = getColor(count);
+
+                  return (
+                    <View
+                      key={dayIndex}
+                      style={[
+                        styles.square,
+                        {
+                          backgroundColor: color,
+                          width: squareSize,
+                          height: squareSize,
+                        },
+                      ]}
+                    />
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </View>
+
+        <View style={styles.legend}>
+          <Text style={styles.legendText}>Moins</Text>
+          {[theme.calendarZero, theme.calendarLevelOne, theme.calendarLevelTwo, theme.calendarLevelThree, theme.calendarLevelFour].map(
+            (color, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.legendSquare,
+                  { backgroundColor: color, width: squareSize, height: squareSize },
+                ]}
+              />
+            ),
+          )}
+          <Text style={styles.legendText}>Plus</Text>
+        </View>
+      </View>
+    </>
+  );
+
+  if (embedded) {
+    return <View style={styles.embedded}>{content}</View>;
+  }
+
+  return (
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.mainWrapperBgColor,
+          borderRadius: 25,
+          borderColor: theme.borderColor,
+          borderWidth: 1,
+        },
+      ]}
+    >
+      {content}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        padding: 16,
-        marginVertical: 10,
-    },
-    title: {
-        fontFamily: "PixelJersey",
-        color: "#ffffff",
-        fontSize: 15,
-        fontWeight: "600",
-        marginBottom: 16,
-    },
-    content: {},
-    monthsRow: {
-        height: 18,
-        position: "relative",
-        marginBottom: 4,
-    },
-    monthLabel: {
-        fontFamily: "PixelJersey",
-        position: "absolute",
-        color: "#9CA3AF",
-        fontSize: 10,
-    },
-    graphContainer: {
-        flexDirection: "row",
-    },
-    dayLabels: {
-        justifyContent: "space-between",
-        marginRight: 6,
-        paddingTop: 2,
-    },
-    dayLabel: {
-        fontFamily: "PixelJersey",
-        color: "#9CA3AF",
-        fontSize: 9,
-    },
-    grid: {
-        flexDirection: "row",
-        gap: 3,
-    },
-    column: {},
-    square: {
-        borderRadius: 2,
-    },
-    emptySquare: {},
-    legend: {
-        flexDirection: "row",
-        alignItems: "center",
-        marginTop: 12,
-        gap: 3,
-        justifyContent: "flex-end",
-    },
-    legendText: {
-        fontFamily: "PixelJersey",
-        color: "#9CA3AF",
-        fontSize: 10,
-    },
-    legendSquare: {
-        borderRadius: 2,
-    },
+  container: {
+    padding: 16,
+    marginVertical: 10,
+  },
+  embedded: {
+    paddingVertical: 2,
+  },
+  title: {
+    fontFamily: "PixelJersey",
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 16,
+  },
+  content: {},
+  monthsRow: {
+    height: 18,
+    position: "relative",
+    marginBottom: 4,
+  },
+  monthLabel: {
+    fontFamily: "PixelJersey",
+    position: "absolute",
+    color: "#9CA3AF",
+    fontSize: 10,
+  },
+  graphContainer: {
+    flexDirection: "row",
+  },
+  dayLabels: {
+    justifyContent: "space-between",
+    marginRight: 6,
+    paddingTop: 2,
+  },
+  dayLabel: {
+    fontFamily: "PixelJersey",
+    color: "#9CA3AF",
+    fontSize: 9,
+  },
+  grid: {
+    flexDirection: "row",
+    gap: 3,
+  },
+  column: {},
+  square: {
+    borderRadius: 2,
+  },
+  emptySquare: {},
+  legend: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
+    gap: 3,
+    justifyContent: "flex-end",
+  },
+  legendText: {
+    fontFamily: "PixelJersey",
+    color: "#9CA3AF",
+    fontSize: 10,
+  },
+  legendSquare: {
+    borderRadius: 2,
+  },
 });
