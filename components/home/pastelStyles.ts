@@ -25,11 +25,13 @@ export function getPastelSurfaceStyle(
   };
 }
 
-export function getPastelChipStyle(theme: typeof lightTheme): ViewStyle {
+export function getPastelChipStyle(theme: typeof lightTheme, overrides?: ViewStyle
+): ViewStyle  {
   return {
     backgroundColor: theme.cardGlow,
     borderWidth: 1,
     borderColor: theme.cardBorderSoft,
     borderRadius: 14,
+    ...overrides,
   };
 }

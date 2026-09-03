@@ -16,7 +16,7 @@ export const lightTheme = {
   buttonColor: "#F0D3FF",
 
   anotherTextColor: "#7c3aed",
-  anotherborderColor: "#7c3aed",
+  anotherBorderColor: "#7c3aed",
 
   // Calendrier
   calendarZero: "#F3F0F9",
@@ -58,6 +58,10 @@ export const lightTheme = {
   courseTintMuted: 0.3,
   postItShadow: "#2A2540",
   postItShadowOpacity: 0.2,
+
+  cycleDefault : "#7C3AED26",
+  cycleInactive: "#6d28d91a",
+  cycleActive : "#7c3aed",
 };
 
 /* Afin d'avoir les memes declarations de variables, on utilise typeof */
@@ -79,7 +83,7 @@ export const darkTheme: typeof lightTheme = {
   buttonColor: "#7c3aed",
 
   anotherTextColor: "#AB8BFF",
-  anotherborderColor: "#AB8BFF",
+  anotherBorderColor: "#AB8BFF",
 
   // Calendrier
   calendarZero: "#2D2A45",
@@ -122,6 +126,10 @@ export const darkTheme: typeof lightTheme = {
   courseTintMuted: 0.22,
   postItShadow: "#000000",
   postItShadowOpacity: 0.38,
+
+  cycleDefault : "#7C3AED26",
+  cycleInactive: "#6d28d91a",
+  cycleActive : "#7c3aed",
 };
 
 export function isDarkTheme(theme: typeof lightTheme): boolean {

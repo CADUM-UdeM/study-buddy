@@ -1,8 +1,7 @@
 import { lightTheme } from "@/components/colors";
 import { getPastelChipStyle, PastelCard } from "@/components/home/PastelCard";
-import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import Animated, {
   Easing,
@@ -23,7 +22,7 @@ interface TimerClockProps {
   min: string;
   sec: string;
   isRunning: boolean;
-  setClickParam: React.Dispatch<React.SetStateAction<boolean>>;
+  numCycle: number;
   remainingCycle: number;
   animated?: boolean;
   animationDelay?: number;
@@ -38,7 +37,7 @@ export function TimerClock({
   min,
   sec,
   isRunning,
-  setClickParam,
+  numCycle,
   remainingCycle,
   animated = true,
   animationDelay = 0,
@@ -73,7 +72,6 @@ export function TimerClock({
 
   const progress =
     phaseTotalSeconds > 0 ? (timeLeft / phaseTotalSeconds) * 100 : 100;
-
   return (
     <PastelCard
       theme={theme}
@@ -119,32 +117,25 @@ export function TimerClock({
         </AnimatedCircularProgress>
       </Animated.View>
 
-      <View className="flex-row items-center justify-center gap-4 mt-6">
-        <Pressable
-          onPress={() => setClickParam(true)}
-          disabled={isRunning}
-          className="rounded-full p-2.5"
-          style={[
-            getPastelChipStyle(theme),
-            isRunning && { opacity: 0.45 },
-          ]}
-        >
-          <Ionicons
-            name="options-outline"
-            size={20}
-            color={theme.activeColorIcon}
-          />
-        </Pressable>
+        {/* --- Nombre de cycle restant ---*/}
+        <View style={{alignItems: 'center', gap: 8, paddingTop: 20,}}>
+            <View style={{flexDirection: 'row', alignItems: 'center', gap: 6}}>
+                {Array.from({length: numCycle}).map((_, i) => {
+                    const isActive = i === (numCycle - remainingCycle);
+                    const isDone = i < (numCycle - remainingCycle);
+                    let color = theme.cycleDefault;
+                    if (isActive) color = theme.cycleActive;
+                    if (isDone) color = theme.cycleInactive;
+                    return (
+                        <View key={i} style={{
+                            height: 7, borderRadius: 40,
+                            width: isActive ? 20 : 7, backgroundColor: color,
+                        }}/>);
+                })}
+            </View>
 
-        <View className="px-4 py-2 rounded-xl" style={getPastelChipStyle(theme)}>
-          <Text
-            className="font-pixel text-base"
-            style={{ color: theme.activeTextColor }}
-          >
-            Cycle · {remainingCycle}
-          </Text>
         </View>
-      </View>
+        {/* ------ */}
     </PastelCard>
   );
 }

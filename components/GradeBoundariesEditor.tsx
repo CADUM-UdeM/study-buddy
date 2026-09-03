@@ -12,7 +12,7 @@ import {
 import {GradeBoundary} from "../app/context/SettingsContext";
 import {useSettings} from "@/app/context/SettingsContext";
 import {darkTheme, lightTheme} from "@/components/colors";
-import {getPastelSurfaceStyle} from "@/components/home/pastelStyles";
+import {getPastelChipStyle, getPastelSurfaceStyle} from "@/components/home/pastelStyles";
 
 
 
@@ -302,7 +302,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                             <View
                                 key={index}
                                 className="flex-row items-center mb-2 rounded-xl px-4 py-3"
-                                style={{backgroundColor: ROW_BG}}
+                                style={getPastelChipStyle(theme, {backgroundColor: theme.background})}
                             >
                                 <Text className=" font-pixel font-bold w-12" style={{color:theme.defaultTextColor}}>
                                     {boundary.letter}
@@ -377,10 +377,12 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                         <View
                             key={index}
                             className="flex-row items-center justify-between mb-2 rounded-xl px-4 py-3"
-                            style={{backgroundColor: ROW_BG}}
+                            style={getPastelChipStyle(theme,
+                                {backgroundColor:theme.background}
+                            )}
                         >
                             <Text className="text-purple-100 font-pixel font-bold w-12"
-                            style={{color :theme.defaultTextColor}}> 
+                            style={{color :theme.defaultTextColor}}>
                             {/*activeTextColor*/}
                                 {boundary.letter}
                             </Text>
@@ -460,7 +462,7 @@ export const GradeBoundariesEditor: React.FC<GradeBoundariesEditorProps> = ({
                             <TouchableOpacity
                                 onPress={() => setEditingIndex(null)}
                                 className="flex-1 rounded-2xl border  py-3 px-4"
-                                style={{backgroundColor:theme.mainWrapperBgColor, borderColor:theme.anotherborderColor}}
+                                style={{backgroundColor:theme.mainWrapperBgColor, borderColor:theme.anotherBorderColor}}
                             >
                                 <Text className=" font-pixel font-medium text-center" style={{color:theme.defaultTextColor}}>
                                     Annuler

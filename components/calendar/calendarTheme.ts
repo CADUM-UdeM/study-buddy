@@ -90,7 +90,9 @@ export function getSessionEventTitle(
   if (courseName) return courseName;
   const description = session.description?.trim();
   if (description) return description;
-  return "Séance d'étude";
+
+  if(session.courseId) return "Focus";
+  return "Étude";
 }
 
 export function sessionToEvent(

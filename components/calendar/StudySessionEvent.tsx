@@ -39,7 +39,7 @@ export function StudySessionEvent({
   const borderColor = shadePastelColor(courseColor, 0.28);
 
   const label = getSessionEventTitle(
-    session ?? { courseId: event.courseId, description: event.description },
+    session ?? { courseId: event.courseId ?? event.id, description: event.description },
     courseName,
   );
 
@@ -58,7 +58,7 @@ export function StudySessionEvent({
         sizeStyle,
         idleStyle,
         {
-          backgroundColor: courseColor,
+          backgroundColor: 'transparent',
           borderRadius: 10,
           paddingHorizontal: 7,
           paddingVertical: 5,

@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import React, {useRef, useState} from "react";
+import {Animated, Pressable, Text, View} from "react-native";
 import { useGPA } from "@/app/hooks/useGPA";
 import { useSettings } from "../context/SettingsContext";
 import ContributionTracker from "../../components/ContributionTracker";
-import { WalkingBirdInline } from "../../components/home/SpritePeeks";
+import { WalkingBirdInline } from "@/components/home/SpritePeeks";
 import { getPastelChipStyle, PastelCard } from "../../components/home/PastelCard";
 import { useSessions } from "../context/SessionsContext";
 import "../global.css";
@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MASCOT_SLOT_WIDTH = 92;
 
 export default function Accueil() {
+  const scrollY = useRef(new Animated.Value(0)).current;
   const router = useRouter();
   const { calculateOverallStats } = useGPA();
   const { activeSession } = useSessions();
@@ -31,15 +32,27 @@ export default function Accueil() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
       <TopStatusBarGuard backgroundColor={theme.background} />
-
+        <Animated.ScrollView
+            className="flex-1 px-5"
+            onScroll={Animated.event(
+                [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                { useNativeDriver: true },
+            )}
+            scrollIndicatorInsets={{ top: insets.top + 8 }}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+                paddingTop: insets.top + 16,
+                paddingBottom: insets.bottom + 24,
+            }}
+        >
       <View
-        className="flex-1 px-5"
         style={{
-          paddingTop: insets.top + 16,
-          paddingBottom: insets.bottom + 8,
+          paddingBottom: 8
         }}
       >
           <View className="flex-row items-end mb-3" style={{ overflow: "visible" }}>
+              {settings.showGPA && (
             <PastelCard
               theme={theme}
               animated
@@ -114,7 +127,7 @@ export default function Accueil() {
                 </View>
               )}
             </PastelCard>
-
+            )}
             <View
               style={{
                 width: MASCOT_SLOT_WIDTH,
@@ -137,8 +150,9 @@ export default function Accueil() {
             </PastelCard>
           )}
 
+          {settings.showWeekCalendar && (
           <WeeklyCalendarCard theme={theme} animated animationDelay={360} />
-
+          )}
           <PastelCard
             theme={theme}
             animated
@@ -159,6 +173,7 @@ export default function Accueil() {
             </Text>
           </PastelCard>
       </View>
+        </Animated.ScrollView>
     </View>
   );
 }

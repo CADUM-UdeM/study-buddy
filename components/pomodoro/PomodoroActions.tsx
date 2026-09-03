@@ -1,7 +1,8 @@
 import { lightTheme } from "@/components/colors";
-import { PastelCard } from "@/components/home/PastelCard";
+import {getPastelChipStyle, PastelCard} from "@/components/home/PastelCard";
 import React from "react";
 import { Text, View } from "react-native";
+import {Ionicons} from "@expo/vector-icons";
 
 interface PomodoroActionsProps {
   theme: typeof lightTheme;
@@ -9,6 +10,7 @@ interface PomodoroActionsProps {
   timeLeft: number;
   onStartPause: () => void;
   onStop: () => void;
+  setClickParam: React.Dispatch<React.SetStateAction<boolean>>;
   startDisabled?: boolean;
   animated?: boolean;
   animationDelay?: number;
@@ -20,6 +22,7 @@ export function PomodoroActions({
   timeLeft,
   onStartPause,
   onStop,
+  setClickParam,
   startDisabled = false,
   animated = true,
   animationDelay = 240,
@@ -28,7 +31,7 @@ export function PomodoroActions({
   const startLabel = isRunning ? "Pause" : "Débuter";
 
   return (
-    <View className="flex-row gap-3 mb-3">
+    <View className="flex-row gap-3 mb-3 px-3 mt-4">
       <PastelCard
         theme={theme}
         animated={animated}
@@ -72,6 +75,27 @@ export function PomodoroActions({
           Stop
         </Text>
       </PastelCard>
+
+
+        <PastelCard
+            theme={theme}
+            animated={animated}
+            animationDelay={animationDelay + 120}
+            onPress={() => setClickParam(true)}
+            disabled={isRunning}
+            style={[
+                getPastelChipStyle(theme),
+                isRunning && { opacity: 0.45 },
+                {borderRadius:25, backgroundColor:theme.cardSurface}
+            ]}
+            contentStyle={{ paddingVertical: 20, alignItems: "center" }}
+        >
+            <Ionicons
+                name="options-outline"
+                size={20}
+                color={theme.activeColorIcon}
+            />
+        </PastelCard>
     </View>
   );
 }

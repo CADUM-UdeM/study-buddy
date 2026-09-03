@@ -24,6 +24,8 @@ interface PomodoroStudyContextType {
   addRecord: (
     record: Omit<PomodoroStudyRecord, "id">,
   ) => PomodoroStudyRecord;
+  updateRecord: (id: string, updates: Partial<Omit<PomodoroStudyRecord, "id">>
+  ) => (PomodoroStudyRecord | undefined)
   deleteRecord: (id: string) => void;
 }
 
@@ -76,6 +78,28 @@ export function PomodoroStudyProvider({ children }: { children: ReactNode }) {
     [persist],
   );
 
+  const updateRecord = useCallback(
+     (id: string, updates: Partial<Omit<PomodoroStudyRecord, "id">>) => {
+         let updatedRecord: PomodoroStudyRecord | undefined;
+
+         setRecords((prev) => {
+             const next = prev.map((record) => {
+                 if (record.id === id) {
+                     updatedRecord = { ...record, ...updates };
+                     return updatedRecord;
+                 }
+                 return record;
+             });
+
+             persist(next);
+             return next;
+         });
+
+         return updatedRecord;
+     },
+     [persist],
+  );
+
   const deleteRecord = useCallback(
     (id: string) => {
       setRecords((prev) => {
@@ -92,9 +116,10 @@ export function PomodoroStudyProvider({ children }: { children: ReactNode }) {
       records,
       isLoading,
       addRecord,
+      updateRecord,
       deleteRecord,
     }),
-    [addRecord, deleteRecord, isLoading, records],
+    [addRecord, updateRecord, deleteRecord, isLoading, records],
   );
 
   return (

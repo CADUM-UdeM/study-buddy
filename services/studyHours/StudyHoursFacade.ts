@@ -1,13 +1,7 @@
-import { Course } from "@/app/context/CoursesContext";
-import { PlannedStudySession } from "@/app/context/PlannedStudyContext";
-import { PomodoroStudyRecord } from "@/app/context/PomodoroStudyContext";
-import {
-  differenceInMinutes,
-  endOfWeek,
-  isWithinInterval,
-  parseISO,
-  startOfWeek,
-} from "date-fns";
+import {Course} from "@/app/context/CoursesContext";
+import {PlannedStudySession} from "@/app/context/PlannedStudyContext";
+import {PomodoroStudyRecord} from "@/app/context/PomodoroStudyContext";
+import {differenceInMinutes, endOfWeek, isSameDay, isWithinInterval, parseISO, startOfWeek,} from "date-fns";
 
 export interface CourseWeeklyProgress {
   goalHours: number;
@@ -42,6 +36,13 @@ function sumMinutesInWeek(records: PomodoroStudyRecord[], now: Date): number {
     if (!isWithinWeek(endedAt, weekStart, weekEnd)) return total;
     return total + record.studyMinutes;
   }, 0);
+}
+export function calculateStudyMinutes(startedAt : string, endedAt: string) : number{
+    const start = new Date(startedAt);
+    const end =   new Date(endedAt);
+    if (!start || !end) return 0;
+
+    return Math.ceil((end.getTime() - start.getTime()) / (1000 * 60))
 }
 
 export function buildCourseWeeklyProgress(
@@ -106,6 +107,35 @@ export function getWeeklyStudyMinutes(
   return sumMinutesInWeek(records, now);
 }
 
+export function getWeeklyStudy(
+    records: PomodoroStudyRecord[],
+    now: Date = new Date()) : PomodoroStudyRecord[]{
+    const weekStart = startOfWeekMonday(now);
+    const weekEnd = endOfWeekMonday(now);
+
+    return records
+        .filter((record) => {
+            const endedAt = parseISO(record.endedAt);
+            return (isWithinWeek(endedAt, weekStart, weekEnd));
+            }, 0);
+}
+
+export function getDailyStudyMinutes(
+    records: PomodoroStudyRecord[],
+    now: Date = new Date()):
+    number {
+    return getDailyStudy(records, now)
+        .reduce((total, record) => total + record.studyMinutes, 0);
+}
+
+
+export function getDailyStudy(
+    records: PomodoroStudyRecord[],
+    now: Date = new Date()) : PomodoroStudyRecord[]{
+    return records
+        .filter(record => isSameDay(parseISO(record.endedAt), now))
+}
+
 export function getContributionsByDate(
   records: PomodoroStudyRecord[],
 ): Record<string, number> {
@@ -117,6 +147,25 @@ export function getContributionsByDate(
   }
 
   return data;
+}
+
+export function getPlannedSessionsCountByDate(plannedSessions: any[], targetDate: Date): number {
+    const targetKey = targetDate.toISOString().split("T")[0];
+
+    return plannedSessions.filter(session => {
+        const sessionKey = new Date(session.startDateTime).toISOString().split("T")[0];
+        return sessionKey === targetKey;
+    }).length;
+}
+
+export function getPlannedSessionsCountForWeek(plannedSessions: any[], now: Date): number {
+    const startOfWeek = startOfWeekMonday(now);
+    const endOfWeek = endOfWeekMonday(now);
+
+    return (plannedSessions.filter(s => {
+        const time = new Date(s.startDateTime).getTime();
+        return time >= startOfWeek.getTime() && time < endOfWeek.getTime();
+    })).length;
 }
 
 export function getLastStudyDate(records: PomodoroStudyRecord[]): string | null {

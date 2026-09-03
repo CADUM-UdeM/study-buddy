@@ -28,18 +28,39 @@ import {
   PackedEvent,
   SizeAnimation,
 } from "@howljs/calendar-kit";
-import { format } from "date-fns";
+import {format} from "date-fns";
 import React, { useCallback, useMemo, useRef } from "react";
-import { Text, View } from "react-native";
+import {Text, View} from "react-native";
+import {useStudyHours} from "@/app/hooks/useStudyHours";
+
+import StudyInfoCalendar from "@/components/calendar/StudyInfoCalendar";
+import {PomodoroStudyRecord, usePomodoroStudy} from "@/app/context/PomodoroStudyContext";
+import {calculateStudyMinutes} from "@/services/studyHours/StudyHoursFacade";
 
 interface StudyCalendarTimelineProps {
   viewMode: "day" | "week";
   selectedDate?: string;
   onDateChanged?: (date: string) => void;
-  onSessionCreated?: (session: PlannedStudySession) => void;
-  onSessionPress?: (session: PlannedStudySession) => void;
+  onSessionCreated?: (session: PlannedStudySession | PomodoroStudyRecord) => void;
+  onSessionPress?: (session: PlannedStudySession | PomodoroStudyRecord) => void;
   theme: typeof lightTheme;
 }
+
+export const useSessionMap = (plannedSessions: PlannedStudySession[]) => {
+    return useMemo(() => {
+        const map = new Map<string, PlannedStudySession>();
+        plannedSessions.forEach((session) => map.set(session.id, session));
+        return map;
+    }, [plannedSessions]);
+};
+
+export const useRecordMap = (records: PomodoroStudyRecord[]) => {
+    return useMemo(() => {
+        const map = new Map<string, PomodoroStudyRecord>();
+        records.forEach((focus) => map.set(focus.id, focus));
+        return map;
+    }, [records]);
+};
 
 export function StudyCalendarTimeline({
   viewMode,
@@ -53,7 +74,8 @@ export function StudyCalendarTimeline({
   const { courses } = useCourses();
   const { plannedSessions, addPlannedSession, updatePlannedSession } =
     usePlannedStudy();
-
+    const {addRecord, updateRecord } = usePomodoroStudy();
+    const {records} = usePomodoroStudy();
   const numberOfDays = viewModeToDays(viewMode);
   const isDayView = viewMode === "day";
   const calendarTheme = useMemo(() => buildCalendarTheme(theme), [theme]);
@@ -83,45 +105,61 @@ export function StudyCalendarTimeline({
     [plannedSessions, courseColorMap, courseNameById],
   );
 
-  const sessionById = useMemo(() => {
-    const map = new Map<string, PlannedStudySession>();
-    plannedSessions.forEach((session) => map.set(session.id, session));
-    return map;
-  }, [plannedSessions]);
+  const sessionById = useSessionMap(plannedSessions);
+  const pomodoroById = useRecordMap(records);
+  const [isSessionView, setIsSessionView] = React.useState(true);
 
   const handleDragCreateEnd = useCallback(
     (event: OnCreateEventResponse) => {
       if (!onSessionCreated) return;
 
-      const created = addPlannedSession({
-        startDateTime: event.start.dateTime!,
-        endDateTime: event.end.dateTime!,
-      });
-      onSessionCreated(created);
+      if(isSessionView){
+          const created = addPlannedSession({
+              startDateTime: event.start.dateTime!,
+              endDateTime: event.end.dateTime!,
+          });
+          onSessionCreated(created);
+      }
+      else {
+          const created = addRecord({
+              courseId: "",
+              studyMinutes: calculateStudyMinutes(event.start.dateTime!,event.end.dateTime!),
+              startedAt: event.start.dateTime!,
+              endedAt: event.end.dateTime!,
+              completed: true,
+          });
+          onSessionCreated(created);
+      }
     },
-    [addPlannedSession, onSessionCreated],
+    [addPlannedSession, addRecord, isSessionView, onSessionCreated],
   );
 
   const handleDragEventEnd = useCallback(
     async (event: OnEventResponse) => {
+      if (isSessionView){  
       updatePlannedSession(event.id, {
         startDateTime: event.start.dateTime!,
         endDateTime: event.end.dateTime!,
       });
+      }
+      else {
+          updateRecord(event.id, {
+              startedAt : event.start.dateTime!,
+              endedAt : event.end.dateTime!,
+          })   
+      }
     },
-    [updatePlannedSession],
+    [isSessionView, updatePlannedSession, updateRecord],
   );
-
   const handlePressEvent = useCallback(
     (event: OnEventResponse) => {
       if (!onSessionPress) return;
-
-      const session = sessionById.get(event.id);
-      if (session) {
-        onSessionPress(session);
+      const getEvent = sessionById.get(event.id) ?? pomodoroById.get(event.id);
+      if (getEvent) {
+        onSessionPress(getEvent);
       }
     },
-    [sessionById, onSessionPress],
+    [pomodoroById, sessionById, onSessionPress],
   );
 
   const renderEvent = useCallback(
@@ -151,7 +189,27 @@ export function StudyCalendarTimeline({
     [sessionById, courseNameById, courseColorMap, isDayView, theme],
   );
 
-  return (
+  const { getDailyStudy, getWeeklyStudy } = useStudyHours();
+  const [calendarSize, setCalendarSize] = React.useState(60);
+  const actualDate = new Date(`${selectedDate}T00:00:00`);
+
+
+  const selectedRecords = isDayView ? getDailyStudy(actualDate) : getWeeklyStudy(actualDate);
+
+  const recordsWithCourses = selectedRecords.map(r => ({
+        id : r.id,
+        title: courses.find(c => c.id === r.courseId)?.name,
+        start: {dateTime : r.startedAt},
+        end : {dateTime : r.endedAt},
+        color: getStudySessionColor(courseColorMap, r.courseId, theme),
+        courseId : courses.find(c => c.id === r.courseId)?.id
+    }));
+
+  const displayedEvents = isSessionView ? events : recordsWithCourses
+
+
+
+    return (
     <View className="flex-1">
       <View
         className="mx-5 mb-2 rounded-xl px-3 py-2"
@@ -162,10 +220,15 @@ export function StudyCalendarTimeline({
         </Text>
       </View>
 
+      <StudyInfoCalendar isDayView={isDayView}
+                         isSessionView={isSessionView} setIsSessionView={setIsSessionView}
+                         calendarSize={calendarSize} setCalendarSize={setCalendarSize}
+                         actualDate={actualDate} theme={theme}/>
+
       <View style={{ flex: 1 }}>
         <CalendarContainer
           ref={calendarRef}
-          events={events as EventItem[]}
+          events={displayedEvents as EventItem[]}
           numberOfDays={numberOfDays}
           firstDay={1}
           locale="fr"
@@ -175,7 +238,6 @@ export function StudyCalendarTimeline({
           onDateChanged={onDateChanged}
           start={STUDY_HOURS.start}
           end={STUDY_HOURS.end}
-          timeInterval={60}
           scrollToNow={false}
           useHaptic
           allowDragToCreate
@@ -186,6 +248,11 @@ export function StudyCalendarTimeline({
           onDragEventEnd={handleDragEventEnd}
           onPressEvent={handlePressEvent}
           useAllDayEvent={false}
+          allowPinchToZoom={true}
+          timeInterval={calendarSize}
+          initialTimeIntervalHeight={80}
+          minTimeIntervalHeight={30}
+          maxTimeIntervalHeight={300}
         >
           <CalendarHeader />
           <CalendarBody

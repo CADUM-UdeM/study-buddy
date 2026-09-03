@@ -25,16 +25,18 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
+import {PomodoroStudyRecord} from "@/app/context/PomodoroStudyContext";
 
 interface StudySessionModalProps {
   visible: boolean;
-  session: PlannedStudySession | null;
+  event: PlannedStudySession | PomodoroStudyRecord | null;
   onClose: () => void;
   onSave: (data: {
     courseId?: string;
     description: string;
     startDateTime: string;
     endDateTime: string;
+    isCompleted?: boolean;
   }) => void;
   onDelete?: () => void;
   theme: typeof lightTheme;
@@ -42,7 +44,7 @@ interface StudySessionModalProps {
 
 export function StudySessionModal({
   visible,
-  session,
+  event,
   onClose,
   onSave,
   onDelete,
@@ -51,6 +53,7 @@ export function StudySessionModal({
   const { courses } = useCourses();
   const [courseId, setCourseId] = useState<string | undefined>();
   const [description, setDescription] = useState("");
+  const [isCompleted, setIsCompleted] = useState(true);
   const [startTime, setStartTime] = useState("09:00");
   const [endTime, setEndTime] = useState("10:00");
   const [sessionDay, setSessionDay] = useState(new Date());
@@ -61,22 +64,38 @@ export function StudySessionModal({
   const cardOpacity = useSharedValue(0);
   const cardTranslateY = useSharedValue(24);
 
+  const isSession = event != null  && "startDateTime" in event;
+  const isFocus = event != null  && "startedAt" in event;
+
   useEffect(() => {
-    if (session) {
-      const start = parseISO(session.startDateTime);
-      const end = parseISO(session.endDateTime);
-      setCourseId(session.courseId);
-      setDescription(session.description ?? "");
+    if (event) {
+      if (isSession)  {
+      const start = parseISO(event.startDateTime);
+      const end = parseISO(event.endDateTime);
+      setCourseId(event.courseId);
+      setDescription(event.description ?? "");
       setStartTime(format(start, "HH:mm"));
       setEndTime(format(end, "HH:mm"));
       setSessionDay(start);
+      }
+      else if (isFocus){
+          const start = parseISO(event.startedAt);
+          const end = parseISO(event.endedAt);
+          setCourseId(event.courseId);
+          setDescription("");
+          setStartTime(format(start, "HH:mm"));
+          setEndTime(format(end, "HH:mm"));
+          setSessionDay(start);
+          setIsCompleted(event.completed);
+      }
     } else {
       setCourseId(undefined);
       setDescription("");
       setStartTime("09:00");
       setEndTime("10:00");
     }
-  }, [session, visible]);
+
+  }, [isFocus, isSession, event, visible]);
 
   useEffect(() => {
     if (visible) {
@@ -164,7 +183,7 @@ export function StudySessionModal({
     });
   };
 
-  if (!session || !mounted) return null;
+  if (!event || !mounted) return null;
 
   return (
     <Modal visible={mounted} transparent animationType="none" onRequestClose={onClose}>
@@ -175,7 +194,6 @@ export function StudySessionModal({
           style={[{ backgroundColor: "rgba(0,0,0,0.5)" }, backdropStyle]}
         />
         <Pressable className="absolute inset-0" onPress={onClose} />
-
         <Animated.View
           className="rounded-2xl p-5 max-h-[90%]"
           style={[cardStyle, cardAnimatedStyle]}
@@ -189,7 +207,7 @@ export function StudySessionModal({
                 className="font-pixel text-xl"
                 style={{ color: theme.defaultTextColor }}
               >
-                {onDelete ? "Modifier la séance" : "Nouvelle séance"}
+                {onDelete ? (isSession ? "Modifier la séance" : "Modifier le focus pomodoro") : "Nouvelle séance"}
               </Text>
 
               <View
@@ -231,6 +249,7 @@ export function StudySessionModal({
                 onSelect={setCourseId}
                 theme={theme}
               />
+              {isSession && (
 
               <View className="gap-2">
                 <Text className="font-pixel text-sm" style={{ color: theme.gray }}>
@@ -253,6 +272,20 @@ export function StudySessionModal({
                   }}
                 />
               </View>
+              )}
+                {isFocus && (
+                    <View
+                        className="rounded-xl px-4 py-3"
+                        style={{ backgroundColor: theme.contentWrapperBgColor }}
+                    >
+                        <Text
+                            className="font-pixel text-sm capitalize"
+                            style={{ color: theme.defaultTextColor }}
+                        >
+                            Statut : {isCompleted ?  "complété" : "non terminé"}
+                        </Text>
+                    </View>
+                )}
 
               <View className="flex-row gap-3 mt-1">
                 {onDelete && (

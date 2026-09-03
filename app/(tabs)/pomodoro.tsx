@@ -23,6 +23,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, AppState, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import "../global.css";
+import {manageNotif, stopNotif} from "@/components/pomodoro/TimerNotification";
 
 function addZero(num: number): string {
   return String(num).padStart(2, "0");
@@ -202,8 +203,6 @@ export default function Pomodoro() {
       } else {
         setTimeOutsideApps(0);
       }
-
-      setTimeOutsideApps(0);
       setTimeLeft(next);
       setPhaseTotalSeconds(next);
       setInBreakTime(!inBreakTime);
@@ -219,6 +218,13 @@ export default function Pomodoro() {
       endTimeRef.current = null;
     }
   }, [timeLeft, isRunning, inBreakTime]);
+
+    useEffect(() => {
+        if (timeLeft > 0 && isRunning) {
+            manageNotif(timeLeft, remainingCycle, inBreakTime, isFinished,
+                Number(pomodoroDuration) * 60, Number(breakDuration) * 60);
+        } else stopNotif().catch(err => console.log(err));
+    }, [isRunning]);
 
   useEffect(() => {
     const appState = AppState.addEventListener("change", (nextAppState) => {
@@ -371,7 +377,7 @@ export default function Pomodoro() {
           min={min}
           sec={sec}
           isRunning={isRunning}
-          setClickParam={setClickParam}
+          numCycle={numCycle}
           remainingCycle={remainingCycle}
           animated
           animationDelay={80}
@@ -416,6 +422,7 @@ export default function Pomodoro() {
           timeLeft={timeLeft}
           onStartPause={isRunning ? pauseButton : startButton}
           onStop={stopButton}
+          setClickParam={setClickParam}
           startDisabled={!canStart}
           animated
           animationDelay={160}

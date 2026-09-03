@@ -10,9 +10,9 @@ export default function ContributionTracker({ embedded = false }: { embedded?: b
     const now = new Date();
     const month = now.getMonth();
 
-    let sessionName = "";
-    let startMonth = 0;
-    let endMonth = 3;
+    let sessionName : string;
+    let startMonth : number;
+    let endMonth: number;
 
     if (month >= 0 && month <= 3) {
       sessionName = "Hiver";
@@ -137,7 +137,7 @@ export default function ContributionTracker({ embedded = false }: { embedded?: b
   const content = (
     <>
       <Text style={[styles.title, { color: theme.defaultTextColor }]}>
-        {totalContributions} séances d&apos;études cette session ({sessionName})
+        {totalContributions} pomodoro{totalContributions > 1 ? "s" : ""} cette session ({sessionName})
       </Text>
 
       <View style={styles.content}>

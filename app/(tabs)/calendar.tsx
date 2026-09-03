@@ -5,7 +5,7 @@ import {
 import { darkTheme, lightTheme } from "@/components/colors";
 import { CalendarViewMode } from "@/components/calendar/calendarTheme";
 import { MonthCalendarView } from "@/components/calendar/MonthCalendarView";
-import { StudyCalendarTimeline } from "@/components/calendar/StudyCalendarTimeline";
+import {StudyCalendarTimeline, useSessionMap} from "@/components/calendar/StudyCalendarTimeline";
 import { StudySessionModal } from "@/components/calendar/StudySessionModal";
 import { ViewModeSwitcher } from "@/components/calendar/ViewModeSwitcher";
 import { buildCourseColorMap } from "@/components/courses/courseColors";
@@ -18,14 +18,20 @@ import { ActivityIndicator, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useSettings } from "../context/SettingsContext";
 import "../global.css";
+import {PomodoroStudyRecord, usePomodoroStudy} from "@/app/context/PomodoroStudyContext";
+import {useStudyHours} from "@/app/hooks/useStudyHours";
 
 export default function Calendar() {
   const { settings } = useSettings();
   const { view } = useLocalSearchParams<{ view?: string }>();
   const { plannedSessions, isLoading, updatePlannedSession, deletePlannedSession } =
     usePlannedStudy();
+  const sessionById = useSessionMap(plannedSessions);
+
   const { courses } = useCourses();
   const insets = useSafeAreaInsets();
+  const {updateRecord, deleteRecord} = usePomodoroStudy();
+    const { calculateStudyMinutes } = useStudyHours();
 
   const theme = settings.isDarkMode ? darkTheme : lightTheme;
 
@@ -34,7 +40,7 @@ export default function Calendar() {
     format(new Date(), "yyyy-MM-dd"),
   );
   const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [modalSession, setModalSession] = useState<PlannedStudySession | null>(
+  const [modalSession, setModalSession] = useState<PlannedStudySession | PomodoroStudyRecord | null>(
     null,
   );
   const [modalVisible, setModalVisible] = useState(false);
@@ -52,7 +58,7 @@ export default function Calendar() {
     [courses, theme],
   );
 
-  const openModal = (session: PlannedStudySession) => {
+  const openModal = (session: PlannedStudySession | PomodoroStudyRecord) => {
     setModalSession(session);
     setModalVisible(true);
   };
@@ -67,20 +73,39 @@ export default function Calendar() {
     description: string;
     startDateTime: string;
     endDateTime: string;
+    completed?: boolean;
   }) => {
     if (!modalSession) return;
-    updatePlannedSession(modalSession.id, {
+    const id = modalSession.id;
+    if (sessionById.get(id)) {
+    updatePlannedSession(id, {
       courseId: data.courseId,
       description: data.description || undefined,
       startDateTime: data.startDateTime,
       endDateTime: data.endDateTime,
     });
+    }
+    else {
+        updateRecord(id, {
+            courseId: data.courseId,
+            studyMinutes : calculateStudyMinutes(data.startDateTime, data.endDateTime),
+            startedAt : data.startDateTime,
+            endedAt: data.endDateTime,
+            completed: true,
+        })
+    }
     closeModal();
   };
 
   const handleDeleteSession = () => {
     if (!modalSession) return;
-    deletePlannedSession(modalSession.id);
+    const id = modalSession.id;
+    if (sessionById.get(id)) {
+        deletePlannedSession(id);
+    }
+    else {
+        deleteRecord(id);
+    }
     closeModal();
   };
 
@@ -147,7 +172,7 @@ export default function Calendar() {
 
       <StudySessionModal
         visible={modalVisible}
-        session={modalSession}
+        event={modalSession}
         onClose={closeModal}
         onSave={handleSaveSession}
         onDelete={modalSession ? handleDeleteSession : undefined}

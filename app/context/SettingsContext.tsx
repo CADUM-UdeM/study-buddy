@@ -18,12 +18,12 @@ export interface GradeBoundary {
 }
 
 export interface Settings {
-  gpaFormat: "4.0" | "4.3" | "percentage";
+  gpaFormat: "4.0" | "4.3" | "%";
   gradeBoundaries: GradeBoundary[];
   showStudyTime: boolean;
   showStreak: boolean;
   showGPA: boolean;
-  showAverage: boolean;
+  showWeekCalendar: boolean;
   showCourseCount: boolean;
   themeMode: ThemeMode;
   isDarkMode: boolean;
@@ -82,7 +82,7 @@ const DEFAULT_SETTINGS: Settings = {
   showStudyTime: true,
   showStreak: true,
   showGPA: true,
-  showAverage: true,
+  showWeekCalendar: true,
   showCourseCount: true,
   themeMode: "system",
   isDarkMode: true,

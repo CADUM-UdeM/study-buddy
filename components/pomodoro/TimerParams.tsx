@@ -54,7 +54,8 @@ function DurationPicker({
   const [open, setOpen] = useState(false);
 
   const handleText = (text: string) => {
-    let cleaned = text.replace(/[^0-9.]/g, "").replace(/(\..*^)\./g, "");
+    {/* Simplifie entree en acceptant que les minutes entières */}
+    let cleaned = text.replace(/[^0-9]/g, "");
     cleaned = cleanText(cleaned);
     onChange(cleaned);
   };
